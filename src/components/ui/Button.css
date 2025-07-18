@@ -1,0 +1,381 @@
+/**
+ * Standardized Button Styles
+ * Consistent design tokens and modern styling
+ */
+
+/* CSS Custom Properties (Design Tokens) */
+:root {
+  /* Colors */
+  --primary-color: #007bff;
+  --primary-hover: #0056b3;
+  --secondary-color: #6c757d;
+  --secondary-hover: #545b62;
+  --success-color: #28a745;
+  --success-hover: #1e7e34;
+  --danger-color: #dc3545;
+  --danger-hover: #c82333;
+  --warning-color: #ffc107;
+  --warning-hover: #e0a800;
+  --info-color: #17a2b8;
+  --info-hover: #117a8b;
+  --light-color: #f8f9fa;
+  --light-hover: #e2e6ea;
+  --dark-color: #343a40;
+  --dark-hover: #23272b;
+
+  /* Spacing */
+  --btn-padding-y-sm: 0.375rem;
+  --btn-padding-x-sm: 0.75rem;
+  --btn-padding-y-md: 0.5rem;
+  --btn-padding-x-md: 1rem;
+  --btn-padding-y-lg: 0.75rem;
+  --btn-padding-x-lg: 1.5rem;
+
+  /* Typography */
+  --btn-font-size-sm: 0.875rem;
+  --btn-font-size-md: 1rem;
+  --btn-font-size-lg: 1.125rem;
+  --btn-font-weight: 500;
+  --btn-line-height: 1.5;
+
+  /* Border Radius */
+  --btn-border-radius: 0.375rem;
+  --btn-border-radius-sm: 0.25rem;
+  --btn-border-radius-lg: 0.5rem;
+
+  /* Transitions */
+  --btn-transition: all 0.15s ease-in-out;
+
+  /* Shadows */
+  --btn-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --btn-shadow-hover: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+/* Base Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-weight: var(--btn-font-weight);
+  line-height: var(--btn-line-height);
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  border-radius: var(--btn-border-radius);
+  transition: var(--btn-transition);
+  box-shadow: var(--btn-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:focus {
+  outline: none;
+  box-shadow: var(--btn-shadow-hover), 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* Size Variants */
+.btn--small {
+  padding: var(--btn-padding-y-sm) var(--btn-padding-x-sm);
+  font-size: var(--btn-font-size-sm);
+  border-radius: var(--btn-border-radius-sm);
+}
+
+.btn--medium {
+  padding: var(--btn-padding-y-md) var(--btn-padding-x-md);
+  font-size: var(--btn-font-size-md);
+}
+
+.btn--large {
+  padding: var(--btn-padding-y-lg) var(--btn-padding-x-lg);
+  font-size: var(--btn-font-size-lg);
+  border-radius: var(--btn-border-radius-lg);
+}
+
+/* Color Variants */
+.btn--primary {
+  color: white;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn--primary:hover:not(.btn--disabled) {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.btn--secondary {
+  color: white;
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn--secondary:hover:not(.btn--disabled) {
+  background-color: var(--secondary-hover);
+  border-color: var(--secondary-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.btn--success {
+  color: white;
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.btn--success:hover:not(.btn--disabled) {
+  background-color: var(--success-hover);
+  border-color: var(--success-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.btn--danger {
+  color: white;
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.btn--danger:hover:not(.btn--disabled) {
+  background-color: var(--danger-hover);
+  border-color: var(--danger-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.btn--warning {
+  color: #212529;
+  background-color: var(--warning-color);
+  border-color: var(--warning-color);
+}
+
+.btn--warning:hover:not(.btn--disabled) {
+  background-color: var(--warning-hover);
+  border-color: var(--warning-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.btn--info {
+  color: white;
+  background-color: var(--info-color);
+  border-color: var(--info-color);
+}
+
+.btn--info:hover:not(.btn--disabled) {
+  background-color: var(--info-hover);
+  border-color: var(--info-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.btn--light {
+  color: #212529;
+  background-color: var(--light-color);
+  border-color: var(--light-color);
+}
+
+.btn--light:hover:not(.btn--disabled) {
+  background-color: var(--light-hover);
+  border-color: var(--light-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.btn--dark {
+  color: white;
+  background-color: var(--dark-color);
+  border-color: var(--dark-color);
+}
+
+.btn--dark:hover:not(.btn--disabled) {
+  background-color: var(--dark-hover);
+  border-color: var(--dark-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+/* Outline Variants */
+.btn--outline-primary {
+  color: var(--primary-color);
+  background-color: transparent;
+  border-color: var(--primary-color);
+}
+
+.btn--outline-primary:hover:not(.btn--disabled) {
+  color: white;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn--outline-secondary {
+  color: var(--secondary-color);
+  background-color: transparent;
+  border-color: var(--secondary-color);
+}
+
+.btn--outline-secondary:hover:not(.btn--disabled) {
+  color: white;
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn--outline-success {
+  color: var(--success-color);
+  background-color: transparent;
+  border-color: var(--success-color);
+}
+
+.btn--outline-success:hover:not(.btn--disabled) {
+  color: white;
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.btn--outline-danger {
+  color: var(--danger-color);
+  background-color: transparent;
+  border-color: var(--danger-color);
+}
+
+.btn--outline-danger:hover:not(.btn--disabled) {
+  color: white;
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.btn--outline-warning {
+  color: var(--warning-color);
+  background-color: transparent;
+  border-color: var(--warning-color);
+}
+
+.btn--outline-warning:hover:not(.btn--disabled) {
+  color: #212529;
+  background-color: var(--warning-color);
+  border-color: var(--warning-color);
+}
+
+.btn--outline-info {
+  color: var(--info-color);
+  background-color: transparent;
+  border-color: var(--info-color);
+}
+
+.btn--outline-info:hover:not(.btn--disabled) {
+  color: white;
+  background-color: var(--info-color);
+  border-color: var(--info-color);
+}
+
+/* Special Variants */
+.btn--link {
+  color: var(--primary-color);
+  background-color: transparent;
+  border-color: transparent;
+  text-decoration: underline;
+  box-shadow: none;
+}
+
+.btn--link:hover:not(.btn--disabled) {
+  color: var(--primary-hover);
+  text-decoration: none;
+  box-shadow: none;
+}
+
+.btn--ghost {
+  color: var(--primary-color);
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.btn--ghost:hover:not(.btn--disabled) {
+  background-color: rgba(0, 123, 255, 0.1);
+  box-shadow: none;
+}
+
+/* States */
+.btn--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+}
+
+.btn--loading {
+  pointer-events: none;
+  position: relative;
+}
+
+.btn--full-width {
+  width: 100%;
+}
+
+/* Button Text */
+.btn__text {
+  flex: 1;
+}
+
+/* Button Icon */
+.btn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
+}
+
+/* Loading Spinner */
+.btn__spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: btn-spinner-animation 0.8s linear infinite;
+}
+
+@keyframes btn-spinner-animation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .btn {
+    min-height: 44px; /* Touch-friendly size */
+  }
+  
+  .btn--small {
+    min-height: 36px;
+  }
+  
+  .btn--large {
+    min-height: 52px;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .btn {
+    border-width: 2px;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+  
+  .btn__spinner {
+    animation: none;
+  }
+} 
