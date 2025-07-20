@@ -100,7 +100,7 @@ const Userlist = ({ columns }) => {
           ticket.email,
           ticket.mobile,
           ticket.country,
-          ticket.type,
+          ticket.isAdmin ? "admin" : ticket.type, // Show "admin" for admin users
           moment(ticket.createdAt).format("MM/DD/YYYY h:mm A"),
           moment(ticket.updatedAt).format("MM/DD/YYYY h:mm A"),
         ];

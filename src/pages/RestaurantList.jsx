@@ -273,36 +273,13 @@ const RestaurantList = () => {
                   <span className="text-sm text-gray-600">
                     Capacity: {restaurant.capacity || "N/A"}
                   </span>
-                  {restaurant.isAdminAdded && (
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                      Admin Added
-                    </span>
-                  )}
                 </div>
-                <div className="flex gap-2">
-                  <Link 
-                    to={restaurant.isAdminAdded ? `/restaurant-admin-details/${restaurant._id}` : `/restaurant-details/${restaurant._id}`}
-                    className="flex-1 text-center bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300"
-                  >
-                    View Details
-                  </Link>
-                  {!restaurant.isAdminAdded && (
-                    <Link 
-                      to={`/restaurant-details/${restaurant._id}`} 
-                      className="flex-1 text-center bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition duration-300"
-                    >
-                      Reserve Now
-                    </Link>
-                  )}
-                  {restaurant.isAdminAdded && (
-                    <button 
-                      onClick={() => alert(`Contact restaurant at: ${restaurant.contactNo || 'Contact information not available'}`)}
-                      className="flex-1 text-center bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition duration-300"
-                    >
-                      Contact
-                    </button>
-                  )}
-                </div>
+                <Link 
+                  to={`/restaurant-book/${restaurant._id}`}
+                  className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg text-sm text-center"
+                >
+                  Book Now
+                </Link>
               </div>
             </div>
           ))}

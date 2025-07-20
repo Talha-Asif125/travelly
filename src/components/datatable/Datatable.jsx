@@ -9,6 +9,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 const Datatable = ({ columns, data, setData, loading: externalLoading, onEdit, refreshData }) => {
   const location = useLocation();
   const path = location.pathname.split("/")[1];
+  const fullPath = location.pathname;
 
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -45,7 +46,7 @@ const Datatable = ({ columns, data, setData, loading: externalLoading, onEdit, r
         } else if (path === "vehicle") {
           deleteUrl = `http://localhost:5000/api/vehicle/${id}`;
           await axios.delete(deleteUrl);
-        } else if (path === "Restaurants" || path === "admin/restaurants") {
+        } else if (fullPath.includes("/admin/restaurants") || fullPath.includes("/Restaurants")) {
           deleteUrl = `http://localhost:5000/api/restaurant/${id}`;
           console.log("Restaurant delete URL:", deleteUrl);
           await axios.delete(deleteUrl);
@@ -125,8 +126,10 @@ const Datatable = ({ columns, data, setData, loading: externalLoading, onEdit, r
             deleteUrl = `http://localhost:5000/api/tours/${id}`;
           } else if (path === "vehicle") {
             deleteUrl = `http://localhost:5000/api/vehicle/${id}`;
-          } else if (path === "Restaurants" || path === "admin/restaurants") {
+                            } else if (fullPath.includes("/admin/restaurants") || fullPath.includes("/Restaurants")) {
             deleteUrl = `http://localhost:5000/api/restaurant/${id}`;
+          } else if (path === "event-management") {
+          deleteUrl = `http://localhost:5000/api/events/${id}`;
           } else {
             deleteUrl = `http://localhost:5000/api/${path}/${id}`;
           }
@@ -213,6 +216,14 @@ const Datatable = ({ columns, data, setData, loading: externalLoading, onEdit, r
         const tourData = await axios.get(`http://localhost:5000/api/tours/${id}`);
         navigate("/tour/view", { state: tourData.data });
       }
+      if (fullPath.includes("/admin/restaurants") || fullPath.includes("/Restaurants")) {
+        console.log("Restaurant view URL:", `http://localhost:5000/api/restaurant/find-resturent-by-id`);
+        navigate(`/restaurant-admin-details/${id}`);
+      }
+      if (path === "event-management") {
+        console.log("Event view URL:", `/event-details/${id}`);
+        navigate(`/event-details/${id}`);
+      }
       setIsLoading(false);
     } catch (error) {
       console.error("Error viewing item:", error);
@@ -252,9 +263,15 @@ const Datatable = ({ columns, data, setData, loading: externalLoading, onEdit, r
         });
       } else if (path === "vehicle") {
         navigate(`/vehicle/edit/${row._id}`);
-      } else if (path === "Restaurants" || path === "admin/restaurants") {
+      } else if (fullPath.includes("/admin/restaurants") || fullPath.includes("/Restaurants")) {
         console.log("Editing restaurant with data:", row);
         navigate("/addrestaurants", { state: { edit: true, data: row } });
+      } else if (path === "event-management") {
+        console.log("Editing event with data:", row);
+        // Event editing will be handled by a custom modal/dialog in EventManagement component
+        if (window.handleEditEvent) {
+          window.handleEditEvent(row);
+        }
       }
     }
   };

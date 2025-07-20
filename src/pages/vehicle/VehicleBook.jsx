@@ -105,15 +105,19 @@ const VehicleBook = () => {
             
           </div>
           
-          <div className="pt-4 flex">
-            <h1 className="text-[#41A4FF] font-bold">Do you need a Driver?</h1>
-              <p className="ml-6">Yes</p>
-              <input type="radio" name="driver" className="ml-2" onChange={() => setDriver(true)} required></input>
-
-              <p className="ml-6">No</p>
-              <input type="radio" name="driver"   className="ml-2" onChange={() => setDriver(false)} required></input>
-            
-
+          <div className="pt-4">
+            <label className="block text-lg font-bold text-[#41A4FF] mb-2">
+              Need Driver *
+            </label>
+            <select 
+              value={driver ? 'Yes' : 'No'}
+              onChange={(e) => setDriver(e.target.value === 'Yes')}
+              className="border rounded-md p-3 w-full"
+              required
+            >
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
           </div>
          
           <div className="flex flex-col md:flex-row mt-6  py-2 justify-between lg:items-center">

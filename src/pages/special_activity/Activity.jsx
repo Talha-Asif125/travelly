@@ -11,10 +11,10 @@ const Activity = () => {
   const { user } = useContext(AuthContext);
   const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  const [tickets, setTickets] = useState(1);
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [cnicNumber, setCnicNumber] = useState('');
+  const [cnicPhoto, setCnicPhoto] = useState('');
   useEffect(() => {
     const getActivity = async () => {
       console.log('Trying to fetch activity with ID:', id);
@@ -109,55 +109,58 @@ const Activity = () => {
     getActivity();
   }, [id]);
 
+  // Initialize customer phone from user data
+  useEffect(() => {
+    if (user && user.phone) {
+      setCustomerPhone(user.phone);
+    }
+  }, [user]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Add null checks for activity and timeRange
-    if (!activity || !activity.timeRange) {
+    if (!user) {
       Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Activity data is not available. Please try again.",
+        icon: 'warning',
+        title: 'Login Required',
+        text: 'You need to login to book tickets',
+        confirmButtonText: 'Login',
+        confirmButtonColor: '#3B82F6'
+      }).then(() => {
+        navigate('/login');
       });
       return;
     }
-    
-    const activityEndTime = activity.timeRange.endTime;
-    const activityStartTime = activity.timeRange.startTime;
-    const selectedStartTime = startTime;
 
-    if (!(activityStartTime <= startTime <= activityEndTime)) {
-      if (!(activityStartTime <= startTime)) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Start time must be after Activity's start time",
-        });
-        return;
-      }
-
-      if (!(startTime <= activityEndTime)) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Start time must be before Activity's end time",
-        });
-        return;
-      }
-    }
-    if (endTime <= selectedStartTime) {
+    if (!customerPhone.trim()) {
       Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "End time must be after start time",
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please enter your phone number',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3B82F6'
       });
       return;
     }
-    if (activityEndTime <= endTime) {
+
+    if (!cnicNumber.trim()) {
       Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Selected end time must be before the Acitivity's End Time",
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please enter your CNIC number',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3B82F6'
+      });
+      return;
+    }
+
+    if (!cnicPhoto) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please upload your CNIC photo',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3B82F6'
       });
       return;
     }
@@ -171,23 +174,38 @@ const Activity = () => {
         // For service activities, use the reservations API
         response = await axios.post(`http://localhost:5000/api/reservations`, {
           serviceId: id,
-          checkInDate: startDate,
-          checkOutDate: endDate,
-          guests: 1,
+          checkInDate: activity?.eventDate || activity?.dateRange?.startDate || new Date().toISOString(),
+          checkOutDate: activity?.eventDate || activity?.dateRange?.startDate || new Date().toISOString(),
+          guests: tickets,
           customerName: user?.name || 'Guest',
           customerEmail: user?.email || 'guest@example.com',
-          customerPhone: user?.phone || '0000000000',
-          specialRequests: `Activity time: ${startTime} - ${endTime}`
+          customerPhone,
+          cnicNumber,
+          cnicPhoto,
+          specialRequests: `Activity ticket booking for ${tickets} ticket(s)`
+        }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
         });
       } else {
         // For regular activities, use the activities reservation API
         response = await axios.post(`http://localhost:5000/api/activity-reservations/create`, {
           activity_id: id,
-          startDate,
-          endDate,
-          startTime,
-          endTime,
+          tickets: tickets,
+          customerName: user.name,
+          customerEmail: user.email,
+          customerPhone,
+          cnicNumber,
+          cnicPhoto,
+          activityDate: activity?.eventDate || activity?.dateRange?.startDate || new Date().toISOString(),
           user_id: user?._id || 'guest'
+        }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
         });
       }
       
@@ -195,9 +213,15 @@ const Activity = () => {
       Swal.fire({
         icon: "success",
         title: "Success!",
-        text: "Reservation created successfully!",
+        text: `${tickets} ticket(s) purchased successfully!`,
       });
-      navigate("/my-reservations");
+
+      // Reset form
+      setTickets(1);
+      setCustomerPhone('');
+      setCnicNumber('');
+      setCnicPhoto('');
+      navigate("/my-bookings");
     } catch (error) {
       console.log(error);
       let errorMessage = "Failed to make reservation";
@@ -396,75 +420,74 @@ const Activity = () => {
               <div className="lg:col-span-1">
                 <div className="bg-white rounded-2xl shadow-xl p-8 sticky top-8">
                   <div className="text-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Make a Reservation</h2>
-                    <p className="text-gray-600">Book your spot for this amazing activity</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Buy Tickets</h2>
+                    <p className="text-gray-600">Get your tickets for this amazing activity</p>
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Start Date
-                        </label>
-                        <input
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                          id="startDate"
-                          type="date"
-                          required
-                          value={startDate}
-                          min={activity?.dateRange.startDate.slice(0, 10)}
-                          max={activity?.dateRange.endDate.slice(0, 10)}
-                          onChange={(e) => setStartDate(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          End Date
-                        </label>
-                        <input
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                          id="endDate"
-                          type="date"
-                          required
-                          value={endDate}
-                          min={startDate ? startDate : activity?.dateRange.startDate.slice(0, 10)}
-                          max={activity?.dateRange.endDate.slice(0, 10)}
-                          onChange={(e) => setEndDate(e.target.value)}
-                        />
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Number of Tickets
+                      </label>
+                      <input
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        type="number"
+                        min="1"
+                        max="10"
+                        required
+                        value={tickets}
+                        onChange={(e) => setTickets(parseInt(e.target.value))}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Each ticket admits one person to the activity</p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Start Time
-                        </label>
-                        <input
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                          id="startTime"
-                          type="time"
-                          required
-                          value={startTime}
-                          min={activity?.timeRange?.startTime || "00:00"}
-                          max={activity?.timeRange?.endTime || "23:59"}
-                          onChange={(e) => setStartTime(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          End Time
-                        </label>
-                        <input
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                          id="endTime"
-                          type="time"
-                          required
-                          value={endTime}
-                          min={startTime || activity?.timeRange?.startTime || "00:00"}
-                          max={activity?.timeRange?.endTime || "23:59"}
-                          onChange={(e) => setEndTime(e.target.value)}
-                        />
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Phone Number
+                      </label>
+                      <input
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        type="tel"
+                        required
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        placeholder="Enter your phone number"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        CNIC Number
+                      </label>
+                      <input
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        type="text"
+                        required
+                        value={cnicNumber}
+                        onChange={(e) => setCnicNumber(e.target.value)}
+                        placeholder="e.g., 12345-1234567-1"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        CNIC Photo
+                      </label>
+                      <input
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        type="file"
+                        accept="image/*"
+                        required
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => setCnicPhoto(e.target.result);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Upload a clear photo of your CNIC (front side)</p>
                     </div>
 
                     <button
@@ -475,14 +498,14 @@ const Activity = () => {
                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-9 4h12m-7 4h2"></path>
                         </svg>
-                        Reserve Now
+                        Buy Tickets
                       </div>
                     </button>
                   </form>
 
                   <div className="mt-6 text-center">
                     <p className="text-sm text-gray-500">
-                      Free cancellation up to 24 hours before the activity
+                      Secure booking • Instant ticket confirmation
                     </p>
                   </div>
                 </div>

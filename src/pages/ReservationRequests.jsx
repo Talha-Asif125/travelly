@@ -67,27 +67,40 @@ const ReservationRequests = () => {
   const loadReservations = async () => {
     try {
       setLoading(true);
-      let url = '/api/reservations/provider';
+      setError('');
       
-      if (selectedReservationType === 'hotel') {
-        url += '?type=service';
-      } else if (selectedReservationType === 'vehicle') {
-        url += '?type=vehicle';
-      }
+      const user = JSON.parse(localStorage.getItem('user'));
+      const token = localStorage.getItem('token');
       
-      const response = await fetch(url, {
-        headers: getAuthHeaders()
+      console.log('Loading reservations for user:', user.id);
+      
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+      
+      // Try the main provider endpoint first
+      const response = await fetch('/api/reservations/provider', {
+        method: 'GET',
+        headers
       });
-      const result = await response.json();
       
-      if (result.success) {
-        setReservations(result.data || []);
+      console.log('Response status:', response.status);
+      const result = await response.json();
+      console.log('Provider reservations response:', result);
+      
+      if (result.success && result.data) {
+        setReservations(result.data);
+        console.log('Set reservations:', result.data);
       } else {
-        setError(result.message || 'Failed to load reservations');
+        console.log('No reservations found or error:', result);
+        setReservations([]);
       }
+      
     } catch (error) {
       console.error('Error loading reservations:', error);
-      setError('Error loading reservations');
+      setError('Error loading reservations: ' + error.message);
+      setReservations([]);
     } finally {
       setLoading(false);
     }

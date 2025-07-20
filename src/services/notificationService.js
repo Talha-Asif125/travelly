@@ -119,7 +119,7 @@ export const createNotification = (type, data) => {
     },
     [NotificationTypes.PAYMENT_CONFIRMED]: {
       title: 'Payment Confirmed',
-      message: `Your payment of $${data.amount} for ${data.serviceName} has been confirmed. Thank you!`,
+      message: `Your payment of Rs. ${data.amount} for ${data.serviceName} has been confirmed. Thank you!`,
       type: NotificationTypes.PAYMENT_CONFIRMED
     },
     [NotificationTypes.SYSTEM_MAINTENANCE]: {

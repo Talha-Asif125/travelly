@@ -760,7 +760,7 @@ const ServiceCreateForm = ({ isOpen, onClose, onSuccess, editingService = null }
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Price (USD) *
+              Price (PKR) *
             </label>
             <input
               type="number"

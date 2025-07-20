@@ -14,11 +14,14 @@ const RestaurantDetails = () => {
 
   // Booking form state
   const today = new Date().toISOString().slice(0, 10);
-  const [checkInDate, setCheckInDate] = useState(today);
-  const [checkOutDate, setCheckOutDate] = useState(today);
+  const [reservationDate, setReservationDate] = useState(today);
+  const [timeFrom, setTimeFrom] = useState('');
+  const [timeTo, setTimeTo] = useState('');
   const [guests, setGuests] = useState(1);
+  const [tables, setTables] = useState(1);
   const [customerPhone, setCustomerPhone] = useState('');
-  const [specialRequests, setSpecialRequests] = useState('');
+  const [cnicNumber, setCnicNumber] = useState('');
+  const [cnicPhoto, setCnicPhoto] = useState('');
 
   useEffect(() => {
     const fetchService = async () => {
@@ -40,7 +43,7 @@ const RestaurantDetails = () => {
     };
 
     fetchService();
-  }, [id]);
+    }, [id]);
 
   // Initialize customer phone from user data
   useEffect(() => {
@@ -63,11 +66,11 @@ const RestaurantDetails = () => {
       return;
     }
 
-    if (!checkInDate || !checkOutDate) {
+    if (!reservationDate || !timeFrom || !timeTo) {
       Swal.fire({
         icon: 'warning',
         title: 'Missing Information',
-        text: 'Please select check-in and check-out dates',
+        text: 'Please select reservation date and time range',
         confirmButtonText: 'OK',
         confirmButtonColor: '#41A4FF'
       });
@@ -85,19 +88,47 @@ const RestaurantDetails = () => {
       return;
     }
 
+    if (!cnicNumber.trim()) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please enter your CNIC number',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#41A4FF'
+      });
+      return;
+    }
+
+    if (!cnicPhoto) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please upload your CNIC photo',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#41A4FF'
+      });
+      return;
+    }
+
     try {
       setSubmitting(true);
       const token = localStorage.getItem('token');
       
+      // Transform our form data to backend expected format
+      const checkInDateTime = new Date(`${reservationDate}T${timeFrom}`);
+      const checkOutDateTime = new Date(`${reservationDate}T${timeTo}`);
+
       const bookingData = {
         serviceId: id,
-        checkInDate,
-        checkOutDate,
+        checkInDate: checkInDateTime.toISOString(),
+        checkOutDate: checkOutDateTime.toISOString(),
         guests,
         customerName: user.name,
         customerEmail: user.email,
         customerPhone,
-        specialRequests
+        cnicNumber,
+        cnicPhoto,
+        specialRequests: `Table reservation for ${tables} table(s)`
       };
 
       console.log('Submitting restaurant booking:', bookingData);
@@ -144,15 +175,16 @@ const RestaurantDetails = () => {
   if (error) return <div className="flex justify-center items-center h-screen text-red-500">{error}</div>;
   if (!service) return <div className="flex justify-center items-center h-screen">Restaurant not found</div>;
 
-  const calculateDays = () => {
-    const start = new Date(checkInDate);
-    const end = new Date(checkOutDate);
-    const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays || 1;
+  const calculateHours = () => {
+    if (!reservationDate || !timeFrom || !timeTo) return 1;
+    const startDateTime = new Date(`${reservationDate}T${timeFrom}`);
+    const endDateTime = new Date(`${reservationDate}T${timeTo}`);
+    const diffTime = Math.abs(endDateTime - startDateTime);
+    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+    return diffHours || 1;
   };
 
-  const totalCost = service.price * calculateDays() * guests;
+  const totalCost = service?.price ? service.price * guests * tables : 0;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -206,30 +238,45 @@ const RestaurantDetails = () => {
               <form onSubmit={(e) => { e.preventDefault(); handleBooking(); }} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Reservation Date (From)
+                    Reservation Date
                   </label>
                   <input
                     type="date"
-                    value={checkInDate}
-                    onChange={(e) => setCheckInDate(e.target.value)}
+                    value={reservationDate}
+                    onChange={(e) => setReservationDate(e.target.value)}
                     min={today}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     required
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Reservation Date (To)
-                  </label>
-                  <input
-                    type="date"
-                    value={checkOutDate}
-                    onChange={(e) => setCheckOutDate(e.target.value)}
-                    min={checkInDate}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      From Time
+                    </label>
+                    <input
+                      type="time"
+                      value={timeFrom}
+                      onChange={(e) => setTimeFrom(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      To Time
+                    </label>
+                    <input
+                      type="time"
+                      value={timeTo}
+                      onChange={(e) => setTimeTo(e.target.value)}
+                      min={timeFrom}
+                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -241,7 +288,22 @@ const RestaurantDetails = () => {
                     value={guests}
                     onChange={(e) => setGuests(parseInt(e.target.value))}
                     min="1"
-                    max={service.capacity}
+                    max={service?.capacity || 50}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Number of Tables
+                  </label>
+                  <input
+                    type="number"
+                    value={tables}
+                    onChange={(e) => setTables(parseInt(e.target.value))}
+                    min="1"
+                    max="10"
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     required
                   />
@@ -263,32 +325,78 @@ const RestaurantDetails = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Special Requests (Optional)
+                    CNIC Number
                   </label>
-                  <textarea
-                    value={specialRequests}
-                    onChange={(e) => setSpecialRequests(e.target.value)}
-                    rows="3"
+                  <input
+                    type="text"
+                    value={cnicNumber}
+                    onChange={(e) => setCnicNumber(e.target.value)}
+                    placeholder="e.g., 12345-1234567-1"
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="Dietary preferences, table location, etc..."
+                    required
                   />
                 </div>
 
-                {/* Cost Summary */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    CNIC Photo
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => setCnicPhoto(e.target.result);
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload a clear photo of your CNIC (front side)</p>
+                </div>
+
+
+
+                {/* Reservation Summary */}
                 <div className="bg-gray-50 p-4 rounded-md">
                   <h3 className="font-semibold mb-2">Reservation Summary</h3>
                   <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span>Duration:</span>
-                      <span>{calculateDays()} day(s)</span>
-                    </div>
+                    {reservationDate && (
+                      <div className="flex justify-between">
+                        <span>Date:</span>
+                        <span>{new Date(reservationDate).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    {timeFrom && timeTo && (
+                      <div className="flex justify-between">
+                        <span>Time:</span>
+                        <span>{timeFrom} - {timeTo}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span>Guests:</span>
                       <span>{guests} guest{guests > 1 ? 's' : ''}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Price per person per day:</span>
-                      <span>Rs. {service.price}</span>
+                      <span>Tables:</span>
+                      <span>{tables} table{tables > 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Duration:</span>
+                      <span>{calculateHours()} hour{calculateHours() > 1 ? 's' : ''}</span>
+                    </div>
+                    {customerPhone && (
+                      <div className="flex justify-between">
+                        <span>Contact:</span>
+                        <span>{customerPhone}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span>Price per person:</span>
+                      <span>Rs. {service?.price || 500}</span>
                     </div>
                     <hr className="my-2" />
                     <div className="flex justify-between font-semibold">

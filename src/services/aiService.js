@@ -172,8 +172,8 @@ const topicResponses = {
     "🌈 Four seasons, countless experiences! Each weather pattern offers unique beauty - monsoon waterfalls, winter festivals, spring blossoms, summer adventures!"
   ],
   budget: [
-    "💰 Pakistan offers incredible value! Budget travelers can explore for $20-30/day, while luxury seekers can indulge for $100-200/day. Great bang for your buck!",
-    "💵 Affordable adventures await! Local transport is cheap, street food costs under $2, and accommodation ranges from $5 hostels to $150 luxury suites!",
+          "💰 Pakistan offers incredible value! Budget travelers can explore for Rs. 5,600-8,400/day, while luxury seekers can indulge for Rs. 28,000-56,000/day. Great bang for your buck!",
+      "💵 Affordable adventures await! Local transport is cheap, street food costs under Rs. 560, and accommodation ranges from Rs. 1,400 hostels to Rs. 42,000 luxury suites!",
     "🏦 Smart spending in Pakistan! Bargaining is common, group tours reduce costs, and local experiences are often free. ATMs are widely available in cities!",
     "💸 Budget-friendly destinations! Pakistan offers premium experiences at fraction of Western costs. Your money goes far while supporting local communities!"
   ],

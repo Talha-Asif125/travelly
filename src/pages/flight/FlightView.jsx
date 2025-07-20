@@ -15,38 +15,10 @@ const FlightView = () => {
   useEffect(() => {
     if (id) {
       setLoading(true);
-      // In a real app, this would be an API call
-      // For demo purposes, we're using mock data
-      const mockFlight = {
-        id: parseInt(id),
-        flightNumber: 'PK' + (300 + parseInt(id)),
-        airline: ['PIA', 'Airblue', 'SereneAir'][parseInt(id) % 3],
-        origin: ['Islamabad', 'Lahore', 'Karachi'][parseInt(id) % 3],
-        destination: ['Karachi', 'Dubai', 'Peshawar'][parseInt(id) % 3],
-        departureDate: '2023-12-' + (24 + parseInt(id)),
-        departureTime: ['09:00', '14:30', '18:45'][parseInt(id) % 3],
-        arrivalTime: ['11:00', '17:30', '20:15'][parseInt(id) % 3],
-        duration: ['2h', '3h', '1h 30m'][parseInt(id) % 3],
-        price: 10000 + parseInt(id) * 8000,
-        status: 'On Time',
-        seatsAvailable: 20 + parseInt(id) * 10,
-        aircraft: 'Boeing 737-800',
-        amenities: ['In-flight Entertainment', 'WiFi', 'Meals', 'USB Charging'],
-        baggage: {
-          cabin: '7 kg',
-          checked: '20 kg'
-        },
-        gate: 'A' + (parseInt(id) + 1),
-        terminal: 'International Terminal',
-        flightClass: 'Economy',
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0]
-      };
       
-      setTimeout(() => {
-        setFlight(mockFlight);
-        setLoading(false);
-      }, 500); // Simulate API delay
+      // Flight services are no longer supported
+      setFlight(null);
+      setLoading(false);
     }
   }, [id]);
 

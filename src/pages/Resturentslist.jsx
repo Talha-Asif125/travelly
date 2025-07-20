@@ -33,55 +33,7 @@ const Resturentslist = ({ columns }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Remove the old actions column useEffect that's causing the duplication
-  useEffect(() => {
-    if (columns && columns.length > 0) {
-      // First remove any existing actions column to avoid duplication
-      const actionsColumnIndex = columns.findIndex(col => col.field === 'actions');
-      if (actionsColumnIndex !== -1) {
-        console.log("Removing existing actions column at index:", actionsColumnIndex);
-        columns.splice(actionsColumnIndex, 1);
-      }
-      
-      // Then add our actions column
-      columns.push({
-        field: 'actions',
-        headerName: 'Actions',
-        width: 180,
-        renderCell: (params) => {
-          console.log("Rendering actions for restaurant:", params.row.name, "with ID:", params.row._id);
-          return (
-            <div className="flex gap-2">
-              <Link 
-                to={`/restaurant-details/${params.row._id}`} 
-                className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
-              >
-                View
-              </Link>
-              <Link 
-                to="/addrestaurants" 
-                state={{ edit: true, data: params.row }}
-                className="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                onClick={() => console.log("Edit clicked for restaurant:", params.row.name, "with ID:", params.row._id)}
-              >
-                Edit
-              </Link>
-              <button
-                onClick={() => {
-                  console.log("Delete clicked for restaurant:", params.row.name, "with ID:", params.row._id);
-                  handleDelete(params.row._id);
-                }}
-                className="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-              >
-                Delete
-              </button>
-            </div>
-          );
-        },
-      });
-      console.log("Added custom actions column to columns array");
-    }
-  }, [columns]);
+  // Let the Datatable component handle CRUD operations automatically
 
   // Remove status column if it exists
   useEffect(() => {
@@ -93,49 +45,7 @@ const Resturentslist = ({ columns }) => {
     }
   }, [columns]);
 
-  // Handle restaurant deletion
-  const handleDelete = async (id) => {
-    try {
-      const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-      });
-      
-      if (result.isConfirmed) {
-        // Using the full URL with http://localhost:5000 prefix to ensure proper routing
-        await axios.delete(`/restaurant/${id}`);
-        
-        // Log success for debugging
-        console.log("Restaurant deleted successfully with ID:", id);
-        
-        Swal.fire(
-          'Deleted!',
-          'Restaurant has been deleted.',
-          'success'
-        );
-        refreshData();
-      }
-    } catch (err) {
-      console.error("Error deleting restaurant:", err);
-      console.error("Error details:", {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-        stack: err.stack
-      });
-      
-      Swal.fire({
-        icon: 'error',
-        title: 'Delete Failed',
-        text: err.response?.data?.message || 'Could not delete restaurant'
-      });
-    }
-  };
+  // Deletion is handled automatically by the Datatable component
 
   // Fetch restaurant data
   useEffect(() => {

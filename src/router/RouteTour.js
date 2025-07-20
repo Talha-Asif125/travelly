@@ -9,7 +9,7 @@ import VehiclePayment from "../pages/vehicle/VehiclePayment";
 import Register from "../pages/Register";
 import Userlist from "../pages/Userlist";
 import ToursHome from "../pages/Tour/Home";
-import TourDetails from "../pages/Tour/TourDetails";
+// import TourDetails from "../pages/Tour/TourDetails"; // REMOVED
 import TourView from "../pages/Tour/Admin/ViewTour";
 import UpdateTour from "../pages/Tour/Admin/updateAddedTour";
 import SearchResults from "../pages/Tour/SerachResults";
@@ -41,6 +41,7 @@ import Profile from "../pages/Profile";
 import Profileupdate from "../pages/Profileupdate";
 import Resturentslist from "../pages/Resturentslist";
 import EventManagement from "../pages/event/EventManagement";
+import AddEvent from "../pages/event/AddEvent";
 import AirplaneTravel from "../pages/airplane/AirplaneTravel";
 import RestaurantList from "../pages/RestaurantList";
 import RestaurantDetails from "../pages/RestaurantDetails";
@@ -62,6 +63,7 @@ import AddVehicle from "../pages/vehicle/AddVehicle";
 import EditVehicle from "../pages/vehicle/EditVehicle";
 import HotelView from "../components/hotel/HotelView";
 import HotelDetailsView from "../components/hotel/HotelDetailsView";
+import HotelBookingPage from "../pages/hotel/HotelBookingPage";
 import HotelOverView from "../components/hotel/HotelOverview";
 import VehicleView from "../pages/vehicle/VehicleView";
 import MapPage from "../pages/MapPage";
@@ -110,36 +112,21 @@ import ServiceProviderRequest from "../pages/OwnerRequest";
 import ServiceBook from "../pages/ServiceBook";
 import Chat from "../pages/Chat";
 import HotelServiceCreate from "../pages/HotelServiceCreate";
+import VehicleServiceCreate from "../pages/VehicleServiceCreate";
+// import VehicleBookingPage from "../pages/vehicle/VehicleBookingPage";
+import TourServiceCreate from "../pages/TourServiceCreate";
+import TourBookingPage from "../TourBooking";
+import RestaurantServiceCreate from "../pages/RestaurantServiceCreate";
+import EventServiceCreate from "../pages/EventServiceCreate";
+import DebugServices from "../components/DebugServices";
 import ChatHub from "../pages/ChatHub";
+import RestaurantBookingPage from "../pages/restaurant/RestaurantBookingPage";
 
 const RouteTour = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // Check session timeout (1 hour)
-  useEffect(() => {
-    // Only run if user is logged in and is admin
-    if (user && user.isAdmin) {
-      // Get the login timestamp from localStorage
-      const loginTime = localStorage.getItem("adminLoginTime");
-      
-      if (!loginTime) {
-        // Set login time if not already set
-        localStorage.setItem("adminLoginTime", Date.now().toString());
-      } else {
-        // Check if the session has expired (1 hour = 3600000 milliseconds)
-        const currentTime = Date.now();
-        const sessionTime = currentTime - parseInt(loginTime);
-        
-        if (sessionTime > 3600000) {
-          // Session expired, log out and redirect
-          localStorage.removeItem("adminLoginTime");
-          alert("Your admin session has expired. Please log in again.");
-          navigate("/login");
-        }
-      }
-    }
-  }, [user, navigate]);
+  // Session management is now handled globally by SessionService in AuthContext
 
   // Regular ProtectedRoute for authenticated users
   // eslint-disable-next-line no-unused-vars
@@ -162,11 +149,6 @@ const RouteTour = () => {
     
     if (!user.isAdmin) {
       return <Navigate to="/" />;
-    }
-    
-    // Set admin login time if not already set
-    if (!localStorage.getItem("adminLoginTime")) {
-      localStorage.setItem("adminLoginTime", Date.now().toString());
     }
     
     return children;
@@ -262,6 +244,7 @@ const RouteTour = () => {
       {/* Yasiru Deshan  */}
       <Route path="/vehicles" element={<VehicleHome />} />
       <Route path="/vehicle/book/:id" element={<VehicleBook />} />
+      {/* <Route path="/vehicle-book/:id" element={<VehicleBookingPage />} /> */}
       <Route path="/vehicle/payment/" element={<VehiclePayment />} />
       <Route path="/vehicle/add" element={<AddVehicle />} />
       <Route path="/vehicle/edit/:id" element={<EditVehicle />} />
@@ -269,7 +252,8 @@ const RouteTour = () => {
 
       {/* //ishara */}
       <Route path="/tours/home" element={<ToursHome />} />
-      <Route path="/tours/:id" element={<TourDetails />} />
+              <Route path="/tours/:id" element={<TourBookingPage />} />
+      <Route path="/tour-book/:id" element={<TourBookingPage />} />
       <Route
         path="/tours/search/:destination/:duration/:maxsize"
         element={<SearchResults />}
@@ -284,6 +268,8 @@ const RouteTour = () => {
       <Route path="/special" element={<AllTourCategories />} />
       <Route path="/cultural" element={<AllTourCategories />} />
       <Route path="/festival" element={<AllTourCategories />} />
+      <Route path="/privatecarservice" element={<AllTourCategories />} />
+      <Route path="/citytocity" element={<AllTourCategories />} />
 
       <Route path="/contactus" element={<ContactUs />} />
       <Route path="/map" element={<MapPage />} />
@@ -367,6 +353,7 @@ const RouteTour = () => {
       <Route path="/restaurant-list" element={<RestaurantList />} />
       <Route path="/restaurant-details/:id" element={<RestaurantDetails />} />
       <Route path="/restaurant-admin-details/:id" element={<RestaurantAdminDetails />} />
+      <Route path="/restaurant-book/:id" element={<RestaurantBookingPage />} />
 
       <Route
         path="/reservations"
@@ -384,6 +371,15 @@ const RouteTour = () => {
         element={
           <AdminRoute>
             <EventManagement />
+          </AdminRoute>
+        } 
+      />
+
+      <Route 
+        path="/add-event" 
+        element={
+          <AdminRoute>
+            <AddEvent />
           </AdminRoute>
         } 
       />
@@ -412,6 +408,7 @@ const RouteTour = () => {
       <Route path="/rooms/new/:id" element={<AddRoom />} />
       <Route path="/hotels/update/:id" element={<UpdateHotel />} />
       <Route path="/hotel/:id" element={<HotelView />} />
+      <Route path="/hotel-book/:id" element={<HotelBookingPage />} />
       <Route path="/hoteloverview/:id" element={<HotelOverView />} />
       <Route path="/hotel-details/:id" element={<HotelDetailsView />} />
       <Route path="/hoteladmin" element={<HadminView />} />
@@ -444,6 +441,47 @@ const RouteTour = () => {
             <HotelServiceCreate />
           </ProtectedRoute>
         } 
+      />
+      
+      <Route 
+        path="/vehicle-service-create" 
+        element={
+          <ProtectedRoute>
+            <VehicleServiceCreate />
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/tour-service-create" 
+        element={
+          <ProtectedRoute>
+            <TourServiceCreate />
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/restaurant-service-create" 
+        element={
+          <ProtectedRoute>
+            <RestaurantServiceCreate />
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/event-service-create" 
+        element={
+          <ProtectedRoute>
+            <EventServiceCreate />
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/debug-services" 
+        element={<DebugServices />} 
       />
 
       {/* Service Booking */}

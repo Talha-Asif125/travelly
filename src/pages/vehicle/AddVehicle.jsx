@@ -4,16 +4,18 @@ import axios from '../../api/axios';
 import Swal from 'sweetalert2'
 import { useContext } from "react";
 import { AuthContext } from "../../context/authContext";
+import AdminBackButton from "../../components/AdminBackButton";
 
 const AddVehicle = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
   const countWords = (description) => {
     return description.trim().split(/./g).length;
   };
 
-
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const validateVehicleNumber = () => {
     // More generic validation - accepts various formats including letters, numbers, and common separators
@@ -38,8 +40,6 @@ const AddVehicle = () => {
     return true;
   };
 
-  const { user } = useContext(AuthContext);
-
   const [ownerName, setOwnerName] = useState('');
   const [brandName, setBrandName] = useState('');
   const [model, setModel] = useState('');
@@ -55,14 +55,44 @@ const AddVehicle = () => {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
 
+  const vehicleTypes = [
+    { value: 'Car', label: 'Car' },
+    { value: 'SUV', label: 'SUV' },
+    { value: 'Van', label: 'Van' },
+    { value: 'Motor Bike', label: 'Motor Bike' },
+    { value: 'Bus', label: 'Bus' }
+  ];
+
+  const transmissionTypes = [
+    { value: 'Auto', label: 'Automatic' },
+    { value: 'Manual', label: 'Manual' }
+  ];
+
+  const fuelTypes = [
+    { value: 'Petrol', label: 'Petrol' },
+    { value: 'Diesel', label: 'Diesel' },
+    { value: 'Hybrid', label: 'Hybrid' },
+    { value: 'Electric', label: 'Electric' }
+  ];
+
+  const cities = [
+    'Lahore', 'Karachi', 'Islamabad', 'Rawalpindi', 'Faisalabad', 
+    'Multan', 'Gujranwala', 'Peshawar', 'Quetta', 'Sialkot',
+    'Bahawalpur', 'Sargodha', 'Hyderabad', 'Abbottabad', 'Sukkur'
+  ];
+
   console.log(model)
   console.log(fuelType)
+  
   async function sendData(e){
     e.preventDefault();
 
     if (!validateVehicleNumber()) {
       return;
     }
+
+    setLoading(true);
+    setError('');
   
     const formData = new FormData();
 
@@ -116,148 +146,294 @@ const AddVehicle = () => {
       console.error("Error details:", err.response ? err.response.data : "No response data");
       console.error("Error status:", err.response ? err.response.status : "No status");
       
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: `Error: ${err.message}`,
-        footer: err.response ? JSON.stringify(err.response.data) : "No server response"
-      });
+      const errorMessage = err.response?.data?.message || err.message || "Unknown error occurred";
+      setError(`Error: ${errorMessage}`);
+    } finally {
+      setLoading(false);
     }
   }
 
-
-
-
   return (
-    <div className='p-4 text-[#383838]  justify-center lg:px-96'>
-        <h1 className='text-lg lg:text-2xl font-bold py-6  text-center'>Add a Vehicle</h1>
-        <form onSubmit={sendData} encType='multipart/form-data'>
-            
-            <label for className='lg:text-lg text-left'>Vehicle Owner's Name</label>
-            <input type='text' className='border rounded-lg w-full p-2 mb-6 mt-2' placeholder='Name' onChange={(e) => setOwnerName(e.target.value) } required/>
+    <>
+      <AdminBackButton />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-2xl mx-auto py-8 px-4">
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold text-center mb-6">Add Vehicle Service</h1>
 
-            <label for className='lg:text-lg text-left'>Vehicle Brand Name</label>
-            <input type='text' className='border rounded-lg w-full p-2 mb-6 mt-2' placeholder='Honda' onChange={(e) => setBrandName(e.target.value) } required/>
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded">
+                  {error}
+                </div>
+              )}
 
-            <label for className='lg:text-lg text-left'>Vehicle Model</label>
-            <input type='text' className='border rounded-lg w-full p-2 mb-6 mt-2' placeholder='Civic' onChange={(e) => setModel(e.target.value) } required/>
+              <form onSubmit={sendData} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Vehicle Owner's Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={ownerName}
+                      onChange={(e) => setOwnerName(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Owner's full name"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Vehicle Brand *
+                    </label>
+                    <input
+                      type="text"
+                      value={brandName}
+                      onChange={(e) => setBrandName(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Honda, Toyota, Suzuki"
+                      required
+                    />
+                  </div>
+                </div>
 
-            <label for className='lg:text-lg text-left'>Vehicle Type</label>
-            <br></br>
-            <select className='p-2 border rounded-md w-full bg-white mt-2 mb-6' value={vehicleType} onChange={(e) => setVehicleType(e.target.value) } required>
-            
-            
-            <option>Car</option>
-            <option>SUV</option>
-            <option>Van</option>
-            <option>Motor Bike</option>
-            <option>Bus</option>
-          </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Vehicle Model *
+                    </label>
+                    <input
+                      type="text"
+                      value={model}
+                      onChange={(e) => setModel(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Civic, Corolla, Swift"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Vehicle Type *
+                    </label>
+                    <select
+                      value={vehicleType}
+                      onChange={(e) => setVehicleType(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      {vehicleTypes.map(type => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-          <label for className='lg:text-lg text-left'>Vehicle Registration Number</label>
-          <input type='text' className='border rounded-lg w-full p-2 mb-6  mt-2' placeholder='ABC-1234' onChange={(e) => setVehicleNumber(e.target.value) } required/>
-          {error && <div className='text-[#ff2d2d] pb-4'>{error}</div>}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Registration Number *
+                    </label>
+                    <input
+                      type="text"
+                      value={vehicleNumber}
+                      onChange={(e) => setVehicleNumber(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="ABC-1234"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Number of Seats *
+                    </label>
+                    <input
+                      type="number"
+                      value={numberOfSeats}
+                      onChange={(e) => setNumberOfSeats(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="4"
+                      min="1"
+                      required
+                    />
+                  </div>
+                </div>
 
-          <label for className='lg:text-lg text-left mt-6'>Number of Seats</label>
-          <input type='number'  className='border rounded-lg w-full p-2 mb-6' placeholder='04' onChange={(e) => setNumberOfSeats(e.target.value) } required/>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Transmission Type *
+                    </label>
+                    <select
+                      value={transmissionType}
+                      onChange={(e) => setTransmissionType(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      {transmissionTypes.map(type => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Fuel Type *
+                    </label>
+                    <select
+                      value={fuelType}
+                      onChange={(e) => setFuelType(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      {fuelTypes.map(type => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-          <label for className='lg:text-lg text-left'>Transmission Type</label>
-          <br></br>
-          <select className='p-2 border rounded-md w-full bg-white mt-2 mb-6' value={transmissionType} onChange={(e) => setTransmissionType(e.target.value) } required>
-            
-            <option>Auto</option>
-            <option>Manual</option>
-          </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Rent Price (per day) *
+                    </label>
+                    <input
+                      type="number"
+                      value={rentPrice}
+                      onChange={(e) => setRentPrice(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="1500"
+                      min="0"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Location *
+                    </label>
+                    <input
+                      type="text"
+                      list="city"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter city or location"
+                      required
+                    />
+                    <datalist id="city">
+                      {cities.map(city => (
+                        <option key={city} value={city} />
+                      ))}
+                    </datalist>
+                  </div>
+                </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Vehicle Description *
+                  </label>
+                  <textarea
+                    rows={4}
+                    maxLength={299}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Describe your vehicle, features, condition, special amenities..."
+                    required
+                  />
+                  <div className="text-sm text-blue-600 mt-1">{countWords(description)}/300</div>
+                </div>
 
-          <label for className='lg:text-lg text-left'>Fuel Type</label>
-          <br></br>
-          <select className='p-2 border rounded-md w-full bg-white mt-2 mb-6' value={fuelType} onChange={(e) => setFuelType(e.target.value) } required>
-            
-            
-            <option>Petrol</option>
-            <option>Diesel</option>
-            <option>Hybrid</option>
-            <option>Electric</option>
-          </select>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Registration Images *
+                  </label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      const images = [];
+                      for (let i = 0; i < files.length; i++) {
+                        images.push(files[i]);
+                      }
+                      setInsuranceImgs(images);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload vehicle registration documents</p>
+                </div>
 
-          <label htmlFor="cover-photo" className="block text-sm font-medium leading-6 text-gray-900">
-                Rent Price (per day)
-              </label>
-          <input type='number' className='border rounded-lg w-full p-2 mb-6 mt-2' placeholder='150' onChange={(e) => setRentPrice(e.target.value) } required/>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Vehicle Cover Image *
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setVehicleMainImg(e.target.files[0])}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload main vehicle photo</p>
+                </div>
 
-          <label htmlFor="cover-photo" className="block text-sm font-medium leading-6 text-gray-900">
-                Description
-              </label>
-          <textarea rows = '4' maxLength={299} value={description} className='border rounded-lg w-full p-2  mt-2' placeholder='Add your description here' onChange={(e) => setDescription(e.target.value) } required/>
-          <div className='mb-6 text-[#41A4FF]'>{countWords(description)}/300</div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Vehicle Images *
+                  </label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      const images = [];
+                      for (let i = 0; i < files.length; i++) {
+                        images.push(files[i]);
+                      }
+                      setVehicleImgs(images);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload additional vehicle photos</p>
+                </div>
 
-          <label htmlFor="cover-photo" className="block text-sm font-medium leading-6 text-gray-900"> Location </label>
-          <input type='text' list='city' className='border rounded-lg w-full p-2 mb-6 mt-2' placeholder='Enter city or location' onChange={(e) => setLocation(e.target.value) } required/>
-
-          <datalist id='city'>
-            
-            <option value='New York'></option>
-            <option value='Los Angeles'></option>
-            <option value='Chicago'></option>
-            <option value='Houston'></option>
-            <option value='Phoenix'></option>
-            <option value='Philadelphia'></option>
-            <option value='San Antonio'></option>
-            <option value='San Diego'></option>
-
-          </datalist>
-
-          
-          <label for className='lg:text-lg text-left'>Registration Images</label>
-          <input type='file' required multiple className='border rounded-lg w-full p-2 mb-6 mt-2'
-          onChange={(e) => {
-            const files = e.target.files;
-            const images = [];
-          
-            for (let i = 0; i < files.length; i++) {
-              images.push(files[i]);
-            }
-            setInsuranceImgs(images);
-          }} />
-
-          <label for className='lg:text-lg text-left'>Vehicle Cover Image</label>  
-          <input type='file' required className='border rounded-lg w-full p-2 mb-6 mt-2'
-          onChange={(e) => setVehicleMainImg(e.target.files[0])}
-          />
-
-
-          <label for className='lg:text-lg text-left'>Vehicle Images</label>
-          <input type='file' required multiple className='border rounded-lg w-full p-2 mb-6 mt-2'
-          onChange={(e) => {
-            const files = e.target.files;
-            const images = [];
-          
-            for (let i = 0; i < files.length; i++) {
-              images.push(files[i]);
-            }
-            setVehicleImgs(images);
-          }} /> 
-
-
-     
-
-
-          <div className='flex flex-col lg:flex-row items-center justify-between lg:my-6'>
-          <button 
-            type="submit"
-            onClick={() => console.log("Add Vehicle button clicked")}
-            className="bg-[#41A4FF] text-white rounded-md font-bold p-3 my-5 lg:my-0 w-full">
-                Add Vehicle
-          </button>
-          <button className="bg-[#636363] text-white rounded-md font-bold p-3 lg:ml-6 w-full mb-12 lg:mb-0" type="reset">
-                Reset
-          </button>
+                <div className="flex justify-center pt-4 space-x-4">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-blue-600 text-white px-8 py-3 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Adding Vehicle...' : 'Add Vehicle'}
+                  </button>
+                  <button
+                    type="reset"
+                    className="bg-gray-500 text-white px-8 py-3 rounded-md font-medium hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-          
-          
-        </form>
-    </div>
+        </div>
+      </div>
+    </>
   )
 }
 

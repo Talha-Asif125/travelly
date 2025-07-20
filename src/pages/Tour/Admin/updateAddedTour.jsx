@@ -258,12 +258,12 @@ const AddTourPackage = () => {
                     onChange={(e) => setCategory(e.target.value)}
                   >
                     <option value="">--Select one--</option>
-                    <option value="sun and beach">Sun and Beach</option>
-                    <option value="hiking and trekking">Hiking and Trekking</option>
+                    <option value="private car service">Private Car Service</option>
+                    <option value="city to city">City to City</option>
                     <option value="wild safari">Wild Safari</option>
-                    <option value="special tours">Special Tour</option>
                     <option value="cultural">Cultural</option>
                     <option value="festival">Festival</option>
+                    <option value="special tours">Special Tours</option>
                   </select>
                 </div>
               </div>

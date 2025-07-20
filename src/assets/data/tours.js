@@ -24,4 +24,4 @@ const tours = [
   },
 ];
 
-export default tours;
+export default tours; 

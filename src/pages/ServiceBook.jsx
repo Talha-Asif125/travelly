@@ -16,9 +16,9 @@ const ServiceBook = () => {
   const today = new Date().toISOString().slice(0, 10);
   const [checkInDate, setCheckInDate] = useState(today);
   const [checkOutDate, setCheckOutDate] = useState(today);
-  const [guests, setGuests] = useState(1);
-  const [rooms, setRooms] = useState(1);
   const [customerPhone, setCustomerPhone] = useState('');
+  const [cnicNumber, setCnicNumber] = useState('');
+  const [cnicPhoto, setCnicPhoto] = useState(null);
   const [specialRequests, setSpecialRequests] = useState('');
 
   useEffect(() => {
@@ -80,6 +80,28 @@ const ServiceBook = () => {
       return;
     }
 
+    if (!cnicNumber.trim()) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please enter your CNIC number',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#1976d2'
+      });
+      return;
+    }
+
+    if (!cnicPhoto) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please upload your CNIC photo',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#1976d2'
+      });
+      return;
+    }
+
     try {
       setSubmitting(true);
       const token = localStorage.getItem('token');
@@ -88,11 +110,11 @@ const ServiceBook = () => {
         serviceId: id,
         checkInDate,
         checkOutDate,
-        guests,
-        rooms: service?.type === 'hotel' ? rooms : undefined,
         customerName: user.name,
         customerEmail: user.email,
         customerPhone: customerPhone || '',
+        cnicNumber,
+        cnicPhoto,
         specialRequests
       };
 
@@ -226,36 +248,6 @@ const ServiceBook = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Number of Guests
-                  </label>
-                  <input
-                    type="number"
-                    value={guests}
-                    onChange={(e) => setGuests(parseInt(e.target.value))}
-                    min="1"
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-
-                {service.type === 'hotel' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Number of Rooms
-                    </label>
-                    <input
-                      type="number"
-                      value={rooms}
-                      onChange={(e) => setRooms(parseInt(e.target.value))}
-                      min="1"
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Customer Phone
                   </label>
                   <input
@@ -266,6 +258,47 @@ const ServiceBook = () => {
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    CNIC Number
+                  </label>
+                  <input
+                    type="text"
+                    value={cnicNumber}
+                    onChange={(e) => setCnicNumber(e.target.value)}
+                    placeholder="Enter your CNIC number (e.g., 12345-1234567-1)"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    CNIC Photo
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setCnicPhoto(reader.result);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                  {cnicPhoto && (
+                    <div className="mt-2">
+                      <img src={cnicPhoto} alt="CNIC Preview" className="w-32 h-20 object-cover rounded border" />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -290,23 +323,13 @@ const ServiceBook = () => {
                       <span>{calculateDays()} day(s)</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Guests:</span>
-                      <span>{guests} guest{guests > 1 ? 's' : ''}</span>
-                    </div>
-                    {service.type === 'hotel' && (
-                      <div className="flex justify-between">
-                        <span>Rooms:</span>
-                        <span>{rooms} room{rooms > 1 ? 's' : ''}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between">
                       <span>Price per day:</span>
                       <span>Rs. {service.price}</span>
                     </div>
                     <hr className="my-2" />
                     <div className="flex justify-between font-semibold">
                       <span>Total Cost:</span>
-                      <span className="text-blue-600">Rs. {totalCost * (service.type === 'hotel' ? rooms : 1)}</span>
+                      <span className="text-blue-600">Rs. {totalCost}</span>
                     </div>
                   </div>
                 </div>

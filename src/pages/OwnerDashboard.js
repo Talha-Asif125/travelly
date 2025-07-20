@@ -56,6 +56,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { notificationManager, NotificationTypes } from '../services/notificationService';
 import { AuthContext } from '../context/authContext';
+import ServiceEditModal from '../components/ServiceEditModal';
 
 const ServiceProviderDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -73,6 +74,10 @@ const ServiceProviderDashboard = () => {
   const [error, setError] = useState('');
   const [providerStatus, setProviderStatus] = useState(null);
   const [selectedServiceType, setSelectedServiceType] = useState('all');
+  const [openViewDialog, setOpenViewDialog] = useState(false);
+  const [viewReservation, setViewReservation] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingService, setEditingService] = useState(null);
 
   // Service type options for the dashboard
   const serviceTypeOptions = [
@@ -169,7 +174,35 @@ const ServiceProviderDashboard = () => {
       setLoading(true);
       let allServices = [];
 
-      // Load tours from tours API if tour type is selected or all services
+      // Load all services from provider services API (includes tours, vehicles, etc.)
+      try {
+        const serviceType = selectedServiceType === 'all' ? '' : selectedServiceType;
+        const servicesResponse = await fetch(`http://localhost:5000/api/provider/services?type=${serviceType}`, {
+          headers: getAuthHeaders()
+        });
+        
+        console.log('Loading services for type:', serviceType);
+        
+        if (servicesResponse.ok) {
+          const servicesResult = await servicesResponse.json();
+          console.log('Provider services response:', servicesResult);
+          
+          if (servicesResult.success) {
+            const userServices = (servicesResult.data || []).map(service => ({
+              ...service,
+              status: service.status || 'active'
+            }));
+            allServices = [...allServices, ...userServices];
+            console.log('User services loaded:', userServices.length);
+          }
+        } else {
+          console.error('Services API response not ok:', servicesResponse.status);
+        }
+      } catch (error) {
+        console.error('Error loading provider services:', error);
+      }
+
+      // Also load traditional tours if tour type is selected or all services
       if (selectedServiceType === 'tour' || selectedServiceType === 'all') {
         try {
           const toursResponse = await fetch('/api/tours', {
@@ -180,7 +213,7 @@ const ServiceProviderDashboard = () => {
           
           if (toursResponse.ok) {
             const toursData = await toursResponse.json();
-            console.log('Tours data:', toursData);
+            console.log('Traditional tours data:', toursData);
             
             // Filter tours by current user
             const userTours = (toursData || []).filter(tour => 
@@ -189,40 +222,19 @@ const ServiceProviderDashboard = () => {
               ...tour,
               type: 'tour',
               price: tour.price,
-              status: 'active' // Tours don't have explicit status
+              status: 'active', // Tours don't have explicit status
+              isTraditionalTour: true // Flag to distinguish
             }));
             
             allServices = [...allServices, ...userTours];
+            console.log('Traditional tours loaded:', userTours.length);
           }
         } catch (error) {
-          console.error('Error loading tours:', error);
+          console.error('Error loading traditional tours:', error);
         }
       }
 
-      // Load other services from provider services API
-      if (selectedServiceType !== 'tour') {
-        try {
-          const serviceType = selectedServiceType === 'all' ? '' : selectedServiceType;
-          const servicesResponse = await fetch(`/api/provider/services?type=${serviceType}`, {
-            headers: getAuthHeaders()
-          });
-          
-          if (servicesResponse.ok) {
-            const servicesResult = await servicesResponse.json();
-            
-            if (servicesResult.success) {
-              // Filter out tours as they're handled separately
-              const nonTourServices = (servicesResult.data || []).filter(service => 
-                service.type !== 'tour'
-              );
-              allServices = [...allServices, ...nonTourServices];
-            }
-          }
-        } catch (error) {
-          console.error('Error loading provider services:', error);
-        }
-      }
-
+      console.log('Total services loaded:', allServices.length);
       setServices(allServices);
       
     } catch (error) {
@@ -254,28 +266,52 @@ const ServiceProviderDashboard = () => {
     setCurrentTab(newValue);
   };
 
-  const handleAddService = () => {
-    // Check if adding hotel service - redirect to comprehensive form
-    const serviceType = selectedServiceType === 'all' 
+  const handleAddService = (serviceType = null) => {
+    // Use passed serviceType or fall back to selectedServiceType
+    const actualServiceType = serviceType || (selectedServiceType === 'all' 
       ? (providerStatus?.approvedTypes[0] || 'hotel') 
-      : selectedServiceType;
+      : selectedServiceType);
 
-    if (serviceType === 'hotel') {
+    if (actualServiceType === 'hotel') {
       // Navigate to comprehensive hotel service creation
       navigate('/hotel-service-create');
       return;
     }
 
+    if (actualServiceType === 'vehicle') {
+      // Navigate to comprehensive vehicle service creation
+      navigate('/vehicle-service-create');
+      return;
+    }
+
+    if (actualServiceType === 'tour') {
+      // Navigate to comprehensive tour service creation
+      navigate('/tour-service-create');
+      return;
+    }
+
+    if (actualServiceType === 'restaurant') {
+      // Navigate to comprehensive restaurant service creation
+      navigate('/restaurant-service-create');
+      return;
+    }
+
+    if (actualServiceType === 'event') {
+      // Navigate to comprehensive event service creation
+      navigate('/event-service-create');
+      return;
+    }
+
     // For other service types, use the existing dialog
     setSelectedService(null);
-    setServiceFormData({ type: serviceType });
+    setServiceFormData({ type: actualServiceType });
     setOpenServiceDialog(true);
   };
 
   const handleEditService = (service) => {
-    setSelectedService(service);
-    setServiceFormData(service);
-    setOpenServiceDialog(true);
+    // Use the new beautiful edit modal for all service types
+    setEditingService(service);
+    setEditModalOpen(true);
   };
 
   const handleDeleteService = async (serviceId) => {
@@ -627,6 +663,11 @@ const ServiceProviderDashboard = () => {
     setOpenRejectDialog(true);
   };
 
+  const handleViewReservation = (reservation) => {
+    setViewReservation(reservation);
+    setOpenViewDialog(true);
+  };
+
   const confirmRejectReservation = async () => {
     try {
       let response;
@@ -844,12 +885,12 @@ const ServiceProviderDashboard = () => {
                 required
               >
                 <MenuItem value="">--Select one--</MenuItem>
-                <MenuItem value="sun and beach">Sun and Beach</MenuItem>
-                <MenuItem value="hiking and trekking">Hiking and Trekking</MenuItem>
+                <MenuItem value="private car service">Private Car Service</MenuItem>
+                <MenuItem value="city to city">City to City</MenuItem>
                 <MenuItem value="wild safari">Wild Safari</MenuItem>
-                <MenuItem value="special tours">Special Tour</MenuItem>
                 <MenuItem value="cultural">Cultural</MenuItem>
                 <MenuItem value="festival">Festival</MenuItem>
+                <MenuItem value="special tours">Special Tours</MenuItem>
               </TextField>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1443,7 +1484,7 @@ const ServiceProviderDashboard = () => {
                       variant="contained"
                       onClick={() => {
                         setSelectedServiceType(option.value);
-                        handleAddService();
+                        handleAddService(option.value);
                       }}
                       startIcon={<Add />}
                     >
@@ -1478,7 +1519,6 @@ const ServiceProviderDashboard = () => {
         <Tabs value={currentTab} onChange={handleTabChange}>
           <Tab label="My Services" />
           <Tab label="Reservations" />
-          <Tab label="Analytics" />
         </Tabs>
 
         {currentTab === 0 && (
@@ -1519,6 +1559,8 @@ const ServiceProviderDashboard = () => {
                 {renderServiceTypeCards()}
               </>
             )}
+
+
 
             {/* Provider Status Info */}
             {providerStatus ? (
@@ -1777,7 +1819,7 @@ const ServiceProviderDashboard = () => {
                           ) : reservation.isTourReservation ? (
                             <Box>
                               <Typography variant="caption" display="block">
-                                Guests: {reservation.guests}
+                                Group Size: {reservation.guests || reservation.groupSize || 1}
                               </Typography>
                               <Typography variant="caption" display="block">
                                 Tour Date: {new Date(reservation.tourDate).toLocaleDateString()}
@@ -1795,13 +1837,38 @@ const ServiceProviderDashboard = () => {
                             </Box>
                           ) : (
                             <Box>
-                              <Typography variant="caption" display="block">
-                                Guests: {reservation.guests}
-                              </Typography>
-                              {reservation.rooms && (
-                                <Typography variant="caption" display="block">
-                                  Rooms: {reservation.rooms}
-                                </Typography>
+                              {/* Use the new formatted details from backend if available */}
+                              {reservation.formattedDetails ? (
+                                <>
+                                  <Typography variant="caption" display="block" color="primary.main" fontWeight="bold">
+                                    {reservation.serviceTypeLabel || 'Service Reservation'}
+                                  </Typography>
+                                  <Typography variant="caption" display="block">
+                                    {reservation.formattedDetails}
+                                  </Typography>
+                                </>
+                              ) : (
+                                <>
+                                  {/* Fallback to old format for backward compatibility */}
+                                  <Typography variant="caption" display="block">
+                                    Guests: {reservation.guests || 1}
+                                  </Typography>
+                                  {reservation.rooms && reservation.serviceId?.type === 'hotel' && (
+                                    <Typography variant="caption" display="block">
+                                      Rooms: {reservation.rooms}
+                                    </Typography>
+                                  )}
+                                  {reservation.vehicleType && (
+                                    <Typography variant="caption" display="block">
+                                      Vehicle: {reservation.vehicleType}
+                                    </Typography>
+                                  )}
+                                  {reservation.eventType && (
+                                    <Typography variant="caption" display="block">
+                                      Event: {reservation.eventType}
+                                    </Typography>
+                                  )}
+                                </>
                               )}
                               {reservation.confirmationNumber && (
                                 <Typography variant="caption" display="block" color="text.secondary">
@@ -1850,7 +1917,10 @@ const ServiceProviderDashboard = () => {
                           {reservation.isTourReservation && (
                             <Chip size="small" label="Tour" variant="outlined" color="primary" />
                           )}
-                          <IconButton>
+                          <IconButton
+                            onClick={() => handleViewReservation(reservation)}
+                            title="View Details"
+                          >
                             <Visibility />
                           </IconButton>
                         </TableCell>
@@ -1863,19 +1933,25 @@ const ServiceProviderDashboard = () => {
           </Box>
         )}
 
-        {currentTab === 2 && (
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom>
-              Analytics
-            </Typography>
-            <Alert severity="info">
-              Analytics dashboard coming soon!
-            </Alert>
-          </Box>
-        )}
+
       </Paper>
 
-      {/* Service Dialog */}
+      {/* Beautiful Service Edit Modal */}
+      <ServiceEditModal
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditingService(null);
+        }}
+        service={editingService}
+        onSave={(updatedService) => {
+          loadServices(); // Refresh the services list
+          setEditModalOpen(false);
+          setEditingService(null);
+        }}
+      />
+
+      {/* Service Dialog (kept for add new service functionality) */}
       <Dialog open={openServiceDialog} onClose={() => setOpenServiceDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>
           {selectedService ? 'Edit Service' : 'Add New Service'}
@@ -1913,6 +1989,195 @@ const ServiceProviderDashboard = () => {
           <Button onClick={confirmRejectReservation} variant="contained" color="error">
             Reject Reservation
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* View Reservation Dialog */}
+      <Dialog open={openViewDialog} onClose={() => setOpenViewDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          Reservation Details
+        </DialogTitle>
+        <DialogContent>
+          {viewReservation && (
+            <Box sx={{ mt: 2 }}>
+              <Grid container spacing={2}>
+                {/* Customer Information */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
+                    Customer Information
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Customer Name</Typography>
+                  <Typography variant="body1">{viewReservation.customerName || 'N/A'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Email</Typography>
+                  <Typography variant="body1">{viewReservation.customerEmail || 'N/A'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Phone</Typography>
+                  <Typography variant="body1">{viewReservation.customerPhone || 'N/A'}</Typography>
+                </Grid>
+                {viewReservation.cnicNumber && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">CNIC Number</Typography>
+                    <Typography variant="body1">{viewReservation.cnicNumber}</Typography>
+                  </Grid>
+                )}
+
+                {/* Booking Information */}
+                <Grid item xs={12} sx={{ mt: 2 }}>
+                  <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
+                    Booking Information
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Service</Typography>
+                  <Typography variant="body1">{viewReservation.serviceId?.name || 'N/A'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Status</Typography>
+                  <Chip 
+                    label={viewReservation.status?.charAt(0).toUpperCase() + viewReservation.status?.slice(1) || 'N/A'} 
+                    color={
+                      viewReservation.status === 'confirmed' ? 'success' : 
+                      viewReservation.status === 'cancelled' ? 'error' : 
+                      'default'
+                    }
+                    size="small"
+                  />
+                </Grid>
+                
+                {/* Date Information */}
+                {viewReservation.checkInDate && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Check-in Date</Typography>
+                    <Typography variant="body1">{new Date(viewReservation.checkInDate).toLocaleString()}</Typography>
+                  </Grid>
+                )}
+                {viewReservation.checkOutDate && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Check-out Date</Typography>
+                    <Typography variant="body1">{new Date(viewReservation.checkOutDate).toLocaleString()}</Typography>
+                  </Grid>
+                )}
+                {viewReservation.tourDate && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Tour Date</Typography>
+                    <Typography variant="body1">{new Date(viewReservation.tourDate).toLocaleDateString()}</Typography>
+                  </Grid>
+                )}
+                {viewReservation.pickupDate && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Pickup Date</Typography>
+                    <Typography variant="body1">{new Date(viewReservation.pickupDate).toLocaleDateString()}</Typography>
+                  </Grid>
+                )}
+                {viewReservation.returnDate && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Return Date</Typography>
+                    <Typography variant="body1">{new Date(viewReservation.returnDate).toLocaleDateString()}</Typography>
+                  </Grid>
+                )}
+
+                {/* Service Details */}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Guests</Typography>
+                  <Typography variant="body1">{viewReservation.guests || 'N/A'}</Typography>
+                </Grid>
+                {viewReservation.rooms && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Rooms</Typography>
+                    <Typography variant="body1">{viewReservation.rooms}</Typography>
+                  </Grid>
+                )}
+                {viewReservation.needDriver !== undefined && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Driver Required</Typography>
+                    <Typography variant="body1">{viewReservation.needDriver ? 'Yes' : 'No'}</Typography>
+                  </Grid>
+                )}
+
+                {/* Financial Information */}
+                {viewReservation.totalAmount && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Total Amount</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                      Rs. {viewReservation.totalAmount.toLocaleString()}
+                    </Typography>
+                  </Grid>
+                )}
+                {viewReservation.pricePerUnit && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Price per Unit</Typography>
+                    <Typography variant="body1">Rs. {viewReservation.pricePerUnit}</Typography>
+                  </Grid>
+                )}
+
+                {/* Special Requests */}
+                {viewReservation.specialRequests && (
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle2" color="text.secondary">Special Requests</Typography>
+                    <Typography variant="body1">{viewReservation.specialRequests}</Typography>
+                  </Grid>
+                )}
+
+                {/* CNIC Photo */}
+                {viewReservation.cnicPhoto && (
+                  <Grid item xs={12} sx={{ mt: 2 }}>
+                    <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
+                      Identity Verification
+                    </Typography>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                      CNIC Photo
+                    </Typography>
+                    <Box 
+                      component="img" 
+                      src={viewReservation.cnicPhoto} 
+                      alt="CNIC Photo" 
+                      sx={{ 
+                        maxWidth: '100%', 
+                        maxHeight: '300px', 
+                        objectFit: 'contain',
+                        border: '1px solid #ddd',
+                        borderRadius: 1,
+                        p: 1
+                      }} 
+                    />
+                  </Grid>
+                )}
+
+                {/* Timestamps */}
+                <Grid item xs={12} sx={{ mt: 2 }}>
+                  <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
+                    Booking Details
+                  </Typography>
+                </Grid>
+                {viewReservation.createdAt && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Booking Date</Typography>
+                    <Typography variant="body1">{new Date(viewReservation.createdAt).toLocaleString()}</Typography>
+                  </Grid>
+                )}
+                {viewReservation.confirmationNumber && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Confirmation Number</Typography>
+                    <Typography variant="body1">{viewReservation.confirmationNumber}</Typography>
+                  </Grid>
+                )}
+                {viewReservation.transactionId && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Transaction ID</Typography>
+                    <Typography variant="body1">{viewReservation.transactionId}</Typography>
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenViewDialog(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Container>

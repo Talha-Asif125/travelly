@@ -23,25 +23,20 @@ const FlightHome = () => {
   const fetchFlights = async () => {
     try {
       setLoading(true);
-      // In a real app, this would be an API call
-      // Mocking data for demonstration
-      const mockFlights = [
-        { id: 1, flightNumber: 'PK301', airline: 'PIA', origin: 'Islamabad', destination: 'Karachi', departureDate: '2023-12-25', departureTime: '09:00', arrivalTime: '11:00', price: 12000, status: 'On Time', seatsAvailable: 45 },
-        { id: 2, flightNumber: 'PK205', airline: 'Airblue', origin: 'Lahore', destination: 'Dubai', departureDate: '2023-12-27', departureTime: '14:30', arrivalTime: '17:30', price: 45000, status: 'On Time', seatsAvailable: 32 },
-        { id: 3, flightNumber: 'PK762', airline: 'SereneAir', origin: 'Karachi', destination: 'Peshawar', departureDate: '2023-12-26', departureTime: '18:45', arrivalTime: '20:15', price: 14000, status: 'On Time', seatsAvailable: 18 },
-        { id: 4, flightNumber: 'PK503', airline: 'PIA', origin: 'Lahore', destination: 'Islamabad', departureDate: '2023-12-25', departureTime: '07:30', arrivalTime: '08:30', price: 10000, status: 'On Time', seatsAvailable: 50 },
-        { id: 5, flightNumber: 'PK811', airline: 'Airblue', origin: 'Karachi', destination: 'Dubai', departureDate: '2023-12-28', departureTime: '23:00', arrivalTime: '01:30', price: 48000, status: 'On Time', seatsAvailable: 22 },
-      ];
       
-      setFlights(mockFlights);
-      setFilteredFlights(mockFlights);
+      // Note: Flight services are no longer supported. This page shows empty results.
+      setFlights([]);
+      setFilteredFlights([]);
       setLoading(false);
+      
     } catch (error) {
       console.error("Error fetching flights:", error);
+      setFlights([]);
+      setFilteredFlights([]);
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to load flights. Please try again later.'
+        icon: 'info',
+        title: 'Flight Services Unavailable',
+        text: 'Flight booking services are currently not available.'
       });
       setLoading(false);
     }

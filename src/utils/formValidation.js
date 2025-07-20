@@ -234,51 +234,8 @@ export const CommonSchemas = {
   
   serviceProviderRequest: {
     firstName: [{ type: ValidationTypes.REQUIRED }],
-    lastName: [{ type: ValidationTypes.REQUIRED }],
-    email: [
-      { type: ValidationTypes.REQUIRED },
-      { type: ValidationTypes.EMAIL }
-    ],
-    phone: [
-      { type: ValidationTypes.REQUIRED },
-      { type: ValidationTypes.PHONE }
-    ],
-    businessName: [{ type: ValidationTypes.REQUIRED }],
-    businessAddress: [{ type: ValidationTypes.REQUIRED }],
-    businessCity: [{ type: ValidationTypes.REQUIRED }],
-    businessState: [{ type: ValidationTypes.REQUIRED }],
-    businessZip: [
-      { type: ValidationTypes.REQUIRED },
-      { type: ValidationTypes.ZIP_CODE }
-    ],
-    businessPhone: [
-      { type: ValidationTypes.REQUIRED },
-      { type: ValidationTypes.PHONE }
-    ],
-    businessEmail: [
-      { type: ValidationTypes.REQUIRED },
-      { type: ValidationTypes.EMAIL }
-    ],
-    registrationNumber: [
-      { type: ValidationTypes.REQUIRED },
-      { type: ValidationTypes.BUSINESS_REGISTRATION }
-    ],
-    licenseNumber: [
-      { type: ValidationTypes.REQUIRED },
-      { type: ValidationTypes.LICENSE_NUMBER }
-    ],
-    taxId: [
-      { type: ValidationTypes.REQUIRED },
-      { type: ValidationTypes.TAX_ID }
-    ],
-    serviceDetails: [
-      { type: ValidationTypes.REQUIRED },
-      { type: ValidationTypes.MIN_LENGTH, param: 50 }
-    ],
-    experience: [
-      { type: ValidationTypes.REQUIRED },
-      { type: ValidationTypes.POSITIVE_NUMBER }
-    ]
+    lastName: [{ type: ValidationTypes.REQUIRED }]
+    // Business details removed - all providers use simplified registration
   },
   
   vehicleDetails: {

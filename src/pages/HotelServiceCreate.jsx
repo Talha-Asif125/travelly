@@ -1,332 +1,114 @@
-import React, { useState, useContext, useEffect } from 'react';
-import {
-  Container,
-  Typography,
-  Box,
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
-  Paper,
-  Grid,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Card,
-  CardContent,
-  IconButton,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  LinearProgress
-} from '@mui/material';
-import {
-  Business,
-  LocationOn,
-  Hotel,
-  Photo,
-  Save,
-  ArrowBack,
-  ArrowForward,
-  Add,
-  Delete,
-  Star,
-  Wifi,
-  LocalParking,
-  Restaurant,
-  FitnessCenter,
-  Pool,
-  Spa
-} from '@mui/icons-material';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/authContext';
 import Swal from 'sweetalert2';
+import AdminBackButton from '../components/AdminBackButton';
 
 const HotelServiceCreate = () => {
-  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const location = useLocation();
-  const isEdit = location.state?.isEdit || false;
-  const existingService = location.state?.service || null;
+  const { user } = useContext(AuthContext);
 
-  const [activeStep, setActiveStep] = useState(0);
+  // Basic Hotel Information
+  const [hotelName, setHotelName] = useState('');
+
+  const [starRating, setStarRating] = useState('3');
+  const [city, setCity] = useState('');
+  const [address, setAddress] = useState('');
+  const [totalRooms, setTotalRooms] = useState('');
+  const [availableRooms, setAvailableRooms] = useState('');
+  const [pricePerNight, setPricePerNight] = useState('');
+  const [checkInTime, setCheckInTime] = useState('14:00');
+  const [checkOutTime, setCheckOutTime] = useState('12:00');
+  const [description, setDescription] = useState('');
+  const [facilities, setFacilities] = useState('');
+  const [hotelImage, setHotelImage] = useState(null);
+
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState('');
 
-  // Hotel service data
-  const [hotelData, setHotelData] = useState({
-    // Basic Information
-    name: '',
-    description: '',
-    category: 'mid-range',
-    starRating: 3,
-    
-    // Location
-    address: '',
-    city: '',
-    province: '',
-    zipCode: '',
-    coordinates: { latitude: '', longitude: '' },
-    
-    // Contact
-    phone: '',
-    email: '',
-    website: '',
-    
-    // Pricing
-    basePrice: '',
-    priceRange: { minimum: '', maximum: '' },
-    
-    // Amenities
-    amenities: {
-      popular: [],
-      parking: [],
-      food: [],
-      internet: [],
-      family: [],
-      conveniences: [],
-      guest: [],
-      accessibility: [],
-      languages: [],
-      entertainment: [],
-      more: []
-    },
-    
-    // Room Types
-    roomTypes: [{
-      name: 'Standard Room',
-      sleeps: 2,
-      beds: '1 Double Bed',
-      pricePerNight: '',
-      totalRooms: 10,
-      availableRooms: 10,
-      highlights: [],
-      images: [],
-      amenities: {
-        parking: [],
-        food: [],
-        internet: [],
-        family: [],
-        conveniences: [],
-        guest: [],
-        accessibility: [],
-        languages: [],
-        entertainment: [],
-        bathroom: [],
-        more: []
-      }
-    }],
-    
-    // Policies
-    policies: {
-      checkIn: '14:00',
-      checkOut: '12:00',
-      cancellation: 'Free cancellation before 24 hours',
-      petPolicy: 'Pets not allowed',
-      smokingPolicy: 'no-smoking',
-      childPolicy: 'Children are welcome'
-    },
-    
-    // Images
-    images: [],
-    
-    // Status
-    status: 'active',
-    featured: false
-  });
+  const starRatings = ['1', '2', '3', '4', '5'];
 
-  const steps = ['Basic Info', 'Location & Contact', 'Amenities', 'Room Types', 'Policies & Images'];
-
-  // Amenity options
-  const amenityOptions = {
-    popular: ['front-desk-24', 'air-conditioning', 'laundry', 'restaurant', 'free-wifi', 'pool', 'gym', 'spa', 'bar', 'parking'],
-    parking: ['free-parking', 'paid-parking', 'valet-parking', 'no-parking', 'street-parking'],
-    food: ['restaurant', 'room-service', 'breakfast', 'bar', 'kitchen', 'microwave', 'refrigerator'],
-    internet: ['free-wifi', 'paid-wifi', 'wifi-all-rooms', 'business-center', 'wifi-speed-high'],
-    family: ['family-friendly', 'kids-club', 'babysitting', 'playground', 'laundry-facilities'],
-    conveniences: ['front-desk-24', 'concierge', 'laundry-facilities', 'dry-cleaning', 'luggage-storage', 'currency-exchange'],
-    guest: ['dry-cleaning', 'housekeeping', 'wake-up-service', 'newspaper', 'shoe-shine'],
-    accessibility: ['wheelchair-accessible', 'elevator', 'accessible-rooms', 'accessible-bathroom', 'braille-signage'],
-    languages: ['english', 'urdu', 'arabic', 'french', 'spanish', 'chinese'],
-    entertainment: ['tv', 'cable-channels', 'satellite-tv', 'netflix', 'music-system', 'games-room'],
-    more: ['no-smoking', 'smoking-rooms', 'pet-friendly', 'eco-friendly', 'adults-only']
-  };
-
-  useEffect(() => {
-    if (isEdit && existingService) {
-      setHotelData({ ...hotelData, ...existingService });
-    }
-  }, [isEdit, existingService]);
-
-  const handleNext = () => {
-    if (validateStep()) {
-      setActiveStep((prev) => prev + 1);
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setHotelImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleBack = () => {
-    setActiveStep((prev) => prev - 1);
-  };
-
-  const validateStep = () => {
-    const newErrors = {};
-    
-    switch (activeStep) {
-      case 0: // Basic Info
-        if (!hotelData.name.trim()) newErrors.name = 'Hotel name is required';
-        if (!hotelData.description.trim()) newErrors.description = 'Description is required';
-        if (!hotelData.basePrice) newErrors.basePrice = 'Base price is required';
-        break;
-      case 1: // Location & Contact
-        if (!hotelData.address.trim()) newErrors.address = 'Address is required';
-        if (!hotelData.city.trim()) newErrors.city = 'City is required';
-        if (!hotelData.phone.trim()) newErrors.phone = 'Phone is required';
-        break;
-      case 3: // Room Types
-        const validRoomTypes = hotelData.roomTypes.filter(room => {
-          return room.name && room.name.trim() && room.pricePerNight && parseFloat(room.pricePerNight) > 0;
-        });
-        if (validRoomTypes.length === 0) {
-          newErrors.roomTypes = 'At least one room type with name and price is required';
-        }
-        // Check each room type for required fields
-        hotelData.roomTypes.forEach((room, index) => {
-          if (!room.name || !room.name.trim()) {
-            newErrors[`roomType_${index}_name`] = 'Room name is required';
-          }
-          if (!room.pricePerNight || parseFloat(room.pricePerNight) <= 0) {
-            newErrors[`roomType_${index}_price`] = 'Valid price per night is required';
-          }
-        });
-        break;
-      // Add more validation as needed
+  const validateForm = () => {
+    if (!hotelName.trim()) {
+      setError('Hotel name is required');
+      return false;
     }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleInputChange = (field, value) => {
-    setHotelData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: undefined
-      }));
+    if (!city.trim()) {
+      setError('City is required');
+      return false;
     }
+    if (!address.trim()) {
+      setError('Address is required');
+      return false;
+    }
+    if (!totalRooms.trim()) {
+      setError('Total rooms is required');
+      return false;
+    }
+    if (!availableRooms.trim()) {
+      setError('Available rooms is required');
+      return false;
+    }
+    if (!pricePerNight.trim()) {
+      setError('Price per night is required');
+      return false;
+    }
+    if (!description.trim()) {
+      setError('Hotel description is required');
+      return false;
+    }
+    if (!hotelImage) {
+      setError('Hotel image is required');
+      return false;
+    }
+
+    setError('');
+    return true;
   };
 
-  const handleNestedChange = (section, field, value) => {
-    setHotelData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }));
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
 
-  const handleAmenityToggle = (category, amenity) => {
-    setHotelData(prev => ({
-      ...prev,
-      amenities: {
-        ...prev.amenities,
-        [category]: prev.amenities[category].includes(amenity)
-          ? prev.amenities[category].filter(a => a !== amenity)
-          : [...prev.amenities[category], amenity]
-      }
-    }));
-  };
+    setLoading(true);
 
-  const addRoomType = () => {
-    setHotelData(prev => ({
-      ...prev,
-      roomTypes: [...prev.roomTypes, {
-        name: '',
-        sleeps: 2,
-        beds: '1 Double Bed',
-        pricePerNight: '',
-        totalRooms: 1,
-        availableRooms: 1,
-        highlights: [],
-        images: [],
-        amenities: {
-          parking: [],
-          food: [],
-          internet: [],
-          family: [],
-          conveniences: [],
-          guest: [],
-          accessibility: [],
-          languages: [],
-          entertainment: [],
-          bathroom: [],
-          more: []
-        }
-      }]
-    }));
-  };
-
-  const removeRoomType = (index) => {
-    setHotelData(prev => ({
-      ...prev,
-      roomTypes: prev.roomTypes.filter((_, i) => i !== index)
-    }));
-  };
-
-  const updateRoomType = (index, field, value) => {
-    setHotelData(prev => ({
-      ...prev,
-      roomTypes: prev.roomTypes.map((room, i) => 
-        i === index ? { ...room, [field]: value } : room
-      )
-    }));
-  };
-
-  const handleSubmit = async () => {
     try {
-      setLoading(true);
-      
-      // Filter out empty room types and ensure required fields
-      const validRoomTypes = hotelData.roomTypes.filter(room => {
-        return room.name && room.name.trim() && room.pricePerNight && parseFloat(room.pricePerNight) > 0;
-      }).map(room => ({
-        ...room,
-        pricePerNight: parseFloat(room.pricePerNight),
-        sleeps: parseInt(room.sleeps) || 2,
-        totalRooms: parseInt(room.totalRooms) || 1,
-        availableRooms: parseInt(room.availableRooms) || 1
-      }));
-
-      // Ensure at least one valid room type
-      if (validRoomTypes.length === 0) {
-        throw new Error('Please add at least one valid room type with name and price');
-      }
-      
       const serviceData = {
-        ...hotelData,
+        name: hotelName,
+        description: description,
         type: 'hotel',
-        price: parseFloat(hotelData.basePrice),
-        location: hotelData.city,
+        price: parseFloat(pricePerNight),
+        location: city,
+        address: address,
+        starRating: parseInt(starRating),
+        totalRooms: parseInt(totalRooms),
+        availableRooms: parseInt(availableRooms),
+        checkInTime,
+        checkOutTime,
+        facilities,
+        images: [hotelImage],
         providerId: user?.id,
-        roomTypes: validRoomTypes
+        status: 'active'
       };
 
-      const method = isEdit ? 'PUT' : 'POST';
-      const url = isEdit ? `/api/services/${existingService._id}` : '/api/services';
-      
-      const response = await fetch(url, {
-        method,
+      console.log("Creating hotel service with data:", serviceData);
+
+      const response = await fetch('http://localhost:5000/api/provider/services', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -335,434 +117,250 @@ const HotelServiceCreate = () => {
       });
 
       const result = await response.json();
+      console.log("Hotel service creation result:", result);
 
       if (result.success) {
+        console.log("Hotel service created successfully:", result.data);
         await Swal.fire({
           icon: 'success',
           title: 'Success!',
-          text: `Hotel service ${isEdit ? 'updated' : 'created'} successfully!`,
+          text: `${hotelName} hotel service created successfully!`,
           confirmButtonText: 'OK',
-          confirmButtonColor: '#1976d2'
+          confirmButtonColor: '#3b82f6'
         });
         
         navigate('/service-provider-dashboard');
       } else {
-        throw new Error(result.message || 'Failed to save hotel service');
+        console.error("Hotel service creation failed:", result);
+        throw new Error(result.message || 'Failed to create hotel service');
       }
     } catch (error) {
-      console.error('Error saving hotel service:', error);
-      await Swal.fire({
+      console.error('Error creating hotel service:', error);
+      setError(error.message || 'Failed to create hotel service');
+      
+      Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: error.message || 'Failed to save hotel service',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#1976d2'
+        text: error.message || 'Failed to create hotel service'
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const renderStepContent = () => {
-    switch (activeStep) {
-      case 0: // Basic Info
-        return (
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Hotel Name"
-                value={hotelData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                error={!!errors.name}
-                helperText={errors.name}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Description"
-                multiline
-                rows={4}
-                value={hotelData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                error={!!errors.description}
-                helperText={errors.description}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Category</InputLabel>
-                <Select
-                  value={hotelData.category}
-                  onChange={(e) => handleInputChange('category', e.target.value)}
-                >
-                  <MenuItem value="budget">Budget</MenuItem>
-                  <MenuItem value="mid-range">Mid-range</MenuItem>
-                  <MenuItem value="luxury">Luxury</MenuItem>
-                  <MenuItem value="resort">Resort</MenuItem>
-                  <MenuItem value="boutique">Boutique</MenuItem>
-                  <MenuItem value="business">Business</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Star Rating</InputLabel>
-                <Select
-                  value={hotelData.starRating}
-                  onChange={(e) => handleInputChange('starRating', e.target.value)}
-                >
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <MenuItem key={star} value={star}>
-                      {Array.from({ length: star }, (_, i) => '⭐').join('')} {star} Star{star > 1 ? 's' : ''}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Base Price (Rs.)"
-                type="number"
-                value={hotelData.basePrice}
-                onChange={(e) => handleInputChange('basePrice', e.target.value)}
-                error={!!errors.basePrice}
-                helperText={errors.basePrice}
-                required
-              />
-            </Grid>
-          </Grid>
-        );
-
-      case 1: // Location & Contact
-        return (
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Address"
-                value={hotelData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                error={!!errors.address}
-                helperText={errors.address}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="City"
-                value={hotelData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                error={!!errors.city}
-                helperText={errors.city}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Province"
-                value={hotelData.province}
-                onChange={(e) => handleInputChange('province', e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Pakistani Phone Number"
-                value={hotelData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                error={!!errors.phone}
-                helperText={errors.phone || 'Format: 03XX-XXXXXXX'}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                value={hotelData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Website"
-                value={hotelData.website}
-                onChange={(e) => handleInputChange('website', e.target.value)}
-                placeholder="https://yourhotel.com"
-              />
-            </Grid>
-          </Grid>
-        );
-
-      case 2: // Amenities
-        return (
-          <Box>
-            <Typography variant="h6" gutterBottom>
-              Select Hotel Amenities
-            </Typography>
-            {Object.entries(amenityOptions).map(([category, options]) => (
-              <Box key={category} sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" gutterBottom sx={{ textTransform: 'capitalize', fontWeight: 'bold' }}>
-                  {category.replace('-', ' ')}
-                </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {options.map(amenity => (
-                    <Chip
-                      key={amenity}
-                      label={amenity.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      onClick={() => handleAmenityToggle(category, amenity)}
-                      variant={hotelData.amenities[category].includes(amenity) ? 'filled' : 'outlined'}
-                      color={hotelData.amenities[category].includes(amenity) ? 'primary' : 'default'}
-                      sx={{ cursor: 'pointer' }}
-                    />
-                  ))}
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        );
-
-      case 3: // Room Types
-        return (
-          <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6">Room Types</Typography>
-              <Button
-                variant="outlined"
-                startIcon={<Add />}
-                onClick={addRoomType}
-              >
-                Add Room Type
-              </Button>
-            </Box>
-            
-            {errors.roomTypes && (
-              <Alert severity="error" sx={{ mb: 3 }}>
-                {errors.roomTypes}
-              </Alert>
-            )}
-            
-            {hotelData.roomTypes.map((room, index) => (
-              <Card key={index} sx={{ mb: 3 }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h6">Room Type {index + 1}</Typography>
-                    {hotelData.roomTypes.length > 1 && (
-                      <IconButton
-                        color="error"
-                        onClick={() => removeRoomType(index)}
-                      >
-                        <Delete />
-                      </IconButton>
-                    )}
-                  </Box>
-                  
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="Room Name"
-                        value={room.name}
-                        onChange={(e) => updateRoomType(index, 'name', e.target.value)}
-                        error={!!errors[`roomType_${index}_name`]}
-                        helperText={errors[`roomType_${index}_name`]}
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <TextField
-                        fullWidth
-                        label="Sleeps"
-                        type="number"
-                        value={room.sleeps}
-                        onChange={(e) => updateRoomType(index, 'sleeps', parseInt(e.target.value))}
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <TextField
-                        fullWidth
-                        label="Price per Night (Rs.)"
-                        type="number"
-                        value={room.pricePerNight}
-                        onChange={(e) => updateRoomType(index, 'pricePerNight', e.target.value)}
-                        error={!!errors[`roomType_${index}_price`]}
-                        helperText={errors[`roomType_${index}_price`]}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="Bed Configuration"
-                        value={room.beds}
-                        onChange={(e) => updateRoomType(index, 'beds', e.target.value)}
-                        placeholder="e.g., 1 Double Bed, 2 Single Beds"
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <TextField
-                        fullWidth
-                        label="Total Rooms"
-                        type="number"
-                        value={room.totalRooms}
-                        onChange={(e) => updateRoomType(index, 'totalRooms', parseInt(e.target.value))}
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <TextField
-                        fullWidth
-                        label="Available Rooms"
-                        type="number"
-                        value={room.availableRooms}
-                        onChange={(e) => updateRoomType(index, 'availableRooms', parseInt(e.target.value))}
-                      />
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        );
-
-      case 4: // Policies & Images
-        return (
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Check-in Time"
-                value={hotelData.policies.checkIn}
-                onChange={(e) => handleNestedChange('policies', 'checkIn', e.target.value)}
-                placeholder="14:00"
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Check-out Time"
-                value={hotelData.policies.checkOut}
-                onChange={(e) => handleNestedChange('policies', 'checkOut', e.target.value)}
-                placeholder="12:00"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Cancellation Policy"
-                multiline
-                rows={2}
-                value={hotelData.policies.cancellation}
-                onChange={(e) => handleNestedChange('policies', 'cancellation', e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Pet Policy"
-                value={hotelData.policies.petPolicy}
-                onChange={(e) => handleNestedChange('policies', 'petPolicy', e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Smoking Policy</InputLabel>
-                <Select
-                  value={hotelData.policies.smokingPolicy}
-                  onChange={(e) => handleNestedChange('policies', 'smokingPolicy', e.target.value)}
-                >
-                  <MenuItem value="no-smoking">No Smoking</MenuItem>
-                  <MenuItem value="smoking-areas">Designated Smoking Areas</MenuItem>
-                  <MenuItem value="smoking-rooms-available">Smoking Rooms Available</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <Alert severity="info">
-                Image upload functionality will be available in the next step. 
-                You can add images after creating the basic hotel service.
-              </Alert>
-            </Grid>
-          </Grid>
-        );
-
-      default:
-        return null;
-    }
-  };
-
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Paper sx={{ p: 4 }}>
-        {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-          <IconButton onClick={() => navigate('/service-provider-dashboard')} sx={{ mr: 2 }}>
-            <ArrowBack />
-          </IconButton>
-          <Hotel sx={{ mr: 2, color: 'primary.main' }} />
-          <Typography variant="h4" component="h1">
-            {isEdit ? 'Edit Hotel Service' : 'Create Hotel Service'}
-          </Typography>
-        </Box>
+    <>
+      <AdminBackButton />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-2xl mx-auto py-8 px-4">
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold text-center mb-6">Add Hotel Service</h1>
 
-        {/* Progress */}
-        {loading && <LinearProgress sx={{ mb: 2 }} />}
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded">
+                  {error}
+                </div>
+              )}
 
-        {/* Stepper */}
-        <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Hotel Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={hotelName}
+                      onChange={(e) => setHotelName(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Grand Palace Hotel"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      City *
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Lahore, Karachi, Islamabad"
+                      required
+                    />
+                  </div>
+                </div>
 
-        {/* Step Content */}
-        <Box sx={{ mb: 4 }}>
-          {renderStepContent()}
-        </Box>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address *
+                  </label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Complete address with landmarks"
+                    required
+                  />
+                </div>
 
-        {/* Navigation Buttons */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Button
-            onClick={handleBack}
-            disabled={activeStep === 0 || loading}
-            startIcon={<ArrowBack />}
-          >
-            Back
-          </Button>
-          
-          <Box>
-            {activeStep === steps.length - 1 ? (
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={loading}
-                startIcon={<Save />}
-                size="large"
-              >
-                {loading ? 'Saving...' : (isEdit ? 'Update Hotel' : 'Create Hotel')}
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                onClick={handleNext}
-                endIcon={<ArrowForward />}
-                size="large"
-              >
-                Next
-              </Button>
-            )}
-          </Box>
-        </Box>
-      </Paper>
-    </Container>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Star Rating *
+                    </label>
+                    <select
+                      value={starRating}
+                      onChange={(e) => setStarRating(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      {starRatings.map(rating => (
+                        <option key={rating} value={rating}>{rating} Star{rating !== '1' ? 's' : ''}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Price per Night (PKR) *
+                    </label>
+                    <input
+                      type="number"
+                      value={pricePerNight}
+                      onChange={(e) => setPricePerNight(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="5000"
+                      min="0"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Total Rooms *
+                    </label>
+                    <input
+                      type="number"
+                      value={totalRooms}
+                      onChange={(e) => setTotalRooms(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="50"
+                      min="1"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Available Rooms *
+                    </label>
+                    <input
+                      type="number"
+                      value={availableRooms}
+                      onChange={(e) => setAvailableRooms(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="45"
+                      min="0"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Check-in Time *
+                    </label>
+                    <input
+                      type="time"
+                      value={checkInTime}
+                      onChange={(e) => setCheckInTime(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Check-out Time *
+                    </label>
+                    <input
+                      type="time"
+                      value={checkOutTime}
+                      onChange={(e) => setCheckOutTime(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Facilities & Amenities
+                  </label>
+                  <textarea
+                    value={facilities}
+                    onChange={(e) => setFacilities(e.target.value)}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="WiFi, Restaurant, Swimming Pool, Gym, Parking..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Hotel Description *
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Describe your hotel, location benefits, special features, services..."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Hotel Image *
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                  {hotelImage && (
+                    <div className="mt-2">
+                      <img src={hotelImage} alt="Hotel preview" className="w-32 h-24 object-cover rounded" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-center pt-4">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-blue-600 text-white px-8 py-3 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Adding Hotel Service...' : 'Add Hotel Service'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

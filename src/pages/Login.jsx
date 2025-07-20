@@ -108,12 +108,30 @@ const Login = () => {
       console.error("Login error:", err);
       dispatch({ type: "LOGIN_FAILURE", payload: err.message });
       
-      Swal.fire({
-        title: "Login Failed",
-        text: err.message || "Something went wrong during login",
-        icon: "error",
-        confirmButtonColor: "#1976d2",
-      });
+      // Check if error is about email verification
+      if (err.message && err.message.includes('verify your email')) {
+        Swal.fire({
+          title: "Email Verification Required 📧",
+          html: `
+            <p>${err.message}</p>
+            <p style="margin-top: 15px;">
+              <a href="/verify-email" style="color: #41A4FF; text-decoration: underline;">
+                Click here to resend verification email
+              </a>
+            </p>
+          `,
+          icon: "warning",
+          confirmButtonColor: "#41A4FF",
+          confirmButtonText: "OK"
+        });
+      } else {
+        Swal.fire({
+          title: "Login Failed",
+          text: err.message || "Something went wrong during login",
+          icon: "error",
+          confirmButtonColor: "#1976d2",
+        });
+      }
     } finally {
       setLoading2(false);
     }

@@ -7,14 +7,14 @@ const nav_links = [
     path: "/tours/home",
     display: "Explore Pakistan",
   },
-  {
-    path: "/sunandbeach",
-    display: "Sun and Beach",
-  },
-  {
-    path: "/hikingandtrekking",
-    display: "Hiking and Trekking",
-  },
+      {
+      path: "/privatecarservice",
+      display: "Private Car Service",
+    },
+    {
+      path: "/citytocity",
+      display: "City to City",
+    },
   {
     path: "/wildsafari",
     display: "Wild Safari",
@@ -30,6 +30,14 @@ const nav_links = [
   {
     path: "/festival",
     display: "Festivals",
+  },
+  {
+    path: "/privatecarservice",
+    display: "Private Car Service",
+  },
+  {
+    path: "/citytocitytravel",
+    display: "City to City Travel",
   },
 ];
 

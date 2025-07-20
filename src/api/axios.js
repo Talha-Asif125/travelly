@@ -1,4 +1,5 @@
 import axios from 'axios';
+import SessionService from '../services/sessionService';
 
 // Create axios instance
 const api = axios.create({
@@ -12,6 +13,8 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      // Reset session timer on API activity (user is active)
+      SessionService.resetSessionTimer();
     }
     return config;
   },

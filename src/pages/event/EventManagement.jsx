@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Datatable from "../../components/datatable/Datatable";
 import AdminBackButton from '../../components/AdminBackButton';
@@ -56,73 +56,9 @@ const EventManagement = () => {
     }
   ];
 
-  // Add actions column
-  useEffect(() => {
-    if (columns && columns.length > 0 && !columns.find(col => col.field === 'actions')) {
-      columns.push({
-        field: 'actions',
-        headerName: 'Actions',
-        width: 180,
-        renderCell: (params) => {
-          return (
-            <div className="flex gap-2">
-              <Link 
-                to={`/event-details/${params.row.id}`} 
-                className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
-              >
-                View
-              </Link>
-              <button 
-                onClick={() => handleEditEvent(params.row)}
-                className="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDeleteEvent(params.row.id)}
-                className="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-              >
-                Delete
-              </button>
-            </div>
-          );
-        },
-      });
-    }
-  }, [columns]);
+  // Let the Datatable component handle CRUD operations automatically
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
-    setLoading(true);
-    try {
-      // In a real scenario, this would be an API call
-      // For now using mock data
-      const mockEvents = [
-        { id: 1, name: "Tech Conference 2023", type: "Conference", date: "2023-12-15", time: "09:00", location: "Islamabad Convention Center", description: "Annual tech conference", capacity: 500, status: "upcoming" },
-        { id: 2, name: "Music Festival", type: "Entertainment", date: "2023-12-20", time: "18:00", location: "Lahore Stadium", description: "Annual music event", capacity: 2000, status: "upcoming" },
-        { id: 3, name: "Business Expo", type: "Exhibition", date: "2023-11-10", time: "10:00", location: "Karachi Expo Center", description: "Business networking event", capacity: 300, status: "completed" },
-        { id: 4, name: "Food Festival", type: "Entertainment", date: "2024-01-05", time: "12:00", location: "Multan Food Park", description: "Food and cultural festival", capacity: 1500, status: "upcoming" },
-        { id: 5, name: "Tech Workshop", type: "Workshop", date: "2023-12-05", time: "14:00", location: "Peshawar IT Park", description: "Hands-on tech workshop", capacity: 100, status: "ongoing" },
-      ];
-      
-      setData(mockEvents);
-      setLoading(false);
-    } catch (err) {
-      console.error("Error fetching events:", err);
-      setError(err.message || "Error fetching events");
-      setLoading(false);
-      Swal.fire({
-        icon: "error",
-        title: "Error loading events",
-        text: err.message || "Failed to load event data"
-      });
-    }
-  };
-
-  const handleEditEvent = (event) => {
+  const handleEditEvent = useCallback((event) => {
     Swal.fire({
       title: 'Edit Event',
       html: `
@@ -161,29 +97,98 @@ const EventManagement = () => {
         }
         
         return {
-          id: event.id,
+          ...event,
           name,
           type,
           date,
           location,
           capacity: Number(capacity),
-          status,
-          time: event.time, // Keep existing data
-          description: event.description // Keep existing data
+          status
         };
       }
-    }).then((result) => {
+         }).then(async (result) => {
       if (result.isConfirmed) {
-        // Update the event in the data state
-        setData(data.map(e => e.id === event.id ? result.value : e));
+         try {
+           // Save the updated event to the backend
+           const eventData = {
+             name: result.value.name,
+             type: result.value.type,
+             date: result.value.date,
+             time: result.value.time,
+             location: result.value.location,
+             capacity: result.value.capacity,
+             status: result.value.status,
+             description: result.value.description
+           };
+           
+           await axios.put(`/events/${event.id}`, eventData);
+           
+           // Refresh the events list
+           await fetchEvents();
         
         Swal.fire({
           icon: 'success',
           title: 'Event Updated',
           text: 'The event has been successfully updated'
         });
-      }
+         } catch (error) {
+           console.error('Error updating event:', error);
+           Swal.fire({
+             icon: 'error',
+             title: 'Error',
+             text: 'Failed to update event. Please try again.'
     });
+         }
+       }
+     });
+  }, []);
+
+  // Expose handleEditEvent to global scope for Datatable component
+  useEffect(() => {
+    window.handleEditEvent = handleEditEvent;
+    return () => {
+      delete window.handleEditEvent;
+    };
+  }, [handleEditEvent]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/events');
+      
+      // The backend returns events directly as an array
+      if (Array.isArray(response.data)) {
+        const events = response.data.map(event => ({
+          id: event._id,
+          name: event.name,
+          type: event.type || "Event",
+          date: event.date,
+          time: event.time || "TBD",
+          location: event.location,
+          description: event.description,
+          capacity: event.capacity || 0,
+          status: event.status || "upcoming"
+        }));
+        setData(events);
+      } else {
+        setData([]);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      setError(err.message || "Error fetching events");
+      setLoading(false);
+      setData([]);
+      Swal.fire({
+        icon: "error",
+        title: "Error loading events",
+        text: err.message || "Failed to load event data"
+      });
+    }
   };
 
   const handleDeleteEvent = (id) => {
@@ -205,70 +210,6 @@ const EventManagement = () => {
           'The event has been deleted.',
           'success'
         );
-      }
-    });
-  };
-
-  const handleAddEvent = () => {
-    Swal.fire({
-      title: 'Add New Event',
-      html: `
-        <input id="name" class="swal2-input" placeholder="Event Name">
-        <select id="type" class="swal2-input">
-          <option value="Conference">Conference</option>
-          <option value="Workshop">Workshop</option>
-          <option value="Seminar">Seminar</option>
-          <option value="Entertainment">Entertainment</option>
-          <option value="Exhibition">Exhibition</option>
-        </select>
-        <input id="date" type="date" class="swal2-input">
-        <input id="location" class="swal2-input" placeholder="Location">
-        <input id="capacity" type="number" class="swal2-input" placeholder="Capacity" value="100">
-        <select id="status" class="swal2-input">
-          <option value="upcoming">Upcoming</option>
-          <option value="ongoing">Ongoing</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      `,
-      focusConfirm: false,
-      showCancelButton: true,
-      confirmButtonText: 'Add',
-      preConfirm: () => {
-        const name = document.getElementById('name').value;
-        const type = document.getElementById('type').value;
-        const date = document.getElementById('date').value;
-        const location = document.getElementById('location').value;
-        const capacity = document.getElementById('capacity').value;
-        const status = document.getElementById('status').value;
-        
-        if (!name || !type || !date || !location || !capacity) {
-          Swal.showValidationMessage('Please fill all fields');
-          return false;
-        }
-        
-        return {
-          id: data.length > 0 ? Math.max(...data.map(e => e.id)) + 1 : 1,
-          name,
-          type,
-          date,
-          location,
-          capacity: Number(capacity),
-          status,
-          time: "09:00", // Default value
-          description: "Event description" // Default value
-        };
-      }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Add the new event to the data state
-        setData([...data, result.value]);
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'Event Added',
-          text: 'The event has been successfully added'
-        });
       }
     });
   };
@@ -321,12 +262,12 @@ const EventManagement = () => {
       <div className="flex flex-row col-span-2 lg:px-32 px-8 pt-7 pb-2 justify-between md:items-center ">
         <div className="text-3xl font-bold">Event Management</div>
         <div className="grid md:grid-cols-2 gap-1">
-          <button 
-            onClick={handleAddEvent}
+          <Link 
+            to="/add-event"
             className="bg-blue-500 hover:bg-blue-700 text-center text-white font-bold py-2 px-4 rounded cursor-pointer lg:mt-0 mt-3"
           >
             Add Event
-          </button>
+          </Link>
           <Link to="/event-reservations" className="bg-gray-800 hover:bg-gray-600 text-center text-white font-bold py-2 px-4 rounded cursor-pointer lg:mt-0 mt-3">
             Event Reservations
           </Link>

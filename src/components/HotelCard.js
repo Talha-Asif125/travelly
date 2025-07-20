@@ -11,10 +11,13 @@ import {
   Stack
 } from '@mui/material';
 import { LocationOn, Wifi, LocalParking, Restaurant } from '@mui/icons-material';
-import ReservationModal from './ReservationModal';
+import HotelReservationForm from './forms/HotelReservationForm';
+import ReservationSuccessModal from './ui/ReservationSuccessModal';
 
 const HotelCard = ({ hotel }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [reservationData, setReservationData] = useState(null);
 
   // Ensure hotel object has all required properties with default values
   const hotelData = {
@@ -40,6 +43,16 @@ const HotelCard = ({ hotel }) => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleReservationSuccess = (reservation) => {
+    setReservationData(reservation);
+    setShowSuccessModal(true);
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setReservationData(null);
   };
 
   return (
@@ -102,10 +115,17 @@ const HotelCard = ({ hotel }) => {
         </CardContent>
       </Card>
 
-      <ReservationModal
-        open={isModalOpen}
+      <HotelReservationForm
+        isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onSuccess={handleReservationSuccess}
         hotel={hotelData}
+      />
+
+      <ReservationSuccessModal
+        isOpen={showSuccessModal}
+        onClose={handleCloseSuccessModal}
+        reservationData={reservationData}
       />
     </>
   );

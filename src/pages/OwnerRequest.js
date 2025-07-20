@@ -51,20 +51,19 @@ const getStepsForServiceType = (serviceType) => {
     baseSteps.push('Business Details');
   }
   
-  // Add service-specific details step
+  // Add service-specific details step (skip for tour - simplified registration)
   if (serviceType === 'hotel') {
     baseSteps.push('Hotel Details');
   } else if (serviceType === 'restaurant') {
     baseSteps.push('Restaurant Details');
   } else if (serviceType === 'event') {
     baseSteps.push('Event Details');
-  } else if (serviceType === 'tour') {
-    baseSteps.push('Tour Details');
   } else if (serviceType === 'vehicle') {
     baseSteps.push('Vehicle Details');
-  } else {
+  } else if (serviceType !== 'tour') {
     baseSteps.push('Service Details');
   }
+  // Note: Tour operators skip service details step for simplified registration
   
   baseSteps.push('Document Upload', 'Review & Submit');
   return baseSteps;
@@ -101,29 +100,8 @@ const getValidationSchema = (step, serviceType) => {
 
       return identityValidation;
     
-    case 2: // Business Details  
-      // Skip business details validation for simplified providers
-      if (serviceType === 'vehicle' || serviceType === 'hotel' || serviceType === 'restaurant' || serviceType === 'event' || serviceType === 'tour') {
-        return {};
-      }
-      
-      return {
-        businessName: [{ type: ValidationTypes.REQUIRED }],
-        businessPhone: [
-          { type: ValidationTypes.REQUIRED },
-          { type: ValidationTypes.PATTERN, param: /^[0-9]{10,11}$/ }
-        ],
-        businessEmail: [
-          { type: ValidationTypes.REQUIRED },
-          { type: ValidationTypes.EMAIL }
-        ],
-        experience: [
-          { type: ValidationTypes.REQUIRED },
-          { type: ValidationTypes.POSITIVE_NUMBER }
-        ],
-        ntnCertificate: [{ type: ValidationTypes.REQUIRED }],
-        businessRegistrationNumber: [{ type: ValidationTypes.REQUIRED }]
-      };
+    case 2: // Business Details - No longer used, all providers simplified
+      return {};
     
     case 3: // Service Details (Dynamic based on service type)
       if (serviceType === 'hotel') {
@@ -185,13 +163,8 @@ const getValidationSchema = (step, serviceType) => {
       }
       
       if (serviceType === 'tour') {
-        return {
-          tourCompanyName: [{ type: ValidationTypes.REQUIRED }],
-          yearsOfExperience: [{ type: ValidationTypes.REQUIRED }],
-          serviceAreas: [{ type: ValidationTypes.REQUIRED }],
-          tourSpecializations: [{ type: ValidationTypes.REQUIRED }],
-          tourBusinessDescription: [{ type: ValidationTypes.REQUIRED }]
-        };
+        // Only identity and documents required for tours
+        return {};
       }
       
       if (serviceType === 'vehicle') {
@@ -203,8 +176,7 @@ const getValidationSchema = (step, serviceType) => {
             { type: ValidationTypes.REQUIRED },
             { type: ValidationTypes.POSITIVE_NUMBER }
           ],
-          yearsInBusiness: [{ type: ValidationTypes.REQUIRED }],
-          vehicleTypesAvailable: [{ type: ValidationTypes.REQUIRED }],
+
           shopPhone: [
             { type: ValidationTypes.REQUIRED },
             { type: ValidationTypes.PATTERN, param: /^[0-9]{10,11}$/ }
@@ -218,7 +190,7 @@ const getValidationSchema = (step, serviceType) => {
     
     case 4: // Document Upload
       if (serviceType === 'hotel') {
-        // Only CNIC and license photo required for hotels
+        // Only CNIC and hotel front photo required for hotels
         return {
           cnicCopy: [{ type: ValidationTypes.REQUIRED }],
           licensePhoto: [{ type: ValidationTypes.REQUIRED }]
@@ -289,15 +261,7 @@ const ServiceProviderRequest = () => {
     cnic: '',
     mobileForOTP: '',
     
-    // Business Details
-    businessName: '',
-    businessPhone: '',
-    businessEmail: '',
-    experience: '',
-    
-    // Required Business Documents
-    ntnCertificate: '',
-    businessRegistrationNumber: '',
+
     
     // Hotel Specific Fields
     hotelName: '',
@@ -324,20 +288,15 @@ const ServiceProviderRequest = () => {
     restaurantEmail: '',
     restaurantPhotos: [],
     
-    // Tour Business Fields
-    tourCompanyName: '',
-    yearsOfExperience: '',
-    serviceAreas: '',
-    tourSpecializations: '',
-    tourBusinessDescription: '',
+    // Tour Business Fields (simplified)
+    // No additional fields needed
     
     // Vehicle Rental Shop Fields
     shopName: '',
     shopCity: '',
     shopAddress: '',
     fleetSize: '',
-    yearsInBusiness: '',
-    vehicleTypesAvailable: '',
+
     shopPhone: '',
     shopDescription: '',
     vehiclePhotos: [],
@@ -352,11 +311,7 @@ const ServiceProviderRequest = () => {
     
     // Document Uploads for Verification
     cnicCopy: null,
-    ownershipDocument: null,
-    ntnCertificateFile: null,
     businessPhotos: [],
-    signboardPhoto: null,
-    licensePhoto: null,
     
     // Common Fields
     additionalInfo: ''
@@ -441,11 +396,21 @@ const ServiceProviderRequest = () => {
       nextStep = 3; // Skip to step 3
     }
     
+    // Skip service details step for tour operators (simplified registration)
+    if (nextStep === 3 && selectedType === 'tour') {
+      nextStep = 4; // Skip directly to documents upload
+    }
+    
     setActiveStep(nextStep);
   };
 
   const handleBack = () => {
     let prevStep = activeStep - 1;
+    
+    // Skip service details step when going backwards for tour operators
+    if (prevStep === 3 && selectedType === 'tour') {
+      prevStep = 1; // Skip back to identity verification
+    }
     
     // Skip business details step when going backwards for certain provider types
     if (prevStep === 2 && (selectedType === 'vehicle' || selectedType === 'hotel' || selectedType === 'restaurant' || selectedType === 'event' || selectedType === 'tour')) {
@@ -470,6 +435,74 @@ const ServiceProviderRequest = () => {
       setError('Authentication token not found. Please log out and log in again to fix this issue.');
       return;
     }
+
+    // Helper function to upload file to Cloudinary
+    const uploadToCloudinary = async (file) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "upload");
+      
+      const uploadResponse = await fetch(
+        "https://api.cloudinary.com/v1_1/dpgelkpd4/image/upload",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+      
+      if (!uploadResponse.ok) {
+        throw new Error(`Failed to upload file: ${uploadResponse.statusText}`);
+      }
+      
+      const uploadResult = await uploadResponse.json();
+      return uploadResult.url;
+    };
+
+    // Upload all files to Cloudinary first
+    const uploadFiles = async () => {
+      const uploadPromises = {};
+      
+      // Single file uploads
+      if (formData.cnicCopy && formData.cnicCopy instanceof File) {
+        uploadPromises.cnicCopy = uploadToCloudinary(formData.cnicCopy);
+      }
+      
+      if (formData.licensePhoto && formData.licensePhoto instanceof File) {
+        uploadPromises.licensePhoto = uploadToCloudinary(formData.licensePhoto);
+      }
+      
+      // Multiple file uploads
+      if (formData.vehiclePhotos && formData.vehiclePhotos.length > 0) {
+        uploadPromises.vehiclePhotos = Promise.all(
+          formData.vehiclePhotos.filter(file => file instanceof File).map(uploadToCloudinary)
+        );
+      }
+      
+      if (formData.restaurantPhotos && formData.restaurantPhotos.length > 0) {
+        uploadPromises.restaurantPhotos = Promise.all(
+          formData.restaurantPhotos.filter(file => file instanceof File).map(uploadToCloudinary)
+        );
+      }
+      
+      if (formData.eventPhotos && formData.eventPhotos.length > 0) {
+        uploadPromises.eventPhotos = Promise.all(
+          formData.eventPhotos.filter(file => file instanceof File).map(uploadToCloudinary)
+        );
+      }
+      
+      // Wait for all uploads to complete
+      const uploadedFiles = {};
+      for (const [key, promise] of Object.entries(uploadPromises)) {
+        try {
+          uploadedFiles[key] = await promise;
+        } catch (error) {
+          console.error(`Failed to upload ${key}:`, error);
+          throw new Error(`Failed to upload ${key}: ${error.message}`);
+        }
+      }
+      
+      return uploadedFiles;
+    };
 
     // Validate all steps up to current
     let allErrors = {};
@@ -517,6 +550,11 @@ const ServiceProviderRequest = () => {
       setFormLoading(true);
       setError(null);
 
+      // Upload files to Cloudinary first
+      console.log('Uploading files to Cloudinary...');
+      const uploadedFiles = await uploadFiles();
+      console.log('Files uploaded successfully:', uploadedFiles);
+
       // Map our form fields to backend expected format
       let requestData = {
         firstName: formData.firstName,
@@ -528,28 +566,7 @@ const ServiceProviderRequest = () => {
       };
 
       // Add service-specific data
-      if (selectedType === 'vehicle') {
-        // For vehicles, structure data according to new simplified model
-        requestData = {
-          ...requestData,
-          vehicleDetails: {
-            vehicleType: formData.vehicleType,
-            make: formData.brandName,
-            model: formData.model,
-            registrationNumber: formData.vehicleNumber,
-            capacity: parseInt(formData.numberOfSeats) || 1,
-            transmission: formData.transmissionType,
-            fuelType: formData.fuelType,
-            pricePerDay: parseFloat(formData.rentPrice) || 0,
-            description: formData.vehicleDescription,
-            location: formData.vehicleLocation
-          },
-          documents: {
-            cnicCopy: formData.cnicCopy,
-            vehiclePhotos: formData.vehiclePhotos
-          }
-        };
-      } else if (selectedType === 'hotel') {
+      if (selectedType === 'hotel') {
         // For hotels, include hotel details instead of business details
         requestData = {
           ...requestData,
@@ -565,8 +582,8 @@ const ServiceProviderRequest = () => {
           hotelEmail: formData.hotelEmail,
           amenities: formData.amenities || [],
           documents: {
-            cnicCopy: formData.cnicCopy,
-            licensePhoto: formData.licensePhoto
+            cnicCopy: uploadedFiles.cnicCopy || formData.cnicCopy,
+            licensePhoto: uploadedFiles.licensePhoto || formData.licensePhoto
           }
         };
       } else if (selectedType === 'restaurant') {
@@ -581,8 +598,8 @@ const ServiceProviderRequest = () => {
           restaurantPhone: formData.restaurantPhone,
           restaurantEmail: formData.restaurantEmail,
           documents: {
-            cnicCopy: formData.cnicCopy,
-            restaurantPhotos: formData.restaurantPhotos
+            cnicCopy: uploadedFiles.cnicCopy || formData.cnicCopy,
+            restaurantPhotos: uploadedFiles.restaurantPhotos || formData.restaurantPhotos
           }
         };
       } else if (selectedType === 'event') {
@@ -595,23 +612,18 @@ const ServiceProviderRequest = () => {
           eventPhone: formData.eventPhone,
           eventEmail: formData.eventEmail,
           documents: {
-            cnicCopy: formData.cnicCopy,
-            eventPhotos: formData.eventPhotos
+            cnicCopy: uploadedFiles.cnicCopy || formData.cnicCopy,
+            eventPhotos: uploadedFiles.eventPhotos || formData.eventPhotos
           }
         };
       } else if (selectedType === 'tour') {
         // For tours, include tour details instead of business details
         requestData = {
           ...requestData,
-          // Tour business details
-          tourCompanyName: formData.tourCompanyName,
-          yearsOfExperience: parseInt(formData.yearsOfExperience) || 0,
-          serviceAreas: formData.serviceAreas,
-          tourSpecializations: formData.tourSpecializations,
-          tourBusinessDescription: formData.tourBusinessDescription,
+          // Tour business details (simplified)
           documents: {
-            cnicCopy: formData.cnicCopy,
-            licensePhoto: formData.licensePhoto
+            cnicCopy: uploadedFiles.cnicCopy || formData.cnicCopy,
+            licensePhoto: uploadedFiles.licensePhoto || formData.licensePhoto
           }
         };
       } else if (selectedType === 'vehicle') {
@@ -623,45 +635,16 @@ const ServiceProviderRequest = () => {
           shopCity: formData.shopCity,
           shopAddress: formData.shopAddress,
           fleetSize: parseInt(formData.fleetSize) || 0,
-          yearsInBusiness: parseInt(formData.yearsInBusiness) || 0,
-          vehicleTypesAvailable: formData.vehicleTypesAvailable,
+
           shopPhone: formData.shopPhone,
           shopDescription: formData.shopDescription,
           documents: {
-            cnicCopy: formData.cnicCopy,
-            vehiclePhotos: formData.vehiclePhotos
+            cnicCopy: uploadedFiles.cnicCopy || formData.cnicCopy,
+            vehiclePhotos: uploadedFiles.vehiclePhotos || formData.vehiclePhotos
           }
         };
       }
-      else {
-        // For other providers, include business data
-        requestData = {
-          ...requestData,
-          email: formData.email,
-          phone: formData.phone,
-          businessName: formData.businessName,
-          businessPhone: formData.businessPhone,
-          businessEmail: formData.businessEmail,
-          experience: parseInt(formData.experience) || 0,
-          registrationNumber: formData.businessRegistrationNumber,
-          licenseNumber: formData.ntnCertificate,
-          taxId: formData.ntnCertificate,
-          businessAddress: formData.hotelAddress || formData.businessName || 'Not specified',
-          businessCity: formData.businessCity || 'Not specified',
-          businessState: formData.businessState || 'Not specified',
-          businessZip: formData.businessZip || '00000',
-          serviceDetails: `${selectedType} service provider with ${formData.experience} years of experience`,
-          // Service-specific details
-          ...formData,
-          documents: {
-            profilePicture: formData.profilePicture,
-            cnicFront: formData.cnicCopy,
-            cnicBack: formData.cnicBackCopy,
-            businessLicense: formData.ownershipDocument,
-            taxCertificate: formData.ntnCertificateFile
-          }
-        };
-      }
+      // All providers now use simplified registration - no additional business data needed
 
       console.log('Submitting request data:', requestData);
 
@@ -910,101 +893,17 @@ const ServiceProviderRequest = () => {
         );
 
       case 2:
-        // This case should not be reached for simplified providers due to step skipping logic above
-        if (selectedType === 'vehicle' || selectedType === 'hotel' || selectedType === 'restaurant' || selectedType === 'event' || selectedType === 'tour') {
-          return null; // This should not render due to step skipping
-        }
+        // Business Details step - No longer used for any providers (all simplified)
         return (
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Typography variant="h6" gutterBottom>
-                🏢 Business Information & Registration
+                🚀 Step Skipped - Simplified Registration
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Provide your business details and registration information. All numbers will be verified against official records.
+              <Typography variant="body2" color="text.secondary">
+                Business details are no longer required for service provider registration. 
+                All provider types now use simplified registration process.
               </Typography>
-              <FormErrorSummary errors={formErrors} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ValidatedInput
-                name="businessName"
-                label="Business Name"
-                value={formData.businessName}
-                onChange={handleInputChange('businessName')}
-                onBlur={() => handleFieldBlur('businessName')}
-                error={getFieldError('businessName')}
-                required
-                placeholder="Enter your business name"
-                helperText="Must match official registration"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ValidatedInput
-                name="businessRegistrationNumber"
-                label="Business Registration Number"
-                value={formData.businessRegistrationNumber}
-                onChange={handleInputChange('businessRegistrationNumber')}
-                onBlur={() => handleFieldBlur('businessRegistrationNumber')}
-                error={getFieldError('businessRegistrationNumber')}
-                required
-                placeholder="Enter business registration number"
-                helperText="As per official business registration certificate"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ValidatedInput
-                name="ntnCertificate"
-                label="NTN Certificate Number"
-                value={formData.ntnCertificate}
-                onChange={handleInputChange('ntnCertificate')}
-                onBlur={() => handleFieldBlur('ntnCertificate')}
-                error={getFieldError('ntnCertificate')}
-                required
-                placeholder="Enter NTN certificate number"
-                helperText="National Tax Number - Required for verification"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ValidatedInput
-                name="experience"
-                type="number"
-                label="Years of Experience"
-                value={formData.experience}
-                onChange={handleInputChange('experience')}
-                onBlur={() => handleFieldBlur('experience')}
-                error={getFieldError('experience')}
-                required
-                placeholder="Enter years of experience"
-                min="0"
-                max="50"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ValidatedInput
-                name="businessPhone"
-                type="tel"
-                label="Business Phone"
-                value={formData.businessPhone}
-                onChange={handleInputChange('businessPhone')}
-                onBlur={() => handleFieldBlur('businessPhone')}
-                error={getFieldError('businessPhone')}
-                required
-                placeholder="Enter your business phone"
-                helperText="We may call this number for verification"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ValidatedInput
-                name="businessEmail"
-                type="email"
-                label="Business Email"
-                value={formData.businessEmail}
-                onChange={handleInputChange('businessEmail')}
-                onBlur={() => handleFieldBlur('businessEmail')}
-                error={getFieldError('businessEmail')}
-                required
-                placeholder="Enter your business email"
-              />
             </Grid>
           </Grid>
         );
@@ -1313,77 +1212,7 @@ const ServiceProviderRequest = () => {
               </>
             )}
 
-            {/* Tour Business Details */}
-            {selectedType === 'tour' && (
-              <>
-                <Grid item xs={12} sm={6}>
-                  <ValidatedInput
-                    name="tourCompanyName"
-                    label="Tour Company Name"
-                    value={formData.tourCompanyName}
-                    onChange={handleInputChange('tourCompanyName')}
-                    onBlur={() => handleFieldBlur('tourCompanyName')}
-                    error={getFieldError('tourCompanyName')}
-                    required
-                    placeholder="Enter your tour company name"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <ValidatedInput
-                    name="yearsOfExperience"
-                    type="number"
-                    label="Years of Experience"
-                    value={formData.yearsOfExperience}
-                    onChange={handleInputChange('yearsOfExperience')}
-                    onBlur={() => handleFieldBlur('yearsOfExperience')}
-                    error={getFieldError('yearsOfExperience')}
-                    required
-                    placeholder="How many years in tourism business?"
-                    min="0"
-                    max="50"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ValidatedInput
-                    name="serviceAreas"
-                    label="Service Areas"
-                    value={formData.serviceAreas}
-                    onChange={handleInputChange('serviceAreas')}
-                    onBlur={() => handleFieldBlur('serviceAreas')}
-                    error={getFieldError('serviceAreas')}
-                    required
-                    placeholder="Which cities/regions do you operate in? (e.g., Karachi, Lahore, Northern Areas)"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ValidatedInput
-                    name="tourSpecializations"
-                    label="Tour Specializations"
-                    value={formData.tourSpecializations}
-                    onChange={handleInputChange('tourSpecializations')}
-                    onBlur={() => handleFieldBlur('tourSpecializations')}
-                    error={getFieldError('tourSpecializations')}
-                    required
-                    placeholder="What types of tours do you specialize in? (e.g., Adventure, Cultural, Historical, Religious)"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ValidatedInput
-                    name="tourBusinessDescription"
-                    label="Business Description"
-                    value={formData.tourBusinessDescription}
-                    onChange={handleInputChange('tourBusinessDescription')}
-                    onBlur={() => handleFieldBlur('tourBusinessDescription')}
-                    error={getFieldError('tourBusinessDescription')}
-                    required
-                    multiline
-                    rows={3}
-                    placeholder="Describe your tour business, services you offer, and what makes you unique"
-                  />
-                </Grid>
-
-              </>
-            )}
+            {/* Tour operators skip this step entirely */}
 
             {/* Vehicle Rental Shop Details */}
             {selectedType === 'vehicle' && (
@@ -1439,33 +1268,7 @@ const ServiceProviderRequest = () => {
                     max="500"
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <ValidatedInput
-                    name="yearsInBusiness"
-                    type="number"
-                    label="Years in Business"
-                    value={formData.yearsInBusiness}
-                    onChange={handleInputChange('yearsInBusiness')}
-                    onBlur={() => handleFieldBlur('yearsInBusiness')}
-                    error={getFieldError('yearsInBusiness')}
-                    required
-                    placeholder="How many years in business?"
-                    min="0"
-                    max="50"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ValidatedInput
-                    name="vehicleTypesAvailable"
-                    label="Types of Vehicles Available"
-                    value={formData.vehicleTypesAvailable}
-                    onChange={handleInputChange('vehicleTypesAvailable')}
-                    onBlur={() => handleFieldBlur('vehicleTypesAvailable')}
-                    error={getFieldError('vehicleTypesAvailable')}
-                    required
-                    placeholder="e.g., Cars, SUVs, Vans, Motorcycles, etc."
-                  />
-                </Grid>
+
                 <Grid item xs={12} sm={6}>
                   <ValidatedInput
                     name="shopPhone"
@@ -1544,11 +1347,11 @@ const ServiceProviderRequest = () => {
               </Typography>
             </Grid>
 
-            {/* For hotels - only CNIC and license photo required (simplified) */}
+            {/* For hotels - only CNIC and hotel front photo required (simplified) */}
             {selectedType === 'hotel' && (
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle2" gutterBottom>
-                  📸 License Display Photo *
+                  📸 Hotel Front Photo *
                 </Typography>
                 <Button
                   variant="outlined"
@@ -1556,7 +1359,7 @@ const ServiceProviderRequest = () => {
                   fullWidth
                   sx={{ mb: 1 }}
                 >
-                  {formData.licensePhoto ? 'License Photo Uploaded ✓' : 'Upload License Photo'}
+                  {formData.licensePhoto ? 'Hotel Front Photo Uploaded ✓' : 'Upload Hotel Front Photo'}
                   <input
                     hidden
                     accept="image/*"
@@ -1565,7 +1368,7 @@ const ServiceProviderRequest = () => {
                   />
                 </Button>
                 <Typography variant="caption" color="text.secondary">
-                  Photo of business license displayed at property
+                  Photo of hotel front entrance
                 </Typography>
               </Grid>
             )}
@@ -1835,46 +1638,10 @@ const ServiceProviderRequest = () => {
                   <strong>CNIC:</strong> {formData.cnic}
                 </Typography>
                 <Typography variant="subtitle1" gutterBottom>
-                  <strong>Mobile (OTP):</strong> {formData.mobileForOTP}
+                  <strong>Mobile:</strong> {formData.mobileForOTP}
                 </Typography>
                 {/* Only show email and contact phone for providers that need business details */}
-                {selectedType !== 'vehicle' && selectedType !== 'hotel' && selectedType !== 'restaurant' && selectedType !== 'event' && selectedType !== 'tour' && (
-                  <>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Email:</strong> {formData.email}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Contact Phone:</strong> {formData.phone}
-                    </Typography>
-                  </>
-                )}
-
-                {/* Business Registration - Hide for simplified providers */}
-                {selectedType !== 'vehicle' && selectedType !== 'hotel' && selectedType !== 'restaurant' && selectedType !== 'event' && selectedType !== 'tour' && (
-                  <>
-                    <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
-                      Business Registration
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Business Name:</strong> {formData.businessName}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Registration Number:</strong> {formData.businessRegistrationNumber}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>NTN Certificate:</strong> {formData.ntnCertificate}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Business Email:</strong> {formData.businessEmail}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Business Phone:</strong> {formData.businessPhone}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Experience:</strong> {formData.experience}
-                    </Typography>
-                  </>
-                )}
+                {/* Business details removed - all providers use simplified registration */}
                 
                 {/* Service specific review - Show hotel details for hotels */}
                 {selectedType === 'hotel' && (
@@ -1908,16 +1675,6 @@ const ServiceProviderRequest = () => {
                         <strong>Amenities:</strong> {formData.amenities.join(', ')}
                       </Typography>
                     )}
-                    
-                    <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
-                      Documents Uploaded
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>CNIC Copy:</strong> {formData.cnicCopy ? '✓ Uploaded' : '❌ Not uploaded'}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>License Photo:</strong> {formData.licensePhoto ? '✓ Uploaded' : '❌ Not uploaded'}
-                    </Typography>
                   </>
                 )}
 
@@ -1940,20 +1697,7 @@ const ServiceProviderRequest = () => {
                       <strong>Seating Capacity:</strong> {formData.seatingCapacity}
                     </Typography>
                     <Typography variant="subtitle1" gutterBottom>
-                      <strong>Price Range:</strong> ${formData.priceRange} per person
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
                       <strong>Contact:</strong> {formData.restaurantPhone} | {formData.restaurantEmail}
-                    </Typography>
-                    
-                    <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
-                      Documents Uploaded
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>CNIC Copy:</strong> {formData.cnicCopy ? '✓ Uploaded' : '❌ Not uploaded'}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Restaurant Photos:</strong> {formData.restaurantPhotos && formData.restaurantPhotos.length > 0 ? `✓ ${formData.restaurantPhotos.length} photos uploaded` : '❌ Not uploaded'}
                     </Typography>
                   </>
                 )}
@@ -1971,60 +1715,19 @@ const ServiceProviderRequest = () => {
                       <strong>Address:</strong> {formData.eventAddress}
                     </Typography>
                     <Typography variant="subtitle1" gutterBottom>
-                      <strong>Type:</strong> {formData.eventType}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Max Attendees:</strong> {formData.maxAttendees}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Price per Person:</strong> ${formData.pricePerPerson}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
                       <strong>Contact:</strong> {formData.eventPhone} | {formData.eventEmail}
-                    </Typography>
-                    
-                    <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
-                      Documents Uploaded
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>CNIC Copy:</strong> {formData.cnicCopy ? '✓ Uploaded' : '❌ Not uploaded'}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Event Photos:</strong> {formData.eventPhotos && formData.eventPhotos.length > 0 ? `✅ ${formData.eventPhotos.length} photos uploaded` : '📷 Not uploaded'}
                     </Typography>
                   </>
                 )}
 
-                {/* Tour business review */}
+                {/* Tour business review (simplified) */}
                 {selectedType === 'tour' && (
                   <>
                     <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
-                      Tour Business Details
+                      Tour Operator Registration (Simplified)
                     </Typography>
                     <Typography variant="subtitle1" gutterBottom>
-                      <strong>Company Name:</strong> {formData.tourCompanyName}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Years of Experience:</strong> {formData.yearsOfExperience} years
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Service Areas:</strong> {formData.serviceAreas}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Tour Specializations:</strong> {formData.tourSpecializations}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Business Description:</strong> {formData.tourBusinessDescription}
-                    </Typography>
-                    
-                    <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
-                      Documents Uploaded
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>CNIC Copy:</strong> {formData.cnicCopy ? '✓ Uploaded' : '❌ Not uploaded'}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>License Photo:</strong> {formData.licensePhoto ? '✓ Uploaded' : '❌ Not uploaded'}
+                      <strong>Registration Type:</strong> Tour Operator
                     </Typography>
                   </>
                 )}
@@ -2044,12 +1747,7 @@ const ServiceProviderRequest = () => {
                     <Typography variant="subtitle1" gutterBottom>
                       <strong>Fleet Size:</strong> {formData.fleetSize} vehicles
                     </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Experience:</strong> {formData.yearsInBusiness} years in business
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Vehicle Types Available:</strong> {formData.vehicleTypesAvailable}
-                    </Typography>
+
 
                     <Typography variant="subtitle1" gutterBottom>
                       <strong>Shop Contact:</strong> {formData.shopPhone}
@@ -2057,59 +1755,47 @@ const ServiceProviderRequest = () => {
                     <Typography variant="subtitle1" gutterBottom>
                       <strong>Description:</strong> {formData.shopDescription}
                     </Typography>
-                    
-                    <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
-                      Documents Uploaded
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>CNIC Copy:</strong> {formData.cnicCopy ? '✓ Uploaded' : '❌ Not uploaded'}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Vehicle Photos:</strong> {formData.vehiclePhotos && formData.vehiclePhotos.length > 0 ? `✓ ${formData.vehiclePhotos.length} photos uploaded` : '❌ Not uploaded'}
-                    </Typography>
                   </>
                 )}
 
-                {/* Documents uploaded summary */}
+                {/* Documents uploaded summary - Service-specific */}
                 <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
                   Documents Uploaded
                 </Typography>
+                
+                {/* Common for all services */}
                 <Typography variant="subtitle1" gutterBottom>
                   <strong>CNIC Copy:</strong> {formData.cnicCopy ? '✅ Uploaded' : '❌ Not uploaded'}
                 </Typography>
-                {/* Hide business documents for vehicle providers */}
-                {selectedType !== 'vehicle' && (
-                  <>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>Ownership Document:</strong> {formData.ownershipDocument ? '✅ Uploaded' : '❌ Not uploaded'}
-                    </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
-                      <strong>NTN Certificate:</strong> {formData.ntnCertificateFile ? '✅ Uploaded' : '❌ Not uploaded'}
-                    </Typography>
-                  </>
-                )}
-                <Typography variant="subtitle1" gutterBottom>
-                  <strong>Signboard Photo:</strong> {formData.signboardPhoto ? '✅ Uploaded' : '❌ Not uploaded'}
-                </Typography>
-                <Typography variant="subtitle1" gutterBottom>
-                  <strong>License Photo:</strong> {formData.licensePhoto ? '✅ Uploaded' : '❌ Not uploaded'}
-                </Typography>
-                <Typography variant="subtitle1" gutterBottom>
-                  <strong>Business Photos:</strong> {formData.businessPhotos.length > 0 ? `✅ ${formData.businessPhotos.length} photos uploaded` : '📷 Optional - not uploaded'}
-                </Typography>
-                {selectedType === 'restaurant' && (
-                  <Typography variant="subtitle1" gutterBottom>
-                    <strong>Restaurant Photos:</strong> {formData.restaurantPhotos.length > 0 ? `✅ ${formData.restaurantPhotos.length} photos uploaded` : '📷 Optional - not uploaded'}
-                  </Typography>
-                )}
-                {selectedType === 'event' && (
-                  <Typography variant="subtitle1" gutterBottom>
-                    <strong>Event Photos:</strong> {formData.eventPhotos.length > 0 ? `✅ ${formData.eventPhotos.length} photos uploaded` : '📷 Optional - not uploaded'}
-                  </Typography>
-                )}
+                
+                {/* Service-specific documents */}
                 {selectedType === 'tour' && (
                   <Typography variant="subtitle1" gutterBottom>
                     <strong>License Photo:</strong> {formData.licensePhoto ? '✅ Uploaded' : '❌ Not uploaded'}
+                  </Typography>
+                )}
+                
+                {selectedType === 'hotel' && (
+                  <Typography variant="subtitle1" gutterBottom>
+                    <strong>Hotel Front Photo:</strong> {formData.licensePhoto ? '✅ Uploaded' : '❌ Not uploaded'}
+                  </Typography>
+                )}
+                
+                {selectedType === 'vehicle' && (
+                  <Typography variant="subtitle1" gutterBottom>
+                    <strong>Vehicle Photos:</strong> {formData.vehiclePhotos && formData.vehiclePhotos.length > 0 ? `✅ ${formData.vehiclePhotos.length} photos uploaded` : '❌ Not uploaded'}
+                  </Typography>
+                )}
+                
+                {selectedType === 'restaurant' && (
+                  <Typography variant="subtitle1" gutterBottom>
+                    <strong>Restaurant Photos:</strong> {formData.restaurantPhotos && formData.restaurantPhotos.length > 0 ? `✅ ${formData.restaurantPhotos.length} photos uploaded` : '❌ Not uploaded'}
+                  </Typography>
+                )}
+                
+                {selectedType === 'event' && (
+                  <Typography variant="subtitle1" gutterBottom>
+                    <strong>Event Photos:</strong> {formData.eventPhotos && formData.eventPhotos.length > 0 ? `✅ ${formData.eventPhotos.length} photos uploaded` : '❌ Not uploaded'}
                   </Typography>
                 )}
               </Paper>
@@ -2216,11 +1902,11 @@ const ServiceProviderRequest = () => {
             </Button>
             <Button
               variant="contained"
-              onClick={activeStep === getStepsForServiceType(selectedType).length - 1 ? handleSubmit : handleNext}
+              onClick={activeStep === 5 ? handleSubmit : handleNext}
               disabled={formLoading || success}
               size="large"
             >
-              {formLoading ? 'Submitting...' : activeStep === getStepsForServiceType(selectedType).length - 1 ? 'Submit Application' : 'Next'}
+              {formLoading ? 'Submitting...' : activeStep === 5 ? 'Submit Application' : 'Next'}
             </Button>
           </Box>
         </Paper>

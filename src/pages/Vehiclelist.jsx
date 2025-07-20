@@ -18,9 +18,50 @@ const Vehiclelist = ({ columns }) => {
       try {
         setLoading(true);
         console.log("Fetching vehicles...");
-        const response = await axios.get("http://localhost:5000/api/vehicle");
-        console.log("Vehicles response:", response.data);
-        setData(response.data);
+        
+        let allVehicles = [];
+        
+        // Fetch traditional vehicles from /api/vehicle
+        try {
+          const vehiclesResponse = await axios.get("http://localhost:5000/api/vehicle");
+          console.log("Traditional vehicles response:", vehiclesResponse.data);
+          const traditionalVehicles = vehiclesResponse.data || [];
+          allVehicles = [...traditionalVehicles];
+        } catch (vehicleErr) {
+          console.warn("Error fetching traditional vehicles:", vehicleErr);
+        }
+        
+        // Fetch new vehicle services from /api/provider/services
+        try {
+          const servicesResponse = await axios.get("http://localhost:5000/api/provider/services?type=vehicle");
+          console.log("Vehicle services response:", servicesResponse.data);
+          
+          if (servicesResponse.data.success) {
+            const vehicleServices = (servicesResponse.data.data || []).map(service => ({
+              _id: service._id,
+              vehicleBrand: service.vehicleBrand || service.name?.split(' ')[0] || 'Unknown',
+              vehicleModel: service.vehicleModel || service.name?.split(' ')[1] || 'Model',
+              vehicleYear: service.vehicleYear || 'N/A',
+              vehicleType: service.vehicleType || service.category || 'Vehicle',
+              vehicleNumber: service.vehicleNumber || 'N/A',
+              seatingCapacity: service.seatingCapacity || service.capacity || service.maxGroupSize || 'N/A',
+              pricePerDay: service.price || 0,
+              location: service.location || 'N/A',
+              description: service.description || 'No description',
+              vehicleImage: service.images?.[0] || '',
+              providerId: service.providerId,
+              status: service.status || 'active',
+              isNewService: true, // Flag to distinguish new services
+              createdAt: service.createdAt
+            }));
+            allVehicles = [...allVehicles, ...vehicleServices];
+          }
+        } catch (servicesErr) {
+          console.warn("Error fetching vehicle services:", servicesErr);
+        }
+        
+        console.log("All vehicles combined:", allVehicles);
+        setData(allVehicles);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching vehicles:", err);
@@ -46,9 +87,49 @@ const Vehiclelist = ({ columns }) => {
     try {
       setLoading(true);
       console.log("Refreshing vehicle data...");
-      const response = await axios.get("http://localhost:5000/api/vehicle");
-      console.log("Refresh response:", response.data);
-      setData(response.data);
+      
+      let allVehicles = [];
+      
+      // Fetch traditional vehicles
+      try {
+        const vehiclesResponse = await axios.get("http://localhost:5000/api/vehicle");
+        console.log("Traditional vehicles refresh:", vehiclesResponse.data);
+        allVehicles = [...(vehiclesResponse.data || [])];
+      } catch (vehicleErr) {
+        console.warn("Error refreshing traditional vehicles:", vehicleErr);
+      }
+      
+      // Fetch vehicle services
+      try {
+        const servicesResponse = await axios.get("http://localhost:5000/api/provider/services?type=vehicle");
+        console.log("Vehicle services refresh:", servicesResponse.data);
+        
+        if (servicesResponse.data.success) {
+          const vehicleServices = (servicesResponse.data.data || []).map(service => ({
+            _id: service._id,
+            vehicleBrand: service.vehicleBrand || service.name?.split(' ')[0] || 'Unknown',
+            vehicleModel: service.vehicleModel || service.name?.split(' ')[1] || 'Model',
+            vehicleYear: service.vehicleYear || 'N/A',
+            vehicleType: service.vehicleType || service.category || 'Vehicle',
+            vehicleNumber: service.vehicleNumber || 'N/A',
+            seatingCapacity: service.seatingCapacity || service.capacity || service.maxGroupSize || 'N/A',
+            pricePerDay: service.price || 0,
+            location: service.location || 'N/A',
+            description: service.description || 'No description',
+            vehicleImage: service.images?.[0] || '',
+            providerId: service.providerId,
+            status: service.status || 'active',
+            isNewService: true,
+            createdAt: service.createdAt
+          }));
+          allVehicles = [...allVehicles, ...vehicleServices];
+        }
+      } catch (servicesErr) {
+        console.warn("Error refreshing vehicle services:", servicesErr);
+      }
+      
+      console.log("All vehicles refreshed:", allVehicles);
+      setData(allVehicles);
       setLoading(false);
     } catch (err) {
       console.error("Error refreshing data:", err);

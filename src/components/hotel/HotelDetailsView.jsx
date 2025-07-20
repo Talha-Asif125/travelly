@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/authContext";
-import HotelReserve from "./HotelReserve";
+import HotelReservationForm from "../forms/HotelReservationForm";
+import ReservationSuccessModal from "../ui/ReservationSuccessModal";
 import { 
   FaStar, 
   FaStarHalfAlt, 
@@ -45,7 +46,9 @@ const HotelDetailsView = () => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageGallery, setShowImageGallery] = useState(false);
-  const [openBooking, setOpenBooking] = useState(false);
+  const [openReservationForm, setOpenReservationForm] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [reservationData, setReservationData] = useState(null);
 
   const location = useLocation();
   const dates = location.state;
@@ -133,41 +136,8 @@ const HotelDetailsView = () => {
     }
   };
 
-  // Sample room data with detailed amenities
-  const roomTypes = [
-    {
-      id: 1,
-      name: "Deluxe Triple Room",
-      sleeps: 2,
-      beds: "1 Double Bed",
-      highlights: [
-        'Air conditioning',
-        'LCD TV',
-        'Separate bedroom',
-        'Private bathroom',
-        'Cable channels',
-        'Iron/ironing board'
-      ],
-      amenities: {
-        parking: ['No onsite parking available'],
-        food: ['A restaurant'],
-        internet: ['Available in all rooms: Free WiFi', 'In-room WiFi speed: 25+ Mbps'],
-        family: ['Laundry facilities'],
-        conveniences: ['24-hour front desk', 'Laundry facilities'],
-        guest: ['Dry cleaning/laundry service', 'Housekeeping (on request)'],
-        accessibility: ['Upper floors accessible by stairs only', 'Wheelchair accessible (may have limitations)', 'Wheelchair-accessible registration desk'],
-        languages: ['English', 'Urdu'],
-        entertainment: ['32-inch LCD TV with cable channels'],
-        bathroom: ['Free toiletries', 'Private bathroom', 'Shower', 'Towels provided'],
-        more: ['Air conditioning', 'Iron/ironing board']
-      },
-      images: [
-        'https://via.placeholder.com/800x600?text=Deluxe+Room+1',
-        'https://via.placeholder.com/800x600?text=Deluxe+Room+2'
-      ],
-      pricePerNight: 15000
-    }
-  ];
+  // Room data will be fetched from hotel service or database
+  const [roomTypes, setRoomTypes] = useState([]);
 
   useEffect(() => {
     fetchHotelData();
@@ -237,10 +207,20 @@ const HotelDetailsView = () => {
 
   const handleBooking = () => {
     if (user) {
-      setOpenBooking(true);
+      setOpenReservationForm(true);
     } else {
       navigate("/login");
     }
+  };
+
+  const handleReservationSuccess = (reservation) => {
+    setReservationData(reservation);
+    setShowSuccessModal(true);
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setReservationData(null);
   };
 
   const showRoomDetails = (room) => {
@@ -448,12 +428,11 @@ const HotelDetailsView = () => {
                         <div className="text-sm text-gray-600 mb-3">
                           total for {dayDifference} night{dayDifference > 1 ? 's' : ''}
                         </div>
-                        <button 
-                          onClick={handleBooking}
-                          className="bg-blue-600 text-white px-6 py-2 rounded-md font-medium hover:bg-blue-700"
-                        >
-                          Reserve
-                        </button>
+                        <Link to={`/hotel-book/${id}`}>
+                          <button className="bg-blue-600 text-white px-6 py-2 rounded-md font-medium hover:bg-blue-700">
+                            Reserve
+                          </button>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -495,12 +474,11 @@ const HotelDetailsView = () => {
                 </div>
               </div>
 
-              <button 
-                onClick={handleBooking}
-                className="w-full bg-blue-600 text-white py-3 rounded-md font-semibold hover:bg-blue-700 mb-4"
-              >
-                Reserve now
-              </button>
+              <Link to={`/hotel-book/${id}`}>
+                <button className="w-full bg-blue-600 text-white py-3 rounded-md font-semibold hover:bg-blue-700 mb-4">
+                  Reserve now
+                </button>
+              </Link>
 
               <div className="text-center text-sm text-gray-600">
                 <p className="mb-2">Perfect for a {dayDifference}-night stay!</p>
@@ -666,15 +644,20 @@ const HotelDetailsView = () => {
       )}
 
       {/* Booking Modal */}
-      {openBooking && (
-        <HotelReserve 
-          setOpen={setOpenBooking} 
-          hotelId={id} 
-          checkInDate={dates?.checkInDate} 
-          checkOutDate={dates?.checkOutDate} 
-          date_difference={dayDifference}
-        />
-      )}
+      {/* New Standardized Reservation Form */}
+      <HotelReservationForm
+        isOpen={openReservationForm}
+        onClose={() => setOpenReservationForm(false)}
+        onSuccess={handleReservationSuccess}
+        hotel={hotelData}
+      />
+
+      {/* Success Modal */}
+      <ReservationSuccessModal
+        isOpen={showSuccessModal}
+        onClose={handleCloseSuccessModal}
+        reservationData={reservationData}
+      />
     </div>
   );
 };

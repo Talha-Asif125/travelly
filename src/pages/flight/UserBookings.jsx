@@ -22,97 +22,13 @@ const UserBookings = () => {
     try {
       setLoading(true);
       
-      // In a real app, we would fetch bookings from an API
-      // Mock data for demonstration
-      const mockBookings = [
-        {
-          id: 1,
-          flightNumber: 'PK301',
-          airline: 'PIA',
-          origin: 'Islamabad',
-          destination: 'Karachi',
-          departureDate: '2023-12-25',
-          departureTime: '09:00',
-          arrivalTime: '11:00',
-          passengers: [
-            { firstName: 'John', lastName: 'Doe' }
-          ],
-          status: 'Confirmed',
-          totalPrice: 12000,
-          bookingDate: '2023-11-15',
-          paymentStatus: 'Paid',
-          bookingReference: 'TRAV123456'
-        },
-        {
-          id: 2,
-          flightNumber: 'PK205',
-          airline: 'Airblue',
-          origin: 'Lahore',
-          destination: 'Dubai',
-          departureDate: '2023-12-28',
-          departureTime: '14:30',
-          arrivalTime: '17:30',
-          passengers: [
-            { firstName: 'John', lastName: 'Doe' },
-            { firstName: 'Jane', lastName: 'Doe' }
-          ],
-          status: 'Confirmed',
-          totalPrice: 90000,
-          bookingDate: '2023-11-20',
-          paymentStatus: 'Paid',
-          bookingReference: 'TRAV234567'
-        },
-        {
-          id: 3,
-          flightNumber: 'PK762',
-          airline: 'SereneAir',
-          origin: 'Karachi',
-          destination: 'Peshawar',
-          departureDate: '2023-10-15',
-          departureTime: '18:45',
-          arrivalTime: '20:15',
-          passengers: [
-            { firstName: 'John', lastName: 'Doe' }
-          ],
-          status: 'Completed',
-          totalPrice: 14000,
-          bookingDate: '2023-09-20',
-          paymentStatus: 'Paid',
-          bookingReference: 'TRAV345678'
-        },
-        {
-          id: 4,
-          flightNumber: 'PK503',
-          airline: 'PIA',
-          origin: 'Lahore',
-          destination: 'Islamabad',
-          departureDate: '2023-09-05',
-          departureTime: '07:30',
-          arrivalTime: '08:30',
-          passengers: [
-            { firstName: 'John', lastName: 'Doe' }
-          ],
-          status: 'Cancelled',
-          totalPrice: 10000,
-          bookingDate: '2023-08-15',
-          paymentStatus: 'Refunded',
-          bookingReference: 'TRAV456789'
-        }
-      ];
-      
-      // Simulate API delay
-      setTimeout(() => {
-        setBookings(mockBookings);
-        setLoading(false);
-      }, 800);
+      // Flight services are no longer supported
+      setBookings([]);
+      setLoading(false);
       
     } catch (error) {
       console.error("Error fetching bookings:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to load your bookings. Please try again later.'
-      });
+      setBookings([]);
       setLoading(false);
     }
   };

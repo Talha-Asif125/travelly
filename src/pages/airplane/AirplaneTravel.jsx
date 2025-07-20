@@ -99,27 +99,14 @@ const AirplaneTravel = () => {
   const fetchFlights = async () => {
     setLoading(true);
     try {
-      // In a real scenario, this would be an API call
-      // For now using mock data
-      const mockFlights = [
-        { id: 1, flightNumber: 'PK301', airline: 'PIA', origin: 'Islamabad', destination: 'Karachi', departureTime: '09:00', arrivalTime: '11:00', price: 12000, status: 'On Time' },
-        { id: 2, flightNumber: 'PK205', airline: 'Airblue', origin: 'Lahore', destination: 'Dubai', departureTime: '14:30', arrivalTime: '17:30', price: 45000, status: 'Delayed' },
-        { id: 3, flightNumber: 'PK762', airline: 'SereneAir', origin: 'Karachi', destination: 'Peshawar', departureTime: '18:45', arrivalTime: '20:15', price: 14000, status: 'On Time' },
-        { id: 4, flightNumber: 'PK503', airline: 'PIA', origin: 'Lahore', destination: 'Islamabad', departureTime: '07:30', arrivalTime: '08:30', price: 10000, status: 'On Time' },
-        { id: 5, flightNumber: 'PK811', airline: 'Airblue', origin: 'Karachi', destination: 'Dubai', departureTime: '23:00', arrivalTime: '01:30', price: 48000, status: 'Cancelled' },
-      ];
-      
-      setData(mockFlights);
+      // Flight services are no longer supported
+      setData([]);
       setLoading(false);
     } catch (err) {
       console.error("Error fetching flights:", err);
-      setError(err.message || "Error fetching flights");
+      setError("Flight services unavailable");
+      setData([]);
       setLoading(false);
-      Swal.fire({
-        icon: "error",
-        title: "Error loading flights",
-        text: err.message || "Failed to load flight data"
-      });
     }
   };
 

@@ -40,7 +40,7 @@ const CommunityFeed = ({ posts, loading, onPostUpdated, onPostDeleted }) => {
 
   return (
     <div className="space-y-4">
-      {posts.map((post) => (
+      {posts.filter(post => post && post._id).map((post) => (
         <PostCard
           key={post._id}
           post={post}

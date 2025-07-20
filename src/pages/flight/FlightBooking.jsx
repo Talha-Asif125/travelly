@@ -41,29 +41,16 @@ const FlightBooking = () => {
   
   const fetchFlightDetails = async () => {
     try {
-      // In a real app, this would be an API call
-      // For demo purposes, we're using mock data
-      const mockFlight = {
-        id: parseInt(id),
-        flightNumber: 'PK' + (300 + parseInt(id)),
-        airline: ['PIA', 'Airblue', 'SereneAir'][parseInt(id) % 3],
-        origin: ['Islamabad', 'Lahore', 'Karachi'][parseInt(id) % 3],
-        destination: ['Karachi', 'Dubai', 'Peshawar'][parseInt(id) % 3],
-        departureDate: '2023-12-' + (24 + parseInt(id)),
-        departureTime: ['09:00', '14:30', '18:45'][parseInt(id) % 3],
-        arrivalTime: ['11:00', '17:30', '20:15'][parseInt(id) % 3],
-        price: 10000 + parseInt(id) * 8000,
-        status: 'On Time'
-      };
-      
-      setFlight(mockFlight);
+      // Flight services are no longer supported
+      setFlight(null);
+      Swal.fire({
+        icon: 'info',
+        title: 'Flight Services Unavailable',
+        text: 'Flight booking services are currently not available.'
+      });
     } catch (error) {
       console.error("Error fetching flight details:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to load flight details. Please try again later.'
-      });
+      setFlight(null);
     }
   };
   

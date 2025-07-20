@@ -3,7 +3,8 @@ import axios from "axios";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/authContext";
-import HotelReserve from "./HotelReserve";
+import HotelReservationForm from "../forms/HotelReservationForm";
+import ReservationSuccessModal from "../ui/ReservationSuccessModal";
 
 const HotelView = () => {
 
@@ -16,7 +17,9 @@ const HotelView = () => {
   const {user}=useContext(AuthContext);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [openBook,setOpenBook]=useState(false);
+  const [openReservationForm, setOpenReservationForm] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [reservationData, setReservationData] = useState(null);
 
   const checkInDate = new Date(date.checkInDate);
 const checkOutDate = new Date(date.checkOutDate);
@@ -51,16 +54,22 @@ const checkOutDate = new Date(date.checkOutDate);
   }, []);
 
   const handleClick = () => {
-    if(user){{setOpenBook(true)}
-
-
-
-    }
-    else{
+    if(user) {
+      setOpenReservationForm(true);
+    } else {
       navigate("/login");
-
     }
-  }
+  };
+
+  const handleReservationSuccess = (reservation) => {
+    setReservationData(reservation);
+    setShowSuccessModal(true);
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setReservationData(null);
+  };
 
   return (
     <div>
@@ -122,9 +131,11 @@ const checkOutDate = new Date(date.checkOutDate);
               </div>
             </div>
             
-              <button onClick={handleClick} className="bg-[#41A4FF] text-white rounded-md lg:ml-8 font-bold p-3 my-5 lg:my-0 w-full md:w-[350px] md:my-0 lg:w-[300px] ">
-                Reserve now
-              </button>
+              <Link to={`/hotel-book/${id}`}>
+                <button className="bg-[#41A4FF] text-white rounded-md lg:ml-8 font-bold p-3 my-5 lg:my-0 w-full md:w-[350px] md:my-0 lg:w-[300px]">
+                  Reserve now
+                </button>
+              </Link>
             
           </div>
         </div>
@@ -144,7 +155,26 @@ const checkOutDate = new Date(date.checkOutDate);
       />
     ))}
 </div>
-      { openBook &&  <HotelReserve setOpen={setOpenBook} hotelId={id} checkInDate={date.checkInDate} checkOutDate={date.checkOutDate} date_difference={day_difference}/>}
+      {/* New Standardized Reservation Form */}
+      <HotelReservationForm
+        isOpen={openReservationForm}
+        onClose={() => setOpenReservationForm(false)}
+        onSuccess={handleReservationSuccess}
+        hotel={{
+          _id: id,
+          name: data.name,
+          location: data.city,
+          description: data.description,
+          price: data.cheapestPrice
+        }}
+      />
+
+      {/* Success Modal */}
+      <ReservationSuccessModal
+        isOpen={showSuccessModal}
+        onClose={handleCloseSuccessModal}
+        reservationData={reservationData}
+      />
 
     </div>
   );

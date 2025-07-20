@@ -186,16 +186,32 @@ const Register = () => {
         ...(imageUrl && { img: imageUrl }),
       };
 
-      await axios.post("/auth/register", registrationData);
+      const response = await axios.post("/auth/register", registrationData);
 
-      Swal.fire({
-        title: "Registration Successful!",
-        text: "Welcome to Travely! Your account has been created successfully.",
-        icon: "success",
-        confirmButtonColor: "#41A4FF",
-      });
-
-      navigate("/login");
+      if (response.data.success) {
+        Swal.fire({
+          title: "Registration Successful! 📧",
+          html: `
+            <p>Welcome to Travel Buddy!</p>
+            <p><strong>Please check your email to verify your account before logging in.</strong></p>
+            <p>We've sent a verification link to <strong>${formData.email}</strong></p>
+            <p style="font-size: 14px; color: #666;">
+              Can't find the email? Check your spam folder or 
+              <a href="/verify-email" style="color: #41A4FF;">click here to resend</a>
+            </p>
+          `,
+          icon: "success",
+          confirmButtonColor: "#41A4FF",
+          confirmButtonText: "Got it!"
+        }).then(() => {
+          navigate("/login", { 
+            state: { 
+              message: "Please verify your email before logging in",
+              email: formData.email 
+            }
+          });
+        });
+      }
     } catch (err) {
       console.error("Registration error:", err);
       

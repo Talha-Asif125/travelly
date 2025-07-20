@@ -29,6 +29,7 @@ const Layout = () => {
     '/restaurant-reservations',
     '/reservations',
     '/event-management',
+    '/add-event',
     '/tourreservation/all',
     '/vehiclereservation',
     '/adminTrain/reviewPanel',

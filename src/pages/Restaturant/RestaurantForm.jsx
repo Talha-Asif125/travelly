@@ -22,6 +22,53 @@ const RestaurantForm = () => {
   const [uploadResimage, setImage] = useState("");
   const [uploadRegimage, setImg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const staffAmountOptions = [
+    { value: "4-7", label: "4-7 Staff" },
+    { value: "7-10", label: "7-10 Staff" },
+    { value: "10-15", label: "10-15 Staff" },
+    { value: "15-30", label: "15-30 Staff" },
+    { value: "30-50", label: "30-50 Staff" },
+    { value: "50-70", label: "50-70 Staff" }
+  ];
+
+  const capacityOptions = [
+    { value: "20-30", label: "20-30 People" },
+    { value: "30-50", label: "30-50 People" },
+    { value: "50-70", label: "50-70 People" },
+    { value: "70-100", label: "70-100 People" },
+    { value: "100-150", label: "100-150 People" },
+    { value: "150-200", label: "150-200 People" }
+  ];
+
+  const districtOptions = [
+    { value: "islamabad", label: "Islamabad" },
+    { value: "lahore", label: "Lahore" },
+    { value: "karachi", label: "Karachi" },
+    { value: "peshawar", label: "Peshawar" },
+    { value: "quetta", label: "Quetta" },
+    { value: "faisalabad", label: "Faisalabad" },
+    { value: "rawalpindi", label: "Rawalpindi" },
+    { value: "multan", label: "Multan" },
+    { value: "gujranwala", label: "Gujranwala" },
+    { value: "sialkot", label: "Sialkot" },
+    { value: "bahawalpur", label: "Bahawalpur" },
+    { value: "sargodha", label: "Sargodha" },
+    { value: "hyderabad", label: "Hyderabad" },
+    { value: "abbottabad", label: "Abbottabad" },
+    { value: "sukkur", label: "Sukkur" },
+    { value: "larkana", label: "Larkana" },
+    { value: "sheikhupura", label: "Sheikhupura" },
+    { value: "mirpur", label: "Mirpur" },
+    { value: "jhang", label: "Jhang" },
+    { value: "rahim-yar-khan", label: "Rahim Yar Khan" },
+    { value: "mardan", label: "Mardan" },
+    { value: "kasur", label: "Kasur" },
+    { value: "gujrat", label: "Gujrat" },
+    { value: "okara", label: "Okara" },
+    { value: "mingora", label: "Mingora" }
+  ];
 
   // If in edit mode, populate the form with the existing data
   useEffect(() => {
@@ -64,6 +111,7 @@ const RestaurantForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError("");
     
     // Extract the table count from the capacity value (e.g., "20-30" -> 25)
     const tableCountValue = capacity.split('-').reduce((a, b) => (parseInt(a) + parseInt(b)) / 2, 0);
@@ -110,11 +158,8 @@ const RestaurantForm = () => {
       navigate("/admin/restaurants");
     } catch (error) {
       console.error("Error details:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: `Failed to ${isEditMode ? 'update' : 'add'} restaurant: ${error.response?.data?.message || error.response?.statusText || error.message || "Unknown error occurred"}`
-      });
+      const errorMessage = error.response?.data?.message || error.response?.statusText || error.message || "Unknown error occurred";
+      setError(`Failed to ${isEditMode ? 'update' : 'add'} restaurant: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -123,215 +168,189 @@ const RestaurantForm = () => {
   return (
     <>
       <AdminBackButton />
-      <div className="max-w-3xl mx-auto mt-10 mb-10">
-        <p className="block text-blue-500 font-bold mb-6 text-center text-3xl">
-          {isEditMode ? "Update Restaurant" : "Add Restaurant"}
-        </p>
-        <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 font-bold mb-2"
-              htmlFor="name"
-            >
-              Restaurant Name
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="name"
-              type="text"
-              placeholder="Restaurant name"
-              value={name}
-              onChange={handleNameChange}
-              required
-            />
-          </div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-2xl mx-auto py-8 px-4">
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold text-center mb-6">
+                {isEditMode ? "Update Restaurant" : "Add Restaurant Service"}
+              </h1>
 
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 font-bold mb-2"
-              htmlFor="staff-amount"
-            >
-              Staff Amount
-            </label>
-            <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="staffAmount"
-              value={staffAmount}
-              onChange={handleStaffAmountChange}
-              required
-            >
-              <option value="">Select Staff Amount</option>
-              <option value="4-7">4-7</option>
-              <option value="7-10">7-10</option>
-              <option value="10-15">10-15</option>
-              <option value="15-30">15-30</option>
-              <option value="30-50">30-50</option>
-              <option value="50-70">50-70</option>
-            </select>
-          </div>
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded">
+                  {error}
+                </div>
+              )}
 
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 font-bold mb-2"
-              htmlFor="restaurant-capacity"
-            >
-              Restaurant Capacity
-            </label>
-            <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="capacity"
-              value={capacity}
-              onChange={handleCapacityChange}
-              required
-            >
-              <option value="">Select Capacity</option>
-              <option value="20-30">20-30</option>
-              <option value="30-50">30-50</option>
-              <option value="50-70">50-70</option>
-              <option value="70-100">70-100</option>
-              <option value="100-150">100-150</option>
-              <option value="150-200">150-200</option>
-            </select>
-          </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Restaurant Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={handleNameChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Restaurant name"
+                    required
+                  />
+                </div>
 
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 font-bold mb-2"
-              htmlFor="uploadResimage"
-            >
-              Upload Restaurant Images
-            </label>
-            {isEditMode && uploadResimage && (
-              <div className="mb-2">
-                <img 
-                  src={uploadResimage} 
-                  alt="Current restaurant" 
-                  className="w-32 h-32 object-cover rounded mb-2" 
-                />
-                <p className="text-sm text-gray-500">Current image</p>
-              </div>
-            )}
-            <FileBase
-              type="file"
-              multiple={false}
-              onDone={({ base64 }) => setImage(base64)}
-              required={!isEditMode}
-            />
-          </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Staff Amount *
+                    </label>
+                    <select
+                      value={staffAmount}
+                      onChange={handleStaffAmountChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Select Staff Amount</option>
+                      {staffAmountOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Restaurant Capacity *
+                    </label>
+                    <select
+                      value={capacity}
+                      onChange={handleCapacityChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Select Capacity</option>
+                      {capacityOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 font-bold mb-2"
-              htmlFor="district"
-            >
-              District
-            </label>
-            <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="city"
-              value={city}
-              onChange={handleDistrictChange}
-              required
-            >
-              <option value="">Select District</option>
-              <option value="islamabad">Islamabad</option>
-              <option value="lahore">Lahore</option>
-              <option value="karachi">Karachi</option>
-              <option value="peshawar">Peshawar</option>
-              <option value="quetta">Quetta</option>
-              <option value="faisalabad">Faisalabad</option>
-              <option value="rawalpindi">Rawalpindi</option>
-              <option value="multan">Multan</option>
-              <option value="gujranwala">Gujranwala</option>
-              <option value="sialkot">Sialkot</option>
-              <option value="bahawalpur">Bahawalpur</option>
-              <option value="sargodha">Sargodha</option>
-              <option value="hyderabad">Hyderabad</option>
-              <option value="abbottabad">Abbottabad</option>
-              <option value="sukkur">Sukkur</option>
-              <option value="larkana">Larkana</option>
-              <option value="sheikhupura">Sheikhupura</option>
-              <option value="mirpur">Mirpur</option>
-              <option value="jhang">Jhang</option>
-              <option value="rahim-yar-khan">Rahim Yar Khan</option>
-              <option value="mardan">Mardan</option>
-              <option value="kasur">Kasur</option>
-              <option value="gujrat">Gujrat</option>
-              <option value="okara">Okara</option>
-              <option value="mingora">Mingora</option>
-            </select>
-          </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      District *
+                    </label>
+                    <select
+                      value={city}
+                      onChange={handleDistrictChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Select District</option>
+                      {districtOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Number *
+                    </label>
+                    <input
+                      type="text"
+                      value={contactNo}
+                      onChange={handleContactNoChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Contact Number"
+                      required
+                    />
+                  </div>
+                </div>
 
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 font-bold mb-2"
-              htmlFor="Address"
-            >
-              Address
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="Address"
-              type="text"
-              placeholder="Address"
-              value={address}
-              onChange={handleAddressChange}
-              required
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address *
+                  </label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={handleAddressChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Complete address with landmarks"
+                    required
+                  />
+                </div>
 
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 font-bold mb-2"
-              htmlFor="contactNo"
-            >
-              Contact Number
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="contactNo"
-              type="text"
-              placeholder="Contact Number"
-              value={contactNo}
-              onChange={handleContactNoChange}
-              required
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Upload Restaurant Images *
+                  </label>
+                  {isEditMode && uploadResimage && (
+                    <div className="mb-2">
+                      <img 
+                        src={uploadResimage} 
+                        alt="Current restaurant" 
+                        className="w-32 h-32 object-cover rounded mb-2" 
+                      />
+                      <p className="text-sm text-gray-500">Current image</p>
+                    </div>
+                  )}
+                  <FileBase
+                    type="file"
+                    multiple={false}
+                    onDone={({ base64 }) => setImage(base64)}
+                    required={!isEditMode}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload restaurant photos</p>
+                </div>
 
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 font-bold mb-2"
-              htmlFor="uploadRegimage"
-            >
-              Upload Restaurant Certificate
-            </label>
-            {isEditMode && uploadRegimage && (
-              <div className="mb-2">
-                <img 
-                  src={uploadRegimage} 
-                  alt="Restaurant certificate" 
-                  className="w-32 h-32 object-cover rounded mb-2" 
-                />
-                <p className="text-sm text-gray-500">Current certificate</p>
-              </div>
-            )}
-            <FileBase
-              type="file"
-              multiple={false}
-              onDone={({ base64 }) => setImg(base64)}
-              required={!isEditMode}
-            />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Upload Restaurant Certificate *
+                  </label>
+                  {isEditMode && uploadRegimage && (
+                    <div className="mb-2">
+                      <img 
+                        src={uploadRegimage} 
+                        alt="Restaurant certificate" 
+                        className="w-32 h-32 object-cover rounded mb-2" 
+                      />
+                      <p className="text-sm text-gray-500">Current certificate</p>
+                    </div>
+                  )}
+                  <FileBase
+                    type="file"
+                    multiple={false}
+                    onDone={({ base64 }) => setImg(base64)}
+                    required={!isEditMode}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload restaurant registration certificate</p>
+                </div>
+
+                <div className="flex justify-center pt-4 space-x-4">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-blue-600 text-white px-8 py-3 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Processing...' : (isEditMode ? "Update Restaurant" : "Add Restaurant")}
+                  </button>
+                  <button
+                    type="reset"
+                    className="bg-gray-500 text-white px-8 py-3 rounded-md font-medium hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-          <div className="flex justify-center">
-            <button
-              className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-              type="submit"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Processing...' : (isEditMode ? "Update Restaurant" : "Add Restaurant")}
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </>
   );

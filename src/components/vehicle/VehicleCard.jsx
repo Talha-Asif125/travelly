@@ -55,11 +55,11 @@ const VehicleCard = (props) => {
         </div>
         <p>{props.fuelType}</p>
         <div className='flex items-center justify-center'>
-        <h1 className='text-2xl font-bold py-3'>Rs. {props.price}</h1>
-        <h1 className=''>/per day</h1>
+          <h1 className='text-2xl font-bold py-3'>Rs. {props.price}</h1>
+          <h1 className=''>/per day</h1>
         </div>
         <Link to={getBookingLink()} className='w-full'>
-        <button className='bg-[#41A4FF] text-white rounded-md font-medium py-3 w-full'  >Reserve Now</button>
+          <button className='bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg text-sm w-full'>Book Now</button>
         </Link>
     </div>
 

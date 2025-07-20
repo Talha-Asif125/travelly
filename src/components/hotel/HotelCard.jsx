@@ -178,16 +178,9 @@ const HotelCard = () => {
                         <span className="text-xs text-gray-500">per night</span>
                       </div>
                       
-                      <Link to={
-                        item.isNewService 
-                          ? `/hotel-details/${item._id}`
-                          : `/hotel-details/${item._id || item.id}`
-                      } state={{
-                        checkInDate: new Date().toISOString().split('T')[0],
-                        checkOutDate: new Date(Date.now() + 86400000).toISOString().split('T')[0]
-                      }}>
-                        <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
-                          View Details
+                      <Link to={`/hotel-book/${item._id || item.id}`}>
+                        <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg text-sm">
+                          Book Now
                         </button>
                       </Link>
                     </div>

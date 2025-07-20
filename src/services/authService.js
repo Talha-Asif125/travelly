@@ -3,6 +3,8 @@
  * Centralized auth management for consistent behavior
  */
 
+import SessionService from './sessionService';
+
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 class AuthService {
@@ -273,7 +275,16 @@ class AuthService {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const currentTime = Date.now() / 1000;
-      return payload.exp < currentTime;
+      const isExpired = payload.exp < currentTime;
+      
+      // If token is expired, trigger session cleanup
+      if (isExpired) {
+        this.clearToken();
+        this.clearUser();
+        SessionService.stopSessionMonitoring();
+      }
+      
+      return isExpired;
     } catch (error) {
       return true;
     }
@@ -301,15 +312,28 @@ class AuthService {
     try {
       if (this.isAuthenticated() && !this.isTokenExpired()) {
         await this.getCurrentUser();
+        // Start session monitoring for authenticated user
+        const user = this.getUser();
+        if (user) {
+          SessionService.initializeSession(
+            () => {
+              this.clearToken();
+              this.clearUser();
+              window.location.href = '/login';
+            }
+          );
+        }
         return true;
       } else {
         this.clearToken();
         this.clearUser();
+        SessionService.stopSessionMonitoring();
         return false;
       }
     } catch (error) {
       this.clearToken();
       this.clearUser();
+      SessionService.stopSessionMonitoring();
       return false;
     }
   }

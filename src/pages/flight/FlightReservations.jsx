@@ -82,96 +82,20 @@ const FlightReservations = () => {
   const fetchReservations = async () => {
     setLoading(true);
     try {
-      // In a real app, this would be an API call
-      // For demonstration purposes, we're using mock data
-      const mockReservations = [
-        { 
-          id: 1, 
-          bookingReference: 'TB123456', 
-          flightNumber: 'PK301', 
-          passengerName: 'John Doe',
-          email: 'john.doe@example.com',
-          phone: '+92 300 1234567',
-          origin: 'Islamabad', 
-          destination: 'Karachi', 
-          departureDate: '2023-12-25',
-          departureTime: '09:00',
-          arrivalTime: '11:00',
-          passengers: 1,
-          totalAmount: 12000, 
-          status: 'Confirmed',
-          bookingDate: '2023-11-15',
-          paymentStatus: 'Paid'
-        },
-        { 
-          id: 2, 
-          bookingReference: 'TB234567', 
-          flightNumber: 'PK205', 
-          passengerName: 'Jane Smith',
-          email: 'jane.smith@example.com',
-          phone: '+92 300 7654321',
-          origin: 'Lahore', 
-          destination: 'Dubai', 
-          departureDate: '2023-12-28',
-          departureTime: '14:30',
-          arrivalTime: '17:30',
-          passengers: 2,
-          totalAmount: 90000, 
-          status: 'Pending',
-          bookingDate: '2023-11-20',
-          paymentStatus: 'Paid'
-        },
-        { 
-          id: 3, 
-          bookingReference: 'TB345678', 
-          flightNumber: 'PK762', 
-          passengerName: 'Ahmed Khan',
-          email: 'ahmed.khan@example.com',
-          phone: '+92 333 1112223',
-          origin: 'Karachi', 
-          destination: 'Peshawar', 
-          departureDate: '2023-12-26',
-          departureTime: '18:45',
-          arrivalTime: '20:15',
-          passengers: 3,
-          totalAmount: 42000, 
-          status: 'Confirmed',
-          bookingDate: '2023-11-18',
-          paymentStatus: 'Paid'
-        },
-        { 
-          id: 4, 
-          bookingReference: 'TB456789', 
-          flightNumber: 'PK503', 
-          passengerName: 'Sara Ali',
-          email: 'sara.ali@example.com',
-          phone: '+92 321 9876543',
-          origin: 'Lahore', 
-          destination: 'Islamabad', 
-          departureDate: '2023-12-30',
-          departureTime: '07:30',
-          arrivalTime: '08:30',
-          passengers: 1,
-          totalAmount: 10000, 
-          status: 'Cancelled',
-          bookingDate: '2023-11-22',
-          paymentStatus: 'Refunded'
-        },
-      ];
+      // Flight services are no longer supported
+      setReservations([]);
+      setLoading(false);
       
-      setTimeout(() => {
-        setReservations(mockReservations);
-        setLoading(false);
-      }, 500);
+      Swal.fire({
+        icon: "info",
+        title: "Flight Services Unavailable",
+        text: "Flight reservation management is currently not available."
+      });
     } catch (err) {
       console.error("Error fetching flight reservations:", err);
-      setError(err.message || "Error fetching flight reservations");
+      setError("Flight services unavailable");
+      setReservations([]);
       setLoading(false);
-      Swal.fire({
-        icon: "error",
-        title: "Error loading reservations",
-        text: err.message || "Failed to load flight reservation data"
-      });
     }
   };
 

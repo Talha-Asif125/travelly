@@ -4,6 +4,8 @@ import Swal from "sweetalert2";
 import backgroundImage from "../assets/images/bg.jpg";
 import Spinner from "../components/spinner/LoadingSpinner";
 import { useLocation, useNavigate } from "react-router";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 const ResetPassword = () => {
   const location = useLocation();
@@ -17,6 +19,7 @@ const ResetPassword = () => {
   const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const axiosInstance = axios.create({
     baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
@@ -39,27 +42,24 @@ const ResetPassword = () => {
 
     try {
       setLoading2(true);
-      try {
-        const response = await axiosInstance.post("/auth/forgot-password", {
-          email: email,
-        });
-        setToken(response.data.token);
-        setLoading2(false);
+      const response = await axiosInstance.post("/auth/forgot-password", {
+        email: email,
+      });
+      
+      setLoading2(false);
+      if (response.data.success) {
         Swal.fire({
           icon: "success",
-          title: "Done",
-          text: "Password reset link sent to your email",
-        });
-      } catch (firstError) {
-        const response = await axiosInstance.post("/user/forgot-password", {
-          email: email,
-        });
-        setToken(response.data.token);
-        setLoading2(false);
-        Swal.fire({
-          icon: "success",
-          title: "Done",
-          text: "Password reset link sent to your email",
+          title: "Reset Link Sent! 📧",
+          html: `
+            <p>Password reset link has been sent to:</p>
+            <p><strong>${email}</strong></p>
+            <p style="font-size: 14px; color: #666;">
+              Please check your email (including spam folder) for the reset link.
+              The link will expire in 1 hour.
+            </p>
+          `,
+          confirmButtonColor: "#41A4FF",
         });
       }
     } catch (error) {
@@ -160,14 +160,27 @@ const ResetPassword = () => {
             <label htmlFor="password" className="block mb-2 font-bold">
               New Password
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="w-full p-2 mb-4 border border-gray-400 rounded"
-            />
+            <div className="relative mb-4">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                                className="w-full p-2 pr-12 border border-gray-400 rounded"
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-600 hover:text-gray-800 focus:outline-none"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <VisibilityOffIcon className="h-5 w-5" />
+                ) : (
+                  <VisibilityIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
 
             <button
               type="submit"

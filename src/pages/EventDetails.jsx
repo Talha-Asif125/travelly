@@ -12,13 +12,11 @@ const EventDetails = () => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Booking form state
-  const today = new Date().toISOString().slice(0, 10);
-  const [checkInDate, setCheckInDate] = useState(today);
-  const [checkOutDate, setCheckOutDate] = useState(today);
-  const [guests, setGuests] = useState(1);
+  // Booking form state for event tickets
+  const [tickets, setTickets] = useState(1);
   const [customerPhone, setCustomerPhone] = useState('');
-  const [specialRequests, setSpecialRequests] = useState('');
+  const [cnicNumber, setCnicNumber] = useState('');
+  const [cnicPhoto, setCnicPhoto] = useState('');
 
   useEffect(() => {
     const fetchService = async () => {
@@ -63,17 +61,6 @@ const EventDetails = () => {
       return;
     }
 
-    if (!checkInDate || !checkOutDate) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please select event dates',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#8B5CF6'
-      });
-      return;
-    }
-
     if (!customerPhone.trim()) {
       Swal.fire({
         icon: 'warning',
@@ -85,11 +72,33 @@ const EventDetails = () => {
       return;
     }
 
-    if (guests > (service.maxAttendees || service.capacity || 1000)) {
+    if (!cnicNumber.trim()) {
       Swal.fire({
         icon: 'warning',
-        title: 'Too Many Attendees',
-        text: `Maximum ${service.maxAttendees || service.capacity} attendees allowed for this event`,
+        title: 'Missing Information',
+        text: 'Please enter your CNIC number',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#8B5CF6'
+      });
+      return;
+    }
+
+    if (!cnicPhoto) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please upload your CNIC photo',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#8B5CF6'
+      });
+      return;
+    }
+
+    if (tickets > (service.maxAttendees || service.capacity || 1000)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Too Many Tickets',
+        text: `Maximum ${service.maxAttendees || service.capacity} tickets available for this event`,
         confirmButtonText: 'OK',
         confirmButtonColor: '#8B5CF6'
       });
@@ -100,15 +109,19 @@ const EventDetails = () => {
       setSubmitting(true);
       const token = localStorage.getItem('token');
       
+      // For events, we use a simplified booking structure
+      const eventDate = service.eventDate || service.scheduleDate || new Date().toISOString();
       const bookingData = {
         serviceId: id,
-        checkInDate,
-        checkOutDate,
-        guests,
+        checkInDate: eventDate,
+        checkOutDate: eventDate,
+        guests: tickets,
         customerName: user.name,
         customerEmail: user.email,
         customerPhone,
-        specialRequests
+        cnicNumber,
+        cnicPhoto,
+        specialRequests: `Event ticket booking for ${tickets} ticket(s)`
       };
 
       console.log('Submitting event booking:', bookingData);
@@ -155,15 +168,7 @@ const EventDetails = () => {
   if (error) return <div className="flex justify-center items-center h-screen text-red-500">{error}</div>;
   if (!service) return <div className="flex justify-center items-center h-screen">Event not found</div>;
 
-  const calculateDays = () => {
-    const start = new Date(checkInDate);
-    const end = new Date(checkOutDate);
-    const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays || 1;
-  };
 
-  const totalCost = service.price * calculateDays() * guests;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -222,50 +227,23 @@ const EventDetails = () => {
 
             {/* Booking Form */}
             <div>
-              <h2 className="text-2xl font-semibold mb-4">Book Event</h2>
+              <h2 className="text-2xl font-semibold mb-4">Buy Tickets</h2>
               
               <form onSubmit={(e) => { e.preventDefault(); handleBooking(); }} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Event Date (From)
-                  </label>
-                  <input
-                    type="date"
-                    value={checkInDate}
-                    onChange={(e) => setCheckInDate(e.target.value)}
-                    min={today}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Event Date (To)
-                  </label>
-                  <input
-                    type="date"
-                    value={checkOutDate}
-                    onChange={(e) => setCheckOutDate(e.target.value)}
-                    min={checkInDate}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Number of Attendees
+                    Number of Tickets
                   </label>
                   <input
                     type="number"
-                    value={guests}
-                    onChange={(e) => setGuests(parseInt(e.target.value))}
+                    value={tickets}
+                    onChange={(e) => setTickets(parseInt(e.target.value))}
                     min="1"
-                    max={service.maxAttendees || service.capacity || 1000}
+                    max={service.maxAttendees || service.capacity || 100}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">Each ticket admits one person to the event</p>
                 </div>
 
                 <div>
@@ -284,37 +262,73 @@ const EventDetails = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Special Requests (Optional)
+                    CNIC Number
                   </label>
-                  <textarea
-                    value={specialRequests}
-                    onChange={(e) => setSpecialRequests(e.target.value)}
-                    rows="3"
+                  <input
+                    type="text"
+                    value={cnicNumber}
+                    onChange={(e) => setCnicNumber(e.target.value)}
+                    placeholder="e.g., 12345-1234567-1"
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    placeholder="Dietary restrictions, accessibility needs, etc..."
+                    required
                   />
                 </div>
 
-                {/* Cost Summary */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    CNIC Photo
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => setCnicPhoto(e.target.result);
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload a clear photo of your CNIC (front side)</p>
+                </div>
+
+                {/* Ticket Summary */}
                 <div className="bg-gray-50 p-4 rounded-md">
-                  <h3 className="font-semibold mb-2">Booking Summary</h3>
+                  <h3 className="font-semibold mb-2">Ticket Summary</h3>
                   <div className="space-y-1 text-sm">
+                    {service.eventDate && (
+                      <div className="flex justify-between">
+                        <span>Event Date:</span>
+                        <span>{new Date(service.eventDate).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    {service.startTime && (
+                      <div className="flex justify-between">
+                        <span>Event Time:</span>
+                        <span>{service.startTime} {service.endTime ? `- ${service.endTime}` : ''}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
-                      <span>Duration:</span>
-                      <span>{calculateDays()} day(s)</span>
+                      <span>Tickets:</span>
+                      <span>{tickets} ticket{tickets > 1 ? 's' : ''}</span>
                     </div>
+                    {customerPhone && (
+                      <div className="flex justify-between">
+                        <span>Contact:</span>
+                        <span>{customerPhone}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
-                      <span>Attendees:</span>
-                      <span>{guests} attendee{guests > 1 ? 's' : ''}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Price per person per day:</span>
-                      <span>Rs. {service.price}</span>
+                      <span>Price per ticket:</span>
+                      <span>Rs. {service?.price || 0}</span>
                     </div>
                     <hr className="my-2" />
                     <div className="flex justify-between font-semibold">
                       <span>Total Cost:</span>
-                      <span className="text-purple-600">Rs. {totalCost}</span>
+                      <span className="text-purple-600">Rs. {(service?.price || 0) * tickets}</span>
                     </div>
                   </div>
                 </div>
@@ -324,7 +338,7 @@ const EventDetails = () => {
                   disabled={submitting}
                   className="w-full bg-purple-500 text-white py-3 px-4 rounded-md hover:bg-purple-600 transition duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {submitting ? 'Processing...' : 'Book Event'}
+                  {submitting ? 'Processing...' : 'Buy Tickets'}
                 </button>
               </form>
             </div>

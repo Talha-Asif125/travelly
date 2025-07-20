@@ -355,68 +355,7 @@ const Admin = () => {
               </Link>
             </div>
 
-            {/* Users Management */}
-            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Users</h3>
-                  <p className="text-gray-600 text-sm mt-1">Manage user accounts</p>
-                </div>
-                <div className="bg-green-100 p-3 rounded-full">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-2.239" />
-                  </svg>
-                </div>
-              </div>
-              <Link
-                to="/admin/users"
-                className="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
-              >
-                Manage Users
-              </Link>
-            </div>
 
-            {/* Reservations */}
-            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Reservations</h3>
-                  <p className="text-gray-600 text-sm mt-1">View all bookings</p>
-                </div>
-                <div className="bg-yellow-100 p-3 rounded-full">
-                  <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              </div>
-              <Link
-                to="/admin/reservations"
-                className="mt-4 inline-block bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition-colors"
-              >
-                View Bookings
-              </Link>
-            </div>
-
-            {/* Services */}
-            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Services</h3>
-                  <p className="text-gray-600 text-sm mt-1">Manage all services</p>
-                </div>
-                <div className="bg-purple-100 p-3 rounded-full">
-                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </div>
-              </div>
-              <Link
-                to="/admin/services"
-                className="mt-4 inline-block bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
-              >
-                Manage Services
-              </Link>
-            </div>
 
             {/* Contact Messages */}
             <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">

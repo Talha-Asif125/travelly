@@ -1,55 +1,117 @@
-import { TbPhotoPlus } from "react-icons/tb";
-import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { Ripple, initTE } from "tw-elements";
-import Swal from "sweetalert2";
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../../context/authContext';
+import Swal from 'sweetalert2';
+import AdminBackButton from '../../../components/AdminBackButton';
 import axios from "../../../api/axios";
 import regularAxios from "axios";
-import { AuthContext } from "../../../context/authContext";
 
 const AddTourPackage = () => {
-  useEffect(() => {
-    initTE({ Ripple });
-  }, []);
   const navigate = useNavigate();
-
-  //store database states
-  const [file, setFile] = useState("");
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
-  const [price, setPrice] = useState(0);
-  const [groupCount, setGroupCount] = useState(0);
-  const [languages, setLanguages] = useState("");
-  const [duration, setDuration] = useState("");
-  const [cities, setCities] = useState("");
-  const [description, setDesc] = useState("");
-  const [introduction, setIntroduction] = useState("");
   const { user } = useContext(AuthContext);
-  const currentUser = user.email;
-  console.log(file);
-  //send data to database
+
+  // Basic Tour Information
+  const [category, setCategory] = useState('');
+  const [tourDate, setTourDate] = useState('');
+  const [departureTime, setDepartureTime] = useState('');
+  const [duration, setDuration] = useState('');
+  const [durationType, setDurationType] = useState('hours');
+  const [pricePerPerson, setPricePerPerson] = useState('');
+  const [availableSeats, setAvailableSeats] = useState('');
+  const [fromLocation, setFromLocation] = useState('');
+  const [toLocation, setToLocation] = useState('');
+  const [description, setDescription] = useState('');
+  
+  // Car specific fields
+  const [carBrand, setCarBrand] = useState('');
+  const [carModel, setCarModel] = useState('');
+  const [carImage, setCarImage] = useState(null);
+  const [numberPlate, setNumberPlate] = useState('');
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const durationTypes = ['minutes', 'hours', 'days'];
+
+  const validateForm = () => {
+    if (!category.trim()) {
+      setError('Category is required');
+      return false;
+    }
+    if (!tourDate.trim()) {
+      setError('Tour date is required');
+      return false;
+    }
+    if (!departureTime.trim()) {
+      setError('Departure time is required');
+      return false;
+    }
+    if (!duration.trim()) {
+      setError('Duration is required');
+      return false;
+    }
+    if (!pricePerPerson.trim()) {
+      setError('Price per person is required');
+      return false;
+    }
+    if (!availableSeats.trim()) {
+      setError('Available seats is required');
+      return false;
+    }
+    if (!fromLocation.trim()) {
+      setError('From location is required');
+      return false;
+    }
+    if (!toLocation.trim()) {
+      setError('To location is required');
+      return false;
+    }
+    if (!description.trim()) {
+      setError('Description is required');
+      return false;
+    }
+
+    // Validate car fields
+    if (!carBrand.trim()) {
+      setError('Car brand is required');
+      return false;
+    }
+    if (!carModel.trim()) {
+      setError('Car model is required');
+      return false;
+    }
+    if (!numberPlate.trim()) {
+      setError('Number plate is required');
+      return false;
+    }
+    if (!carImage) {
+      setError('Car image is required');
+      return false;
+    }
+
+    setError('');
+    return true;
+  };
+
+  const handleCarImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCarImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (
-      file === "" ||
-      name === "" ||
-      category === "" ||
-      price === 0 ||
-      groupCount === 0 ||
-      languages === "" ||
-      duration === "" ||
-      cities === "" ||
-      description === "" ||
-      introduction === ""
-    ) {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "missing required fields!",
-      });
+    
+    if (!validateForm()) {
       return;
     }
+
+    setLoading(true);
 
     try {
       const result = await Swal.fire({
@@ -60,364 +122,314 @@ const AddTourPackage = () => {
       });
 
       if (result.isConfirmed) {
+        // Upload image to Cloudinary
         const data = new FormData();
-        data.append("file", file);
+        data.append("file", carImage);
         data.append("upload_preset", "upload");
-        console.log("Uploading image to Cloudinary...");
+        
         const uploadRes = await regularAxios.post(
           "https://api.cloudinary.com/v1_1/dpgelkpd4/image/upload",
           data
         );
 
         const { url } = uploadRes.data;
-        console.log("Image uploaded, URL:", url);
         
-        console.log("Sending tour data to API...");
-        const response = await axios.post("/tours", {
-          currentUser,
+        // Create tour data for admin API
+        const tourData = {
+          currentUser: user.email,
           img: url,
-          name,
+          name: `${carBrand} ${carModel}`,
           category,
-          price,
-          groupCount,
-          languages,
-          duration,
-          cities,
+          price: parseFloat(pricePerPerson),
+          groupCount: parseInt(availableSeats),
+          languages: "English, Urdu", // Default for admin
+          duration: `${duration} ${durationType}`,
+          cities: `${fromLocation} to ${toLocation}`,
           description,
-          introduction,
-        });
-        console.log("Tour API response:", response.data);
+          introduction: description, // Using description as introduction
+          carBrand,
+          carModel,
+          numberPlate,
+          tourDate,
+          departureTime,
+          fromLocation,
+          toLocation,
+          availableSeats: parseInt(availableSeats)
+        };
+
+        const response = await axios.post("/tours", tourData);
         
         Swal.fire(response.data.message, "", "success");
         navigate("/tours");
       } else {
         Swal.fire("Tour adding Cancelled!", "", "error");
       }
-    } catch (err) {
-      console.error("Error in tour submission:", err);
-      console.error("Error details:", {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-        url: err.config?.url
-      });
+    } catch (error) {
+      console.error('Error creating tour:', error);
+      const errorMessage = error.response?.data?.message || error.message || "Failed to create tour";
+      setError(errorMessage);
       
       Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: err.message,
-        footer: err.response?.data ? `Server response: ${JSON.stringify(err.response.data)}` : "No server response"
+        icon: 'error',
+        title: 'Error',
+        text: errorMessage
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  //gather all form data
-
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-4 sm:py-15 lg:max-w-7xl lg:px-8">
-      <form>
-        <div className="space-y-12">
-          {/* basic details */}
-          <div>
-            <h2 className="text-3xl font-semibold leading-7 text-[#41A4FF] text-center">
-              Add Tour Package
-            </h2>
-            <p className="mt-3 text-red-500 text-lg leading-6 text-center">
-              This information will be displayed publicly so be careful what you
-              share.
-            </p>
-            {/* photo add */}
+    <>
+      <AdminBackButton />
+      <div className="max-w-2xl mx-auto py-8 px-4">
+        <div className="bg-white shadow-lg rounded-lg p-6">
+          <h1 className="text-2xl font-bold text-center mb-6">Add Tour & Travel Service</h1>
+
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label
-                htmlFor="photo"
-                className="block text-lg font-medium leading-6 text-gray-900 mt-10"
-              >
-                Add a cover photo for the package
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Category *
               </label>
-              <div className="mt-10 flex flex-row">
-                <div className="basis-1/3"></div>
-                <div className="basis-2/3">
-                  <img
-                    className="w-[610px] h-[400px] rounded-3xl"
-                    src={
-                      file
-                        ? URL.createObjectURL(file)
-                        : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"
-                    }
-                    alt="avatar"
-                  />
-                </div>
-                <div className="basis-1/3"></div>
-              </div>
-              <div className="mb-6 flex flex-row justify-center items-center text-center mt-12">
-                <label htmlFor="file">
-                  click below Icon to add a Cover Photo :{" "}
-                  <TbPhotoPlus
-                    className="mx-auto h-12 w-12 text-gray-300"
-                    aria-hidden="true"
-                  />
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">--Select Category--</option>
+                <option disabled style={{fontWeight: 'bold', backgroundColor: '#f0f0f0'}}>🏖️ TOURS</option>
+                <option value="private car service">&nbsp;&nbsp;Private Car Service</option>
+                <option value="city to city">&nbsp;&nbsp;City to City</option>
+                <option value="wild safari">&nbsp;&nbsp;Wild Safari</option>
+                <option value="cultural">&nbsp;&nbsp;Cultural</option>
+                <option value="festival">&nbsp;&nbsp;Festival</option>
+                <option value="special tours">&nbsp;&nbsp;Special Tours</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Service Date *
                 </label>
                 <input
-                  type="file"
-                  id="file"
-                  name="file"
-                  style={{ display: "none" }}
-                  onChange={(e) => {
-                    setFile(e.target.files[0]);
-                  }}
+                  type="date"
+                  value={tourDate}
+                  onChange={(e) => setTourDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min={new Date().toISOString().slice(0, 10)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Departure Time *
+                </label>
+                <input
+                  type="time"
+                  value={departureTime}
+                  onChange={(e) => setDepartureTime(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
                 />
               </div>
             </div>
-            {/* name and category */}
-            <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-              {/* add name */}
-              <div className="sm:col-span-3">
-                <label
-                  htmlFor="name"
-                  className="block text-lg font-medium leading-6 text-gray-900"
-                >
-                  Add Name for Package
-                </label>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    placeholder="Type Here"
-                    className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    onChange={(e) => {
-                      setName(e.target.value);
-                    }}
-                  />
-                </div>
-              </div>
-              {/* select category */}
-              <div className="sm:col-span-3">
-                <label
-                  htmlFor="category"
-                  className="block text-lg font-medium leading-6 text-gray-900"
-                >
-                  Select Tour Category
-                </label>
-                <div className="mt-2">
-                  <select
-                    id="category"
-                    name="category"
-                    className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    onChange={(e) => {
-                      setCategory(e.target.value);
-                    }}
-                  >
-                    <option>--Select one--</option>
-                    <option value={"sun and beach"}>Sun and Beach</option>
-                    <option value={"hiking and trekking"}>
-                      Hiking and Trekking
-                    </option>
-                    <option value={"wild safari"}>Wild Safari</option>
-                    <option value={"special tours"}>Special Tour</option>
-                    <option vlaue={"cultural"}>Cultural</option>
-                    <option values={"festival"}>Festival</option>
-                  </select>
-                </div>
-              </div>
-              {/* price and group size*/}
 
-              {/* add price*/}
-              <div className="sm:col-span-3">
-                <label
-                  htmlFor="price"
-                  className="block text-lg font-medium leading-6 text-gray-900"
-                >
-                  Add PerPerson Price for Package
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  From *
                 </label>
-                <div className="mt-2">
-                  <input
-                    type="number"
-                    name="price"
-                    id="price"
-                    placeholder="Type Here"
-                    className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    onChange={(e) => {
-                      setPrice(e.target.value);
-                    }}
-                  />
-                </div>
-              </div>
-              {/* select group size */}
-              <div className="sm:col-span-3">
-                <label
-                  htmlFor="maxsize"
-                  className="block text-lg font-medium leading-6 text-gray-900"
-                >
-                  Add Maximum Group Size
-                </label>
-                <div className="mt-2">
-                  <input
-                    type="number"
-                    id="maxsize"
-                    name="maxsize"
-                    className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    onChange={(e) => {
-                      setGroupCount(e.target.value);
-                    }}
-                  />
-                </div>
-              </div>
-              {/* languages and duration */}
-
-              {/* add languages */}
-              <div className="sm:col-span-3">
-                <label
-                  htmlFor="languages"
-                  className="block text-lg font-medium leading-6 text-gray-900"
-                >
-                  Add Languages
-                </label>
-                <p className="text-sm">(English, Urdu, Punjabi, Pashto, etc..)</p>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    name="languages"
-                    id="languages"
-                    placeholder="Type Here"
-                    className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    onChange={(e) => {
-                      setLanguages(e.target.value);
-                    }}
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={fromLocation}
+                  onChange={(e) => setFromLocation(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Lahore"
+                  required
+                />
               </div>
 
-              {/* select duration */}
-              <div className="sm:col-span-3">
-                <label
-                  htmlFor="duration"
-                  className="block text-lg font-medium leading-6 text-gray-900"
-                >
-                  Select Tour Duration
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  To *
                 </label>
-                <p className="text-sm">(In days)</p>
-                <div className="mt-2">
-                  <select
-                    id="duration"
-                    name="duration"
-                    className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    onChange={(e) => {
-                      setDuration(e.target.value);
-                    }}
-                  >
-                    <option>--Select One--</option>
-                    <option value={1}>1 Day</option>
-                    <option value={2}>2 Days</option>
-                    <option value={3}>3 Days</option>
-                    <option value={5}>5 Days</option>
-                    <option value={7}>7 Days</option>
-                    <option value={9}>9 Days</option>
-                    <option value={12}>12 Days</option>
-                    <option value={15}>15 Days</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* add cities */}
-              <div className="col-span-full">
-                <label
-                  htmlFor="places"
-                  className="block text-lg font-medium leading-6 text-gray-900"
-                >
-                  Cities That included in your package
-                </label>
-                <p className="text-sm">
-                  (Type cities in visiting order)
-                </p>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    name="places"
-                    id="places"
-                    className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="Type Here"
-                    onChange={(e) => {
-                      setCities(e.target.value);
-                    }}
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={toLocation}
+                  onChange={(e) => setToLocation(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Karachi"
+                  required
+                />
               </div>
             </div>
-          </div>
 
-          {/* add description */}
-          <div className="col-span-full">
-            <label
-              htmlFor="description"
-              className="block text-lg font-medium leading-6 text-gray-900"
-            >
-              Add a brief description about your tour package
-            </label>
-            <p className="text-sm">
-              (This part will show as overall description part of tourdetails)
-            </p>
-            <div className="mt-2">
-              <textarea
-                rows={10}
-                type="text"
-                name="description"
-                id="description"
-                className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="Type Your Description Here"
-                onChange={(e) => {
-                  setDesc(e.target.value);
-                }}
+            {/* Car fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Car Brand *
+                </label>
+                <input
+                  type="text"
+                  value={carBrand}
+                  onChange={(e) => setCarBrand(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Toyota, Honda"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Car Model *
+                </label>
+                <input
+                  type="text"
+                  value={carModel}
+                  onChange={(e) => setCarModel(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Corolla, Civic"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Number Plate *
+                </label>
+                <input
+                  type="text"
+                  value={numberPlate}
+                  onChange={(e) => setNumberPlate(e.target.value.toUpperCase())}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., ABC-123"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Car Image *
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCarImageUpload}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                {carImage && (
+                  <div className="mt-2">
+                    <img src={carImage} alt="Car preview" className="w-32 h-24 object-cover rounded" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Duration *
+                </label>
+                <input
+                  type="number"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="3"
+                  min="1"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Duration Type *
+                </label>
+                <select
+                  value={durationType}
+                  onChange={(e) => setDurationType(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  {durationTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Available Seats *
+                </label>
+                <input
+                  type="number"
+                  value={availableSeats}
+                  onChange={(e) => setAvailableSeats(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="3"
+                  min="1"
+                  max="20"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Price per Person (PKR) *
+              </label>
+              <input
+                type="number"
+                value={pricePerPerson}
+                onChange={(e) => setPricePerPerson(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="2500"
+                min="0"
+                required
               />
             </div>
-          </div>
 
-          {/* add Introduction */}
-          <div className="col-span-full">
-            <label
-              htmlFor="intro"
-              className="block text-lg font-medium leading-6 text-gray-900"
-            >
-              Add a Introduction about your tour destinations and activites
-            </label>
-            <p className="text-sm">
-              (This part will show as overall introduction part of tour)
-            </p>
-            <div className="mt-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description *
+              </label>
               <textarea
-                rows={10}
-                type="text"
-                name="intro"
-                id="intro"
-                className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="Type Your Introduction Here"
-                onChange={(e) => {
-                  setIntroduction(e.target.value);
-                }}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Describe what's included in this service, meeting point, what to expect, etc."
+                required
               />
             </div>
-          </div>
-        </div>
 
-        {/* reset submit button */}
-        <div className="mt-6 flex items-center justify-end gap-x-6">
-          <button
-            type="reset"
-            className="text-lg font-semibold leading-6  text-red-700"
-            value={"Reset"}
-          >
-            Reset
-          </button>
-          <button
-            type="submit"
-            className="rounded-md bg-black px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-[#41A4FF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            onClick={handleSubmit}
-          >
-            Submit For Review
-          </button>
+            <div className="flex justify-center pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                {loading ? 'Adding...' : 'Add Service'}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
+      </div>
+    </>
   );
 };
+
 export default AddTourPackage;

@@ -53,6 +53,15 @@ export const userColumns = [
     field: "type",
     headerName: "Type",
     width: 150,
+    renderCell: (params) => {
+      // Show "admin" for users with isAdmin: true, otherwise show their type
+      const displayType = params.row.isAdmin ? "admin" : params.row.type;
+      return (
+        <div className="cellWithText">
+          <span>{displayType}</span>
+        </div>
+      );
+    },
   },
 ];
 

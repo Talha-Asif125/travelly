@@ -124,7 +124,7 @@ const ReservationModal = ({ open, onClose, hotel }) => {
         hotelId: hotel.id,
         ...bookingData,
         totalPrice,
-        currency: 'USD',
+        currency: 'PKR',
         status: 'pending'
       };
 

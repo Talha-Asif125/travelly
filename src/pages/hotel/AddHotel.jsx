@@ -22,53 +22,54 @@ export const AddHotel = () => {
   const [featured, setFeatured] = useState(true);
   const [sustainability, setSustainability] = useState(false);
   const [availableWork, setAvailableWork] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   
+  const hotelTypes = [
+    { value: "Hotel", label: "Hotel" },
+    { value: "apartment", label: "Apartment" },
+    { value: "resort", label: "Resort" },
+    { value: "villa", label: "Villa" },
+    { value: "cabin", label: "Cabin" }
+  ];
+
+  const provinces = [
+    { value: "Federal", label: "Federal" },
+    { value: "Punjab", label: "Punjab" },
+    { value: "Khyber Pakhtunkhwa", label: "Khyber Pakhtunkhwa(KPK)" },
+    { value: "Sindh", label: "Sindh" },
+    { value: "Gilgit Baltistan", label: "Gilgit Baltistan" },
+    { value: "Kashmir", label: "Kashmir" },
+    { value: "Balochistan", label: "Balochistan" }
+  ];
+
+  const starRatings = ['1', '2', '3', '4', '5'];
+
   function sendData(e) {
     e.preventDefault();
 
     // More comprehensive validation
     if (!name || !title || !type || !city || !province || !address || !zip || !contactName || !contactNo || !description || !cheapestPrice || !rating) {
-      Swal.fire({
-        icon: "error",
-        title: "Incomplete Form",
-        text: "Please fill in all required fields",
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#41A4FF'
-      });
+      setError("Please fill in all required fields");
       return;
     }
 
     if (isNaN(zip)) {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid Input",
-        text: "Please enter a valid zip code",
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#41A4FF'
-      });
+      setError("Please enter a valid zip code");
       return;
     }
     if (contactNo.length !== 10) {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid Input",
-        text: "Please enter a valid 10-digit mobile number",
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#41A4FF'
-      });
+      setError("Please enter a valid 10-digit mobile number");
       return;
     }
 
     if (hotelImgs.length === 0) {
-      Swal.fire({
-        icon: "error",
-        title: "Missing Images",
-        text: "Please upload at least one hotel image",
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#41A4FF'
-      });
+      setError("Please upload at least one hotel image");
       return;
     }
+
+    setLoading(true);
+    setError("");
 
     const formData = new FormData();
 
@@ -95,33 +96,6 @@ export const AddHotel = () => {
     // Log form data for debugging
     console.log("Submitting hotel with name:", name);
     console.log("Image count:", hotelImgs.length);
-    console.log("Form data summary:", {
-      name,
-      title,
-      type,
-      city,
-      province,
-      address,
-      zip,
-      contactName,
-      contactNo: contactNo.length, // Don't log the full number
-      description: description.substring(0, 20) + "...", // Just log the start
-      cheapestPrice,
-      rating,
-      featured,
-      sustainability,
-      availableWork
-    });
-
-    Swal.fire({
-      title: 'Adding hotel...',
-      text: 'Please wait while we process your request',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
 
     axios
       .post("/hotels", formData, {
@@ -135,7 +109,7 @@ export const AddHotel = () => {
           title: 'Success!',
           text: 'Hotel added successfully',
           confirmButtonText: 'OK',
-          confirmButtonColor: '#41A4FF'
+          confirmButtonColor: '#3b82f6'
         }).then((result) => {
           if (result.isConfirmed) {
             navigate("/hotels");
@@ -147,295 +121,302 @@ export const AddHotel = () => {
         let errorMessage = "Something went wrong while adding the hotel";
         
         if (err.response) {
-          // The server responded with an error
           errorMessage = err.response.data.message || errorMessage;
         } else if (err.request) {
-          // The request was made but no response was received
           errorMessage = "Could not connect to the server. Please check your network connection.";
         } else {
-          // Something else caused the error
           errorMessage = err.message || errorMessage;
         }
         
-        Swal.fire({
-          icon: 'error',
-          title: 'Adding Failed',
-          text: errorMessage,
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#41A4FF'
-        });
+        setError(errorMessage);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }
 
   return (
-    <div className="p-4">
-      <div className="mb-6">
-        <AdminBackButton />
-      </div>
-      
-      <div className="flex justify-center">
-        <form
-          className="w-full max-w-lg"
-          onSubmit={sendData}
-          encType="multipart/form-data"
-        >
-          <h1 className="text-2xl font-bold mb-8 mt-8">
-            List Your <span className="text-[#41A4FF]">Hotel</span> and{" "}
-            <span className="text-[#41A4FF]">Join</span> with us
-          </h1>
-          
-          <div className="flex flex-wrap -mx-3 mb-3">
-            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Hotel name
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                type="text"
-                placeholder="Enter your Hotel name"
-                required
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-          </div>
+    <>
+      <AdminBackButton />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-2xl mx-auto py-8 px-4">
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold text-center mb-6">Add Hotel Service</h1>
 
-          <div className="flex flex-wrap -mx-3">
-            <div className="w-full px-3">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Title
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                type="text"
-                placeholder="Enter title for your Hotel"
-                required
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full md:w-1/2 px-3 md:mb-0">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Select your Hotel Type
-              </label>
-              <select
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                onChange={(e) => setType(e.target.value)}
-                defaultValue="Hotel"
-                required
-              >
-                <option value="">Select hotel type</option>
-                <option value="Hotel">Hotel</option>
-                <option value="apartment">Apartment</option>
-                <option value="resort">Resort</option>
-                <option value="villa">Villa</option>
-                <option value="cabin">Cabin</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap -mx-3 mb-2">
-            <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                City
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                type="text"
-                onChange={(e) => setCity(e.target.value.toLowerCase())}
-              />
-            </div>
-            <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Province
-              </label>
-              <div className="relative">
-                <select
-                  className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  onChange={(e) => setProvince(e.target.value)}
-                  defaultValue="Punjab"
-                  required
-                >
-                  <option value="">Select Province</option>
-                  <option value="Federal">Federal</option>
-                  <option value="Punjab">Punjab</option>
-                  <option value="Khyber Pakhtunkhwa">Khyber Pakhtunkhwa(KPK)</option>
-                  <option value="Sindh">Sindh</option>
-                  <option value="Gilgit Baltistan">Gilgit Baltistan</option>
-                  <option value="Kashmir">Kashmir</option>
-                  <option value="Balochistan">Balochistan</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                  <svg
-                    className="fill-current h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                  </svg>
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded">
+                  {error}
                 </div>
-              </div>
-            </div>
-            <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Zip
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                type="text"
-                placeholder="44000"
-                onChange={(e) => setZip(e.target.value)}
-              />
-            </div>
-          </div>
+              )}
 
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full px-3">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Address
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                type="text"
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </div>
-          </div>
+              <form onSubmit={sendData} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Hotel Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter your Hotel name"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Title *
+                    </label>
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter title for your Hotel"
+                      required
+                    />
+                  </div>
+                </div>
 
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full px-3">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Contact Name
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                type="text"
-                onChange={(e) => setContactName(e.target.value)}
-              />
-            </div>
-          </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Hotel Type *
+                    </label>
+                    <select
+                      value={type}
+                      onChange={(e) => setType(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      {hotelTypes.map(hotelType => (
+                        <option key={hotelType.value} value={hotelType.value}>
+                          {hotelType.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Star Rating *
+                    </label>
+                    <select
+                      value={rating}
+                      onChange={(e) => setRating(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Select Rating</option>
+                      {starRatings.map(rating => (
+                        <option key={rating} value={rating}>{rating} Star{rating !== '1' ? 's' : ''}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full px-3">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Contact Number
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                type="tel"
-                onChange={(e) => setContactNo(e.target.value)}
-              />
-            </div>
-          </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      City *
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value.toLowerCase())}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Lahore, Karachi, Islamabad"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Province *
+                    </label>
+                    <select
+                      value={province}
+                      onChange={(e) => setProvince(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      {provinces.map(province => (
+                        <option key={province.value} value={province.value}>
+                          {province.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      ZIP Code *
+                    </label>
+                    <input
+                      type="text"
+                      value={zip}
+                      onChange={(e) => setZip(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="44000"
+                      required
+                    />
+                  </div>
+                </div>
 
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full px-3">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Description
-              </label>
-              <textarea
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-          </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address *
+                  </label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Complete address with landmarks"
+                    required
+                  />
+                </div>
 
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full px-3">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Cheapest Price (Rs)
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                type="number"
-                onChange={(e) => setPrice(e.target.value)}
-              />
-            </div>
-          </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Contact person name"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Number *
+                    </label>
+                    <input
+                      type="tel"
+                      value={contactNo}
+                      onChange={(e) => setContactNo(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="10-digit mobile number"
+                      required
+                    />
+                  </div>
+                </div>
 
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full px-3">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Rating (0-5)
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                type="number"
-                min="0"
-                max="5"
-                step="0.1"
-                onChange={(e) => setRating(e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full px-3">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Additional Features
-              </label>
-              <div className="flex items-center mb-2">
-                <input 
-                  type="checkbox" 
-                  className="mr-2"
-                  defaultChecked
-                  onChange={(e) => setFeatured(e.target.checked)}
-                />
-                <span>Featured</span>
-              </div>
-              <div className="flex items-center mb-2">
-                <input 
-                  type="checkbox" 
-                  className="mr-2"
-                  onChange={(e) => setSustainability(e.target.checked)}
-                />
-                <span>Sustainability</span>
-              </div>
-              <div className="flex items-center">
-                <input 
-                  type="checkbox" 
-                  className="mr-2"
-                  onChange={(e) => setAvailableWork(e.target.checked)}
-                />
-                <span>Available Work</span>
-              </div>
-            </div>
-          </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Price per Night (PKR) *
+                  </label>
+                  <input
+                    type="number"
+                    value={cheapestPrice}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="5000"
+                    min="0"
+                    required
+                  />
+                </div>
 
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full px-3">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                Upload hotel images (upload up to 5 images)
-              </label>
-              <input
-                type="file"
-                className="bg-gray-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                multiple
-                required
-                onChange={(e) => {
-                  const files = e.target.files;
-                  const images = [];
-                  for (let i = 0; i < files.length; i++) {
-                    images.push(files[i]);
-                  }
-                  setHotelImgs(images);
-                }}
-              />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Hotel Description *
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Describe your hotel, location benefits, special features, services..."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Additional Features
+                  </label>
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        checked={featured}
+                        onChange={(e) => setFeatured(e.target.checked)}
+                      />
+                      <span className="text-sm text-gray-700">Featured</span>
+                    </div>
+                    <div className="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        checked={sustainability}
+                        onChange={(e) => setSustainability(e.target.checked)}
+                      />
+                      <span className="text-sm text-gray-700">Sustainability</span>
+                    </div>
+                    <div className="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        checked={availableWork}
+                        onChange={(e) => setAvailableWork(e.target.checked)}
+                      />
+                      <span className="text-sm text-gray-700">Available Work</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Upload Hotel Images *
+                  </label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      const images = [];
+                      for (let i = 0; i < files.length; i++) {
+                        images.push(files[i]);
+                      }
+                      setHotelImgs(images);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload up to 5 images</p>
+                </div>
+
+                <div className="flex justify-center pt-4 space-x-4">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-blue-600 text-white px-8 py-3 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Adding Hotel...' : 'Add Hotel'}
+                  </button>
+                  <button
+                    type="reset"
+                    className="bg-gray-500 text-white px-8 py-3 rounded-md font-medium hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-
-          <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mb-8">
-            SUBMIT
-          </button>
-          <input 
-            className="bg-[#787878] hover:bg-[#474747] text-white font-bold py-2 px-4 rounded-full ml-5" 
-            type="reset" 
-            value="Reset" 
-          />
-        </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

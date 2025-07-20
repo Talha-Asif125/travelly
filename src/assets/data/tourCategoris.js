@@ -1,15 +1,15 @@
 const tourCategories = [
   {
     id: "01",
-    title: "Hiking and Trekking",
-    links: "hikingandtrekking",
+    title: "Private Car Service",
+    links: "privatecarservice",
     photo:
       "https://cdn.pixabay.com/photo/2016/02/07/19/50/mountaineer-1185474_640.jpg",
   },
   {
     id: "02",
-    title: "Sun and Beach",
-    links: "sunandbeach",
+    title: "City to City",
+    links: "citytocity",
     photo:
       "https://cdn.pixabay.com/photo/2013/04/02/13/06/beach-99388_640.jpg",
   },

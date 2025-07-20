@@ -14,7 +14,17 @@ const PostCard = ({ post, onPostUpdated, onPostDeleted }) => {
   const [replyImagePreview, setReplyImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const isLiked = user && post.likes.includes(user.id);
+  // Safety check for null post and required properties
+  if (!post || !post._id || !post.user || !post.user._id) {
+    return null;
+  }
+
+  // Ensure arrays exist and are valid
+  const safeLikes = Array.isArray(post.likes) ? post.likes : [];
+  const safeReplies = Array.isArray(post.replies) ? post.replies : [];
+  const safeHashtags = Array.isArray(post.hashtags) ? post.hashtags : [];
+
+  const isLiked = user && safeLikes.includes(user.id);
   const canDelete = user && (
     user.id === post.user._id || 
     user._id === post.user._id || 
@@ -189,9 +199,9 @@ const PostCard = ({ post, onPostUpdated, onPostDeleted }) => {
           <p className="text-gray-900 whitespace-pre-wrap">{post.content}</p>
           
           {/* Hashtags */}
-          {post.hashtags && post.hashtags.length > 0 && (
+          {safeHashtags.length > 0 && (
             <div className="mt-2">
-              {post.hashtags.map((tag, index) => (
+              {safeHashtags.map((tag, index) => (
                 <span key={index} className="text-blue-600 text-sm mr-2">
                   #{tag}
                 </span>
@@ -228,7 +238,7 @@ const PostCard = ({ post, onPostUpdated, onPostDeleted }) => {
               ) : (
                 <HeartIcon className="h-5 w-5" />
               )}
-              <span className="text-sm">{post.likes.length}</span>
+                              <span className="text-sm">{safeLikes.length}</span>
             </button>
 
             <button
@@ -236,7 +246,7 @@ const PostCard = ({ post, onPostUpdated, onPostDeleted }) => {
               className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors"
             >
               <ChatBubbleLeftIcon className="h-5 w-5" />
-              <span className="text-sm">{post.replies.length}</span>
+                              <span className="text-sm">{safeReplies.length}</span>
             </button>
           </div>
         </div>
@@ -321,9 +331,9 @@ const PostCard = ({ post, onPostUpdated, onPostDeleted }) => {
         )}
 
         {/* Replies */}
-        {post.replies && post.replies.length > 0 && (
+        {safeReplies.length > 0 && (
           <div className="mt-4 border-t border-gray-100 pt-4 space-y-3">
-            {post.replies.map((reply) => (
+            {safeReplies.filter(reply => reply && reply._id && reply.user).map((reply) => (
               <div key={reply._id} className="flex space-x-3">
                 <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-sm font-semibold">

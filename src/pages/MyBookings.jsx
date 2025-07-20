@@ -25,9 +25,7 @@ import {
   DirectionsCar,
   Tour,
   Restaurant,
-  Flight,
   Event,
-  Train,
   LocationOn,
   CalendarToday,
   Group,
@@ -36,9 +34,12 @@ import {
   Cancel,
   Schedule,
   Info,
-  FilterList
+  FilterList,
+  Delete
 } from '@mui/icons-material';
 import { AuthContext } from '../context/authContext';
+import Swal from 'sweetalert2';
+import axios from 'axios';
 
 const MyBookings = () => {
   const { user } = useContext(AuthContext);
@@ -66,11 +67,7 @@ const MyBookings = () => {
         params.append('type', 'tour');
       } else if (serviceTypeFilter === 'restaurant') {
         params.append('type', 'service');
-      } else if (serviceTypeFilter === 'flight') {
-        params.append('type', 'service');
       } else if (serviceTypeFilter === 'event') {
-        params.append('type', 'service');
-      } else if (serviceTypeFilter === 'train') {
         params.append('type', 'service');
       }
       // For 'all', we don't add type parameter to get all types
@@ -102,10 +99,52 @@ const MyBookings = () => {
   }, [serviceTypeFilter]);
 
   useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        
+        // Try multiple endpoints to fetch user bookings
+        const endpoints = [
+          '/api/reservations/my-bookings',
+          '/api/reservations/user',
+          `/api/reservations/customer/${user?.id || user?._id}`,
+          '/api/service-reservations/my-reservations'
+        ];
+        
+        let bookingsData = [];
+        
+        for (const endpoint of endpoints) {
+          try {
+            console.log(`Trying endpoint: ${endpoint}`);
+            const response = await axios.get(endpoint, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            if (response.data && (response.data.data || response.data.length > 0)) {
+              bookingsData = response.data.data || response.data;
+              console.log(`Found bookings at ${endpoint}:`, bookingsData);
+              break;
+            }
+          } catch (err) {
+            console.log(`Endpoint ${endpoint} failed:`, err.message);
+            continue;
+          }
+        }
+        
+        setBookings(bookingsData);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+        setError('Failed to load bookings');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (user) {
       fetchBookings();
     }
-  }, [user, fetchBookings]);
+  }, [user]);
 
   const getServiceIcon = (type) => {
     const iconProps = { fontSize: 'medium', color: 'primary' };
@@ -114,9 +153,7 @@ const MyBookings = () => {
       case 'vehicle': return <DirectionsCar {...iconProps} />;
       case 'tour': return <Tour {...iconProps} />;
       case 'restaurant': return <Restaurant {...iconProps} />;
-      case 'flight': return <Flight {...iconProps} />;
       case 'event': return <Event {...iconProps} />;
-      case 'train': return <Train {...iconProps} />;
       default: return <Info {...iconProps} />;
     }
   };
@@ -164,17 +201,9 @@ const MyBookings = () => {
       filteredByType = bookings.filter(booking => 
         booking.serviceId?.type === 'restaurant'
       );
-    } else if (serviceTypeFilter === 'flight') {
-      filteredByType = bookings.filter(booking => 
-        booking.serviceId?.type === 'flight'
-      );
     } else if (serviceTypeFilter === 'event') {
       filteredByType = bookings.filter(booking => 
         booking.serviceId?.type === 'event'
-      );
-    } else if (serviceTypeFilter === 'train') {
-      filteredByType = bookings.filter(booking => 
-        booking.serviceId?.type === 'train'
       );
     }
 
@@ -222,6 +251,59 @@ const MyBookings = () => {
   const handleServiceTypeChange = (event, newType) => {
     if (newType !== null) {
       setServiceTypeFilter(newType);
+    }
+  };
+
+  const handleDeleteBooking = async (bookingId) => {
+    try {
+      // Show confirmation dialog
+      const result = await Swal.fire({
+        title: 'Delete Booking?',
+        text: 'Are you sure you want to permanently delete this booking? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d32f2f',
+        cancelButtonColor: '#1976d2',
+        confirmButtonText: 'Yes, Delete',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (result.isConfirmed) {
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`/api/reservations/${bookingId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Remove the booking from local state
+          setBookings(prev => prev.filter(booking => booking._id !== bookingId));
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Your booking has been deleted successfully.',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          throw new Error(data.message || 'Failed to delete booking');
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to delete booking. Please try again.',
+        confirmButtonColor: '#1976d2'
+      });
     }
   };
 
@@ -276,17 +358,9 @@ const MyBookings = () => {
             <Restaurant sx={{ mr: 1 }} fontSize="small" />
             Restaurants
           </ToggleButton>
-          <ToggleButton value="flight" aria-label="flight services">
-            <Flight sx={{ mr: 1 }} fontSize="small" />
-            Flights
-          </ToggleButton>
           <ToggleButton value="event" aria-label="event services">
             <Event sx={{ mr: 1 }} fontSize="small" />
             Events
-          </ToggleButton>
-          <ToggleButton value="train" aria-label="train services">
-            <Train sx={{ mr: 1 }} fontSize="small" />
-            Trains
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
@@ -403,6 +477,25 @@ const MyBookings = () => {
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                         Booked on {formatDate(booking.createdAt)}
                       </Typography>
+
+                      {/* Delete button for cancelled or completed bookings */}
+                      {(booking.status === 'cancelled' || booking.status === 'completed' || new Date(booking.checkOutDate) < new Date()) && (
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                          <Button
+                            size="small"
+                            color="error"
+                            variant="outlined"
+                            startIcon={<Delete />}
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent card click
+                              handleDeleteBooking(booking._id);
+                            }}
+                            sx={{ fontSize: '0.75rem', padding: '4px 8px' }}
+                          >
+                            Delete
+                          </Button>
+                        </Box>
+                      )}
                     </CardContent>
                   </Card>
                 </Grid>

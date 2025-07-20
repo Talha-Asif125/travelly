@@ -13,9 +13,48 @@ const ServiceCard = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axios.get("/api/tours");
-        console.log("Tours API Response:", response.data);
-        setTour(response.data || []);
+        
+        let allTours = [];
+        
+        // Fetch traditional tours from /api/tours
+        try {
+          const toursResponse = await axios.get("/api/tours");
+          console.log("Traditional Tours API Response:", toursResponse.data);
+          const traditionalTours = toursResponse.data || [];
+          allTours = [...traditionalTours];
+        } catch (toursErr) {
+          console.warn("Error fetching traditional tours:", toursErr);
+        }
+        
+        // Fetch new tour/travel services from /api/provider/services
+        try {
+          const servicesResponse = await axios.get("http://localhost:5000/api/provider/services?type=tour");
+          console.log("Tour Services API Response:", servicesResponse.data);
+          
+          if (servicesResponse.data.success) {
+            const tourServices = (servicesResponse.data.data || []).map(service => ({
+              _id: service._id,
+              name: service.name,
+              category: service.category,
+              price: service.price,
+              duration: service.duration,
+              img: service.images?.[0] || "https://via.placeholder.com/400x300?text=No+Image",
+              description: service.description,
+              fromLocation: service.fromLocation,
+              toLocation: service.toLocation,
+              availableSeats: service.availableSeats,
+              tourDate: service.tourDate,
+              departureTime: service.departureTime,
+              isNewService: true // Flag to distinguish new services
+            }));
+            allTours = [...allTours, ...tourServices];
+          }
+        } catch (servicesErr) {
+          console.warn("Error fetching tour services:", servicesErr);
+        }
+        
+        console.log("All Tours Combined:", allTours);
+        setTour(allTours);
       } catch (err) {
         console.error("Error fetching tours:", err);
         setError(err.message);
@@ -79,11 +118,31 @@ const ServiceCard = () => {
                   <p className="text-sm text-gray-600 mb-1">
                     Category: {tours.category}
                   </p>
+                  {tours.isNewService && tours.fromLocation && tours.toLocation && (
+                    <p className="text-sm text-gray-600 mb-1">
+                      Route: {tours.fromLocation} → {tours.toLocation}
+                    </p>
+                  )}
+                  {tours.isNewService && tours.availableSeats && (
+                    <p className="text-sm text-gray-600 mb-1">
+                      Available Seats: {tours.availableSeats}
+                    </p>
+                  )}
+                  {tours.isNewService && tours.tourDate && (
+                    <p className="text-sm text-gray-600 mb-1">
+                      Date: {new Date(tours.tourDate).toLocaleDateString()}
+                    </p>
+                  )}
+                  {tours.isNewService && tours.departureTime && (
+                    <p className="text-sm text-gray-600 mb-1">
+                      Departure: {tours.departureTime}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex flex-row mr-2 space-x-3 justify-between items-center p-3">
                 <p className="text-lg font-bold text-blue-600">
-                  From ${tours.price}
+                  {tours.isNewService ? `Rs. ${tours.price}` : `From $${tours.price}`}
                 </p>
                 <Link
                   to={`/tours/${tours._id}`}

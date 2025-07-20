@@ -5,6 +5,8 @@ import "./App.css";
 import HotelReservations from "./pages/hotel-reservations/HotelReservations";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import EmailVerification from "./pages/EmailVerification";
+import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ServiceProviderDashboard from "./pages/OwnerDashboard";
@@ -22,6 +24,8 @@ export default function App() {
             <Route path="/*" element={<Layout />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/verify-email" element={<EmailVerification />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/service-provider-dashboard" element={<ServiceProviderDashboard />} />

@@ -33,10 +33,10 @@ const Payment = () => {
     const total = numberOfDays() * data?.price;
 
     let totalWithDriver = null;
-    let driverFee = numberOfDays() * 2500;
+    let driverFee = numberOfDays() * 700000;
 
     if(needDriver) {
-        totalWithDriver = total + (2500 * numberOfDays())
+        totalWithDriver = total + (700000 * numberOfDays())
         console.log(totalWithDriver)
         console.log(numberOfDays())
     } else {

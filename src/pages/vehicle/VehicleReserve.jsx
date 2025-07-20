@@ -27,7 +27,7 @@ const VehicleReserve = ({ setOpen, vehicleId, pickupDate, returnDate, date_diffe
     if (!vehicleData) return 0;
     
     const vehicleFee = vehicleData.price * date_difference;
-    const driverFee = needDriver ? 2500 * date_difference : 0;
+    const driverFee = needDriver ? 700000 * date_difference : 0;
     return vehicleFee + driverFee;
   };
 
@@ -144,29 +144,18 @@ const VehicleReserve = ({ setOpen, vehicleId, pickupDate, returnDate, date_diffe
         </div>
 
         <div className="mb-6">
-          <h4 className="font-semibold text-blue-600 mb-3">Do you need a driver?</h4>
-          <div className="flex justify-center gap-8">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="driver"
-                value="yes"
-                onChange={() => setNeedDriver(true)}
-                className="mr-2"
-              />
-              <span>Yes</span>
-            </label>
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="driver"
-                value="no"
-                onChange={() => setNeedDriver(false)}
-                className="mr-2"
-              />
-              <span>No</span>
-            </label>
-          </div>
+          <label className="block font-semibold text-blue-600 mb-2">
+            Need Driver *
+          </label>
+          <select
+            value={needDriver ? 'Yes' : 'No'}
+            onChange={(e) => setNeedDriver(e.target.value === 'Yes')}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            required
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
         </div>
 
         <div className="border-t pt-4 mb-6">
