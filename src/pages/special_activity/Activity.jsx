@@ -172,7 +172,7 @@ const Activity = () => {
       let response;
       if (activity.isServiceActivity) {
         // For service activities, use the reservations API
-        response = await axios.post(`/reservations`, {
+        response = await axios.post(`/api/activity-reservations`, {
           serviceId: id,
           checkInDate: activity?.eventDate || activity?.dateRange?.startDate || new Date().toISOString(),
           checkOutDate: activity?.eventDate || activity?.dateRange?.startDate || new Date().toISOString(),

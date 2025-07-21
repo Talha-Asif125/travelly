@@ -97,38 +97,34 @@ const MyBookings = () => {
     const fetchBookings = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
         
-        // Try multiple endpoints to fetch user bookings
-        const endpoints = [
-          '/api/reservations/my-bookings',
-          '/api/reservations/user',
-          `/api/reservations/customer/${user?.id || user?._id}`,
-          '/api/service-reservations/my-reservations'
-        ];
+        // Try multiple endpoints to get all booking types
+        const [hotelBookings, serviceBookings, tourBookings] = await Promise.allSettled([
+          api.get('/hotel-reservations/user'),
+          api.get('/reservations/customer'), 
+          api.get('/tour-reservations/customer')
+        ]);
         
-        let bookingsData = [];
+        let allBookings = [];
         
-        for (const endpoint of endpoints) {
-          try {
-            console.log(`Trying endpoint: ${endpoint}`);
-            const response = await api.get(endpoint);
-            
-            if (response.data && (response.data.data || response.data.length > 0)) {
-              bookingsData = response.data.data || response.data;
-              console.log(`Found bookings at ${endpoint}:`, bookingsData);
-              break;
-            }
-          } catch (err) {
-            console.log(`Endpoint ${endpoint} failed:`, err.message);
-            continue;
-          }
+        // Combine successful responses
+        if (hotelBookings.status === 'fulfilled' && hotelBookings.value.data) {
+          allBookings = [...allBookings, ...hotelBookings.value.data];
         }
         
-        setBookings(bookingsData);
+        if (serviceBookings.status === 'fulfilled' && serviceBookings.value.data?.data) {
+          allBookings = [...allBookings, ...serviceBookings.value.data.data];
+        }
+        
+        if (tourBookings.status === 'fulfilled' && tourBookings.value.data) {
+          allBookings = [...allBookings, ...tourBookings.value.data];
+        }
+        
+        setBookings(allBookings);
       } catch (error) {
         console.error('Error fetching bookings:', error);
         setError('Failed to load bookings');
+        setBookings([]);
       } finally {
         setLoading(false);
       }

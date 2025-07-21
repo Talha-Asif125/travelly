@@ -170,7 +170,7 @@ const VehicleBookingPage = () => {
 
       console.log('Submitting vehicle booking:', bookingData);
 
-      const response = await axios.post('/api/reservations', bookingData, {
+      const response = await axios.post('/api/vehiclereservation', bookingData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

@@ -146,13 +146,16 @@ const TourBookingPage = () => {
       const token = localStorage.getItem('token');
       
       const bookingData = {
-        serviceId: id,
-        checkInDate: tourDate,
-        checkOutDate: tourDate, // Same day for tour
-        guests: parseInt(travelers),
+        tourId: id,
+        tourOwnerId: tour.currentUser || tour.ownerId,
         customerName: user.name,
         customerEmail: user.email,
         customerPhone: customerPhone || '',
+        tourName: tour.name,
+        tourDate: tourDate,
+        guests: parseInt(travelers),
+        tourPrice: tour.price,
+        totalAmount: tour.price * parseInt(travelers),
         cnicNumber,
         cnicPhoto,
         specialRequests
@@ -160,7 +163,7 @@ const TourBookingPage = () => {
 
       console.log('Submitting tour booking:', bookingData);
 
-      const response = await axios.post('/reservations', bookingData, {
+      const response = await axios.post('/api/tours', bookingData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

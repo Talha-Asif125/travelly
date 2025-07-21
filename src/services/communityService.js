@@ -95,8 +95,7 @@ export const getUserPosts = async (userId, page = 1, limit = 20) => {
 // Create a new post
 export const createPost = async (formData) => {
   try {
-    console.log('Creating post with formData:', formData);
-    const response = await axios.post('/posts', formData, {
+    const response = await axios.post('/api/community/posts', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

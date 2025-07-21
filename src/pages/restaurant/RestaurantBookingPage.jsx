@@ -155,7 +155,7 @@ const RestaurantBookingPage = () => {
 
       console.log('Submitting restaurant booking:', bookingData);
 
-      const response = await axios.post('/reservations', bookingData, {
+      const response = await axios.post('/api/restaurantReservation/create', bookingData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
