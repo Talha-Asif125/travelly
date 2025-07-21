@@ -3,8 +3,9 @@ import SessionService from './src/services/sessionService';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://travelly-backend-27bn.onrender.com',
-  withCredentials: true // This will send cookies with requests
+  baseURL: 'https://travelly-backend-27bn.onrender.com',
+  timeout: 10000, // Add timeout
+  withCredentials: true
 });
 
 // Request interceptor to add authorization header
