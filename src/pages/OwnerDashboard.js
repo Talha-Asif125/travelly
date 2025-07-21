@@ -177,7 +177,7 @@ const ServiceProviderDashboard = () => {
       // Load all services from provider services API (includes tours, vehicles, etc.)
       try {
         const serviceType = selectedServiceType === 'all' ? '' : selectedServiceType;
-        const servicesResponse = await fetch(`http://localhost:5000/api/provider/services?type=${serviceType}`, {
+        const servicesResponse = await fetch(`https://travelly-backend-27bn.onrender.com/api/provider/services?type=${serviceType}`, {
           headers: getAuthHeaders()
         });
         

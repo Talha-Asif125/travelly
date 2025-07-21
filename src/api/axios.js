@@ -3,7 +3,7 @@ import SessionService from '../services/sessionService';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://travelly-backend-27bn.onrender.com/api',
   withCredentials: true // This will send cookies with requests
 });
 

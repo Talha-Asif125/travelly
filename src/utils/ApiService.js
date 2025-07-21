@@ -5,7 +5,7 @@ import AuthService from '../services/authService';
  * Handles all HTTP requests with consistent patterns
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://travelly-backend-27bn.onrender.com/api';
 
 class ApiService {
   /**

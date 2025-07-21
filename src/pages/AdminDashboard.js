@@ -348,7 +348,7 @@ const AdminDashboard = () => {
 
   // Real-time chat functions
   const initializeSocket = () => {
-    socket.current = io('http://localhost:5000');
+    socket.current = io('https://travelly-backend-27bn.onrender.com');
     socket.current.emit('setup', user);
     
     socket.current.on('message received', (newMessage) => {
