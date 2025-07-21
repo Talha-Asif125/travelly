@@ -1,0 +1,31 @@
+{
+  "files": {
+    "main.css": "/static/css/main.bda78c8c.css",
+    "main.js": "/static/js/main.259a2bd0.js",
+    "static/js/239.ad40150f.chunk.js": "/static/js/239.ad40150f.chunk.js",
+    "static/js/213.69a5e8d8.chunk.js": "/static/js/213.69a5e8d8.chunk.js",
+    "static/js/455.1b0a6a6b.chunk.js": "/static/js/455.1b0a6a6b.chunk.js",
+    "static/js/905.3feb3835.chunk.js": "/static/js/905.3feb3835.chunk.js",
+    "static/js/320.cce50e9b.chunk.js": "/static/js/320.cce50e9b.chunk.js",
+    "static/media/rentCarAdImg.png": "/static/media/rentCarAdImg.adeb6646f443ca57e690.png",
+    "static/media/carmain.png": "/static/media/carmain.078962bd4dc5c3bc7f89.png",
+    "static/media/bg.jpg": "/static/media/bg.47920eba4a9992fb67cf.jpg",
+    "static/media/HeroTrain.jpg": "/static/media/HeroTrain.90b7ea185c2b059d3a62.jpg",
+    "static/media/Kandy-to-Ell-by-train.jpg": "/static/media/Kandy-to-Ell-by-train.f319d13b8a35cbd20166.jpg",
+    "static/media/singletrain.jpg": "/static/media/singletrain.3333a843d377a9bbc6b0.jpg",
+    "static/media/Welcome.jpg": "/static/media/Welcome.e247035d623f92fec7a5.jpg",
+    "static/media/ev.png": "/static/media/ev.888df948e825e00f2a1b.png",
+    "index.html": "/index.html",
+    "main.bda78c8c.css.map": "/static/css/main.bda78c8c.css.map",
+    "main.259a2bd0.js.map": "/static/js/main.259a2bd0.js.map",
+    "239.ad40150f.chunk.js.map": "/static/js/239.ad40150f.chunk.js.map",
+    "213.69a5e8d8.chunk.js.map": "/static/js/213.69a5e8d8.chunk.js.map",
+    "455.1b0a6a6b.chunk.js.map": "/static/js/455.1b0a6a6b.chunk.js.map",
+    "905.3feb3835.chunk.js.map": "/static/js/905.3feb3835.chunk.js.map",
+    "320.cce50e9b.chunk.js.map": "/static/js/320.cce50e9b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.bda78c8c.css",
+    "static/js/main.259a2bd0.js"
+  ]
+}

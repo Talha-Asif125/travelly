@@ -1,12 +1,7 @@
 import axios from '../api/axios';
 
-// Create axios instance with interceptors for auth
-const api = axios.create({
-  baseURL: API_BASE_URL,
-});
-
 // Add auth token to requests
-api.interceptors.request.use((config) => {
+axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -16,7 +11,7 @@ api.interceptors.request.use((config) => {
 });
 
 // Response interceptor for better error handling
-api.interceptors.response.use(
+axios.interceptors.response.use(
   (response) => {
     // console.log('API Response:', response.data);
     return response;
@@ -56,7 +51,7 @@ api.interceptors.response.use(
 // Get all posts with pagination
 export const getAllPosts = async (page = 1, limit = 20) => {
   try {
-    const response = await api.get(`/posts?page=${page}&limit=${limit}`);
+    const response = await axios.get(`/posts?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching posts:', error);
@@ -67,7 +62,7 @@ export const getAllPosts = async (page = 1, limit = 20) => {
 // Search posts
 export const searchPosts = async (query, page = 1, limit = 20) => {
   try {
-    const response = await api.get(`/posts/search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
+    const response = await axios.get(`/posts/search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error('Error searching posts:', error);
@@ -78,7 +73,7 @@ export const searchPosts = async (query, page = 1, limit = 20) => {
 // Get posts by location
 export const getPostsByLocation = async (location, page = 1, limit = 20) => {
   try {
-    const response = await api.get(`/posts/location/${encodeURIComponent(location)}?page=${page}&limit=${limit}`);
+    const response = await axios.get(`/posts/location/${encodeURIComponent(location)}?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching posts by location:', error);
@@ -89,7 +84,7 @@ export const getPostsByLocation = async (location, page = 1, limit = 20) => {
 // Get user's posts
 export const getUserPosts = async (userId, page = 1, limit = 20) => {
   try {
-    const response = await api.get(`/posts/user/${userId}?page=${page}&limit=${limit}`);
+    const response = await axios.get(`/posts/user/${userId}?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching user posts:', error);
@@ -101,7 +96,7 @@ export const getUserPosts = async (userId, page = 1, limit = 20) => {
 export const createPost = async (formData) => {
   try {
     console.log('Creating post with formData:', formData);
-    const response = await api.post('/posts', formData, {
+    const response = await axios.post('/posts', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -138,7 +133,7 @@ export const addReply = async (postId, replyData) => {
       };
     }
     
-    const response = await api.post(`/posts/${postId}/reply`, requestData, config);
+    const response = await axios.post(`/posts/${postId}/reply`, requestData, config);
     return response.data;
   } catch (error) {
     console.error('Error adding reply:', error);
@@ -149,7 +144,7 @@ export const addReply = async (postId, replyData) => {
 // Toggle like on a post
 export const toggleLike = async (postId) => {
   try {
-    const response = await api.post(`/posts/${postId}/like`);
+    const response = await axios.post(`/posts/${postId}/like`);
     return response.data;
   } catch (error) {
     console.error('Error toggling like:', error);
@@ -160,7 +155,7 @@ export const toggleLike = async (postId) => {
 // Delete a post
 export const deletePost = async (postId) => {
   try {
-    const response = await api.delete(`/posts/${postId}`);
+    const response = await axios.delete(`/posts/${postId}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting post:', error);
