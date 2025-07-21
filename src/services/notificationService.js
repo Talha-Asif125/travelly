@@ -13,7 +13,10 @@ export const getNotifications = async () => {
     const response = await axios.get(`/api/notifications`, {
       withCredentials: true,
     });
-    return response.data;
+    // Always return an array for notifications
+    if (Array.isArray(response.data)) return response.data;
+    if (response.data && Array.isArray(response.data.data)) return response.data.data;
+    return [];
   } catch (error) {
     throw new Error('Failed to fetch notifications: ' + error.message);
   }
