@@ -13,7 +13,7 @@ export const UpdateHotel = () => {
   console.log("Updating hotel with ID:", id);
   console.log("Fetch URL:", `/hotels/find/${id}`);
   
-  const { data, loading, error } = useFetch(`/hotels/find/${id}`);
+  const { data, loading, error } = useFetch(`/api/hotelreservation/${id}`);
 
   const [name, setName] = useState("");
   const [title, setTitle] = useState("");

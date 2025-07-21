@@ -3,7 +3,7 @@ import useFetch from "../../hooks/useFetch";
 import { useState, useEffect } from "react";
 
 const HotelCard = () => {
-  const { data: existingHotels, loading: hotelsLoading, error: hotelsError } = useFetch(`/hotels`);
+  const { data: existingHotels, loading: hotelsLoading, error: hotelsError } = useFetch(`/api/hotelreservation/getAll`);
   const [newServices, setNewServices] = useState([]);
   const [servicesLoading, setServicesLoading] = useState(false);
   const [imgError, setImgError] = useState({});
