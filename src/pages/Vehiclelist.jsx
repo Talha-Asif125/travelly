@@ -8,9 +8,10 @@ import axios from "../api/axios";
 import Swal from "sweetalert2";
 
 const Vehiclelist = ({ columns }) => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [data, setData] = useState([]);
 
   // Fetch vehicle data
   useEffect(() => {
@@ -89,7 +90,7 @@ const Vehiclelist = ({ columns }) => {
       
       // Original working endpoint
       const vehiclesResponse = await axios.get("/vehicle");
-      setVehicles(vehiclesResponse.data || []);
+      setData(vehiclesResponse.data || []);
       
     } catch (error) {
       console.error("Error refreshing vehicles:", error);
@@ -181,4 +182,5 @@ const Vehiclelist = ({ columns }) => {
 };
 
 export default Vehiclelist;
+
 

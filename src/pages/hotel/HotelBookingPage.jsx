@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
 import Swal from 'sweetalert2';
 import { AuthContext } from "../../context/authContext";
+import { bookHotel } from '../../services/hotelService';
 
 const HotelBookingPage = () => {
   const [hotel, setHotel] = useState(null);
@@ -24,8 +25,17 @@ const HotelBookingPage = () => {
   const [cnicPhoto, setCnicPhoto] = useState(null);
   const [specialRequests, setSpecialRequests] = useState('');
 
+  const [bookingData, setBookingData] = useState({
+    checkIn: '',
+    checkOut: '',
+    guests: 1,
+    rooms: 1
+  });
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+
   useEffect(() => {
     const fetchHotel = async () => {
+      let response;
       try {
         // Try service API first
         try {
@@ -78,115 +88,33 @@ const HotelBookingPage = () => {
     }
   };
 
-  const handleBooking = async () => {
-    if (!user) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Please Login',
-        text: 'You need to login to make a booking',
-        confirmButtonText: 'Login',
-        confirmButtonColor: '#1976d2'
-      }).then(() => {
-        navigate('/login');
-      });
-      return;
-    }
-
-    if (!checkInDate || !checkOutDate) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please select check-in and check-out dates',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#1976d2'
-      });
-      return;
-    }
-
-    if (!customerPhone.trim()) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please enter your phone number',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#1976d2'
-      });
-      return;
-    }
-
-    if (!cnicNumber.trim()) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please enter your CNIC number',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#1976d2'
-      });
-      return;
-    }
-
-    if (!cnicPhoto) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please upload your CNIC photo',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#1976d2'
-      });
-      return;
-    }
-
+  const handleBooking = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
     try {
-      setSubmitting(true);
-      const token = localStorage.getItem('token');
-      
-      const bookingData = {
-        serviceId: id,
-        checkInDate,
-        checkOutDate,
-        guests: parseInt(guests),
-        customerName: user.name,
-        customerEmail: user.email,
-        customerPhone: customerPhone || '',
-        cnicNumber,
-        cnicPhoto,
-        rooms: parseInt(rooms),
-        specialRequests
-      };
-
-      console.log('Submitting hotel booking:', bookingData);
-
-      const response = await axios.post('/api/hotelreservation/reservation', bookingData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const response = await bookHotel({
+        hotelId: hotel._id,
+        checkIn: bookingData.checkIn,
+        checkOut: bookingData.checkOut,
+        guests: bookingData.guests,
+        rooms: bookingData.rooms
       });
-
-      if (response.data.success) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Booking Successful!',
-          text: 'Your hotel reservation has been submitted successfully! Please wait for confirmation from the hotel.',
-          confirmButtonText: 'View My Bookings',
-          confirmButtonColor: '#1976d2'
-        }).then(() => {
-          navigate('/my-bookings');
+      
+      if (response.success) {
+        setBookingSuccess(true);
+        setBookingData({
+          checkIn: '',
+          checkOut: '',
+          guests: 1,
+          rooms: 1
         });
-      } else {
-        throw new Error(response.data.message || 'Booking failed');
       }
     } catch (error) {
-      console.error('Hotel booking error:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Booking Failed',
-        text: error.response?.data?.message || error.message || 'Something went wrong with your booking',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#1976d2'
-      });
+      console.error('Booking error:', error);
+      setError('Failed to book hotel. Please try again.');
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
