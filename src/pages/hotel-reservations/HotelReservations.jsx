@@ -22,7 +22,7 @@ const HotelReservations = () => {
     const fetchReservations = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("/hotelreservation/getAll");
+        const response = await axios.get("/api/hotelreservation/getAll");
         // Add id field to each reservation for DataGrid
         const reservationsWithId = response.data.map((reservation, index) => ({
           ...reservation,

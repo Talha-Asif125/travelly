@@ -10,10 +10,10 @@ const getAuthHeaders = () => {
 
 export const getNotifications = async () => {
   try {
-    const response = await axios.get(`/notifications`, {
-      headers: getAuthHeaders()
+    const response = await axios.get(`/api/notifications`, {
+      withCredentials: true,
     });
-    return response.data.data || [];
+    return response.data;
   } catch (error) {
     throw new Error('Failed to fetch notifications: ' + error.message);
   }
@@ -21,8 +21,8 @@ export const getNotifications = async () => {
 
 export const markNotificationAsRead = async (notificationId) => {
   try {
-    const response = await axios.post(`/notifications/${notificationId}/read`, {}, {
-      headers: getAuthHeaders()
+    const response = await axios.post(`/api/notifications/${notificationId}/read`, {}, {
+      withCredentials: true,
     });
     return response.data;
   } catch (error) {
@@ -32,8 +32,8 @@ export const markNotificationAsRead = async (notificationId) => {
 
 export const markAllNotificationsAsRead = async () => {
   try {
-    const response = await axios.post(`/notifications/mark-all-read`, {}, {
-      headers: getAuthHeaders()
+    const response = await axios.post(`/api/notifications/mark-all-read`, {}, {
+      withCredentials: true,
     });
     return response.data;
   } catch (error) {

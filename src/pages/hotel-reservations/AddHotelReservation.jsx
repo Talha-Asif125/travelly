@@ -30,7 +30,7 @@ const AddHotelReservation = () => {
   useEffect(() => {
     const fetchHotels = async () => {
       try {
-        const response = await axios.get('/hotels');
+        const response = await axios.get('/api/hotelreservation/getAll');
         setHotels(response.data);
       } catch (err) {
         console.error('Error fetching hotels:', err);

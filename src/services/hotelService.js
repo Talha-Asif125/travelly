@@ -2,7 +2,7 @@ import axios from '../api/axios';
 
 export const searchHotels = async (searchParams) => {
   try {
-    const response = await axios.get(`/hotels/search`, { params: searchParams });
+    const response = await axios.get(`/api/hotelreservation/getAll`); // No search params supported in backend, fallback to getAll
     return response.data;
   } catch (error) {
     console.error('Hotel search error:', error);
@@ -12,7 +12,7 @@ export const searchHotels = async (searchParams) => {
 
 export const getHotelDetails = async (hotelId) => {
   try {
-    const response = await axios.get(`/hotels/details/${hotelId}`);
+    const response = await axios.get(`/api/hotelreservation/${hotelId}`);
     return response.data;
   } catch (error) {
     console.error('Hotel details error:', error);
@@ -22,7 +22,7 @@ export const getHotelDetails = async (hotelId) => {
 
 export const bookHotel = async (bookingData) => {
   try {
-    const response = await axios.post(`/hotel-reservations`, bookingData);
+    const response = await axios.post(`/api/hotelreservation/reservation`, bookingData);
     return response.data;
   } catch (error) {
     console.error('Hotel booking error:', error);
@@ -32,7 +32,7 @@ export const bookHotel = async (bookingData) => {
 
 export const getPopularHotels = async () => {
   try {
-    const response = await axios.get(`/hotels/popular`);
+    const response = await axios.get(`/api/hotelreservation/getAll`); // No popular endpoint, fallback to getAll
     return response.data;
   } catch (error) {
     console.error('Popular hotels error:', error);

@@ -44,7 +44,7 @@ const HotelBookingPage = () => {
         }
 
         // Fallback to old hotel API
-        response = await axios.get(`/hotels/find/${id}`);
+        response = await axios.get(`/api/hotelreservation/${id}`);
         setHotel({
           ...response.data,
           price: response.data.cheapestPrice,
