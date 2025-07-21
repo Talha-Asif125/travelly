@@ -1,15 +1,12 @@
 import axios from 'axios';
 
-const instance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000', // removed /api
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
+const api = axios.create({
+  baseURL: 'https://travelly-backend-27bn.onrender.com',
+  // Make sure baseURL doesn't end with /api if routes include it
 });
 
 // Add request interceptor to include auth token
-instance.interceptors.request.use(
+api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -22,4 +19,7 @@ instance.interceptors.request.use(
   }
 );
 
-export default instance;
+export default api;
+
+
+
