@@ -1,7 +1,5 @@
 import axios from '../api/axios';
 
-// Remove API_BASE_URL, use relative paths
-
 // Create axios instance with interceptors for auth
 const api = axios.create({
   baseURL: API_BASE_URL,
