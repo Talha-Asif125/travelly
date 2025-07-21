@@ -26,14 +26,14 @@ const Hero3 = () => {
                   <div className="py-3 sm:py-4">
                     <img
                       src="https://pakistanhouse.net/wp-content/uploads/2022/07/ef2kn5-scaled-1200x900.jpg"
-                      alt=""
+                      alt="Pakistan travel destination 1"
                       className="w-full rounded-2xl"
                     />
                   </div>
                   <div className="py-3 sm:py-4">
                     <img
                       src="https://dairysciencepark.org/wp-content/uploads/2024/06/maxresdefault-1024x576.jpg"
-                      alt="Pakistan travel destination"
+                      alt="Pakistan travel destination 2"
                       className="w-full rounded-2xl"
                     />
                   </div>
@@ -42,7 +42,7 @@ const Hero3 = () => {
                   <div className="relative z-10 my-4">
                     <img
                       src="https://pakistantravelplaces.com/wp-content/uploads/2022/02/4.jpg"
-                      alt=""
+                      alt="Pakistan travel destination 3"
                       className="w-full rounded-2xl"
                     />
                   </div>

@@ -6,8 +6,6 @@
 import axios from '../api/axios';
 import SessionService from './sessionService';
 
-// Remove API_BASE_URL, use relative paths
-
 class AuthService {
   // Token management
   static getToken() {

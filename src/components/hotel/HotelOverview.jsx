@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "../../api/axios";
-import { Link, useParams } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const HotelOverview = () => {
@@ -135,7 +134,7 @@ const HotelOverview = () => {
             !imgError[image] ? (
               <img
                 src={`https://travelly-backend-27bn.onrender.com/api/hotels/images/${image}`}
-                alt={`Hotel Image ${index}`}
+                alt={`Hotel ${index}`}
                 key={index}
                 className="w-full h-64 object-cover rounded-lg mb-2"
                 onError={() => handleImageError(image)}
@@ -143,7 +142,7 @@ const HotelOverview = () => {
             ) : (
               <img
                 src="https://via.placeholder.com/250x250?text=Image+Not+Available"
-                alt={`Placeholder ${index}`}
+                alt={`Placeholder for Hotel ${index}`}
                 key={index}
                 className="w-full h-64 object-cover rounded-lg mb-2"
               />

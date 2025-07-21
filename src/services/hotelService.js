@@ -1,7 +1,5 @@
 import axios from '../api/axios';
 
-// Remove API_BASE_URL, use relative paths
-
 export const searchHotels = async (searchParams) => {
   try {
     const response = await axios.get(`/hotels/search`, { params: searchParams });
@@ -14,7 +12,7 @@ export const searchHotels = async (searchParams) => {
 
 export const getHotelDetails = async (hotelId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/hotels/details/${hotelId}`);
+    const response = await axios.get(`/hotels/details/${hotelId}`);
     return response.data;
   } catch (error) {
     console.error('Hotel details error:', error);
@@ -24,7 +22,7 @@ export const getHotelDetails = async (hotelId) => {
 
 export const bookHotel = async (bookingData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/hotel-reservations`, bookingData);
+    const response = await axios.post(`/hotel-reservations`, bookingData);
     return response.data;
   } catch (error) {
     console.error('Hotel booking error:', error);
@@ -34,7 +32,7 @@ export const bookHotel = async (bookingData) => {
 
 export const getPopularHotels = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/hotels/popular`);
+    const response = await axios.get(`/hotels/popular`);
     return response.data;
   } catch (error) {
     console.error('Popular hotels error:', error);

@@ -1,7 +1,5 @@
 import axios from '../api/axios';
 
-// Remove API_BASE_URL, use relative paths
-
 export const getAllTours = async () => {
   try {
     const response = await axios.get(`/tour`);

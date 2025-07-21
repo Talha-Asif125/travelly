@@ -20,7 +20,7 @@ const Profile = () => {
             <img
               className="w-48 h-48 rounded-full shadow-lg border-4 border-blue-500 object-cover"
               src={`${user.img}`}
-              alt=""
+              alt="User profile"
             />
           </div>
         </div>

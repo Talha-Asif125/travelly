@@ -215,7 +215,7 @@ const PostCard = ({ post, onPostUpdated, onPostDeleted }) => {
           <div className="mb-4">
             <img
               src={`https://travelly-backend-27bn.onrender.com/api/community/images/${post.image}`}
-              alt="Post attachment"
+              alt="Community post attachment"
               className="w-full max-h-96 object-cover rounded-lg border"
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -358,7 +358,7 @@ const PostCard = ({ post, onPostUpdated, onPostDeleted }) => {
                       <div className="mt-2">
                         <img
                           src={`https://travelly-backend-27bn.onrender.com/api/community/images/${reply.image}`}
-                          alt="Reply attachment"
+                          alt="Community reply attachment"
                           className="max-w-full h-32 object-cover rounded-lg border reply-image cursor-pointer"
                           onError={(e) => {
                             e.target.style.display = 'none';

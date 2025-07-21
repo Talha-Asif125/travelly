@@ -16,13 +16,13 @@ const VehicleHero = () => {
             <p className='text-sm md:text-1xl  lg:max-w-[580px] md:max-w-[900px] text-justify'>Experience hassle-free vehicle reservations with our intuitive web app. Whether you're planning a road trip, a business trip, or simply need a reliable ride, our platform offers a vast selection of vehicles to choose from. With easy booking, flexible pickup and return options, and the ability to customize your reservation with add-ons like drivers, our web app ensures a seamless and convenient experience. Say goodbye to tedious reservation processes and enjoy the freedom of reserving your perfect vehicle with just a few clicks. Start your journey with our vehicle reservation web app today.</p>
             
             <div className='flex py-4 items-center justify-center lg:justify-start'>
-                <img src={evImg} className='w-14 h-14' alt='evlogo'/>
+                <img src={evImg} className='w-14 h-14' alt='Electric Vehicle Logo'/>
                 <h2 className='py-4 font-bold text-auto md:text-2xl px-4 '>Try EV and Save Atmosphere</h2>
             </div>
         </div>
 
         <div>
-            <img src={carMainImg} className='lg:w-[600px] md:w-[650px] ' alt='mainCarImage'/>
+            <img src={carMainImg} className='lg:w-[600px] md:w-[650px] ' alt='Main Car'/>
         </div>
     </div>
     

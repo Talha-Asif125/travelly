@@ -5,13 +5,13 @@ import { useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/authContext";
 import HotelReservationForm from "../forms/HotelReservationForm";
 import ReservationSuccessModal from "../ui/ReservationSuccessModal";
-import { 
-  FaStar, 
-  FaStarHalfAlt, 
-  FaRegStar, 
-  FaWifi, 
-  FaCar, 
-  FaUtensils, 
+import {
+  FaStar,
+  FaStarHalfAlt,
+  FaRegStar,
+  FaWifi,
+  FaCar,
+  FaUtensils,
   FaDumbbell,
   FaSwimmingPool,
   FaCoffee,
@@ -36,6 +36,7 @@ import {
   FaEnvelope,
   FaClock
 } from 'react-icons/fa';
+// Removed unused icon imports
 
 const HotelDetailsView = () => {
   const [hotelData, setHotelData] = useState(null);

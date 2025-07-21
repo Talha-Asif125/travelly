@@ -16,7 +16,6 @@ const HotelView = () => {
   const { id } = useParams();
   const {user}=useContext(AuthContext);
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
   const [openReservationForm, setOpenReservationForm] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [reservationData, setReservationData] = useState(null);
@@ -53,14 +52,6 @@ const checkOutDate = new Date(date.checkOutDate);
       });
   }, []);
 
-  const handleClick = () => {
-    if(user) {
-      setOpenReservationForm(true);
-    } else {
-      navigate("/login");
-    }
-  };
-
   const handleReservationSuccess = (reservation) => {
     setReservationData(reservation);
     setShowSuccessModal(true);
@@ -80,7 +71,7 @@ const checkOutDate = new Date(date.checkOutDate);
         <div className="flex justify-center items-center w-full flex-col lg:flex-row pt-12 lg:pt-0">
           <img
             src={`https://travelly-backend-27bn.onrender.com/api/hotels/images/${data.HotelImg}`}
-            alt="Hotel Image"
+            alt="Hotel"
             className=" w-[320px] md:w-[700px]  lg:w-[800px] rounded-lg mb-10"
           />
 
@@ -149,7 +140,7 @@ const checkOutDate = new Date(date.checkOutDate);
     data.HotelImgs.map((image, index) => (
       <img
         src={`https://travelly-backend-27bn.onrender.com/api/hotels/images/${image}`}
-        alt={`Hotel Image ${index}`}
+        alt={`Hotel ${index}`}
         key={index}
         class="ml-10 w-64 h-64 rounded-lg mb-2"
       />

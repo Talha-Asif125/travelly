@@ -133,7 +133,7 @@ const HotelReservations = () => {
           {params.row.hotelImage ? (
             <img 
               src={`https://travelly-backend-27bn.onrender.com/api/hotels/images/${params.row.hotelImage}`}
-              alt="Hotel"
+              alt="Hotel reservation"
               className="w-8 h-8 rounded-full mr-2"
             />
           ) : null}

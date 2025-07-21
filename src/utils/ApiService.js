@@ -5,8 +5,6 @@ import AuthService from '../services/authService';
  * Handles all HTTP requests with consistent patterns
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://travelly-backend-27bn.onrender.com/api';
-
 class ApiService {
   /**
    * Handle API response
@@ -50,7 +48,7 @@ class ApiService {
    */
   static async get(endpoint, options = {}) {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
           ...AuthService.getHeaders(),
@@ -77,7 +75,7 @@ class ApiService {
     try {
       const isFormData = data instanceof FormData;
       
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           ...(isFormData ? AuthService.getAuthHeaders() : AuthService.getHeaders()),
@@ -105,7 +103,7 @@ class ApiService {
     try {
       const isFormData = data instanceof FormData;
       
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: 'PUT',
         headers: {
           ...(isFormData ? AuthService.getAuthHeaders() : AuthService.getHeaders()),
@@ -130,7 +128,7 @@ class ApiService {
    */
   static async delete(endpoint, options = {}) {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: 'DELETE',
         headers: {
           ...AuthService.getHeaders(),
@@ -157,7 +155,7 @@ class ApiService {
     try {
       const isFormData = data instanceof FormData;
       
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: 'PATCH',
         headers: {
           ...(isFormData ? AuthService.getAuthHeaders() : AuthService.getHeaders()),
@@ -213,7 +211,7 @@ class ApiService {
           reject(new Error('Upload failed'));
         });
         
-        xhr.open('POST', `${API_BASE_URL}${endpoint}`);
+        xhr.open('POST', endpoint);
         
         // Set auth header
         const token = AuthService.getToken();
@@ -236,7 +234,7 @@ class ApiService {
    */
   static async download(endpoint, filename) {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: 'GET',
         headers: AuthService.getAuthHeaders(),
         credentials: 'include'

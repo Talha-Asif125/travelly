@@ -99,7 +99,7 @@ const HadminView = () => {
             {mainImage && (
               <img
                 src={`https://travelly-backend-27bn.onrender.com/api/hotels/images/${mainImage}`}
-                alt="Hotel"
+                alt="Hotel main"
                 className="w-full rounded-lg mb-10 shadow-lg max-h-[500px] object-cover"
               />
             )}
@@ -111,7 +111,7 @@ const HadminView = () => {
                 {data.HotelImgs && data.HotelImgs.map((image, index) => (
                   <img
                     src={`https://travelly-backend-27bn.onrender.com/api/hotels/images/${image}`}
-                    alt={`Hotel ${index + 1}`}
+                    alt={`Hotel image ${index + 1}`}
                     key={index}
                     className="w-full h-48 object-cover rounded-lg shadow-md"
                   />

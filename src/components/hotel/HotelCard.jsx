@@ -126,7 +126,7 @@ const HotelCard = () => {
                             ? (item.images?.[0] || "https://via.placeholder.com/400x250?text=Hotel+Image")
                             : `https://travelly-backend-27bn.onrender.com/api/hotels/images/${item.HotelImgs[0]}`
                         }
-                        alt={item.name}
+                        alt={`Hotel ${item.name}`}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         onError={() => handleImageError(item._id || item.id)}
                       />

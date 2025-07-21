@@ -1,7 +1,5 @@
 import axios from '../api/axios';
 
-// Remove API_BASE_URL, use relative paths
-
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
   return {
