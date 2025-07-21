@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import axios from "../../api/axios";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/authContext";
@@ -161,7 +161,7 @@ const HotelDetailsView = () => {
       } catch (error) {
         // If hotel not found, try services API
         try {
-          response = await axios.get(`https://travelly-backend-27bn.onrender.com/api/services/details/${id}`);
+          response = await axios.get(`/services/details/${id}`);
           if (response.data.success) {
             setHotelData({
               ...response.data.data,

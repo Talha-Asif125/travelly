@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BiRestaurant } from "react-icons/bi";
 import { MdLocationOn, MdRestaurantMenu, MdPhone, MdPeople, MdTableRestaurant } from "react-icons/md";
+import api from '../api/axios';
 
 const RestaurantAdminDetails = () => {
   const { id } = useParams();
@@ -13,14 +14,8 @@ const RestaurantAdminDetails = () => {
   useEffect(() => {
     const fetchRestaurant = async () => {
       try {
-        const response = await fetch('/api/restaurant/find-resturent-by-id', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ id })
-        });
-        const result = await response.json();
+        const response = await api.post('/restaurant/find-resturent-by-id', { id });
+        const result = response.data;
         
         if (result && (Array.isArray(result) ? result.length > 0 : result._id)) {
           const restaurantData = Array.isArray(result) ? result[0] : result;

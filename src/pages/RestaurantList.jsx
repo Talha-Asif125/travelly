@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { BiRestaurant } from "react-icons/bi";
 import { MdLocationOn, MdRestaurantMenu } from "react-icons/md";
+import api from '../api/axios';
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -22,8 +23,8 @@ const RestaurantList = () => {
         
         // Fetch owner-added restaurants from services API
         try {
-          const serviceResponse = await fetch('https://travelly-backend-27bn.onrender.com/api/services/restaurant');
-          const serviceResult = await serviceResponse.json();
+          const serviceResponse = await api.get('/services/restaurant');
+          const serviceResult = serviceResponse.data;
           
           if (serviceResult.success && serviceResult.data) {
             allRestaurants = [...allRestaurants, ...serviceResult.data];
@@ -39,19 +40,11 @@ const RestaurantList = () => {
           
           // Try to get all restaurants first (if there's an endpoint for it)
           try {
-            const allAdminResponse = await fetch('https://travelly-backend-27bn.onrender.com/api/restaurant', {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            });
-            
-            if (allAdminResponse.ok) {
-              const allAdminResult = await allAdminResponse.json();
-              if (Array.isArray(allAdminResult)) {
-                adminRestaurants = allAdminResult;
-                console.log('Loaded all admin restaurants via GET:', adminRestaurants.length);
-              }
+            const allAdminResponse = await api.get('/restaurant');
+            const allAdminResult = allAdminResponse.data;
+            if (Array.isArray(allAdminResult)) {
+              adminRestaurants = allAdminResult;
+              console.log('Loaded all admin restaurants via GET:', adminRestaurants.length);
             }
           } catch (getAllError) {
             console.log('GET all restaurants not available, trying limited endpoint');
@@ -60,14 +53,8 @@ const RestaurantList = () => {
           // If we didn't get restaurants from the GET endpoint, try the limited one
           if (adminRestaurants.length === 0) {
             try {
-              const adminResponse = await fetch('https://travelly-backend-27bn.onrender.com/api/restaurant/find-first-five-resturents', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({})
-              });
-              const adminResult = await adminResponse.json();
+              const adminResponse = await api.post('/restaurant/find-first-five-resturents', {});
+              const adminResult = adminResponse.data;
               
               // Handle different response structures
               if (Array.isArray(adminResult)) {

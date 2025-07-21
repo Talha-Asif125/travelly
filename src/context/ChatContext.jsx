@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContext } from './authContext';
-import axios from 'axios';
+import axios from '../api/axios';
 import { io } from 'socket.io-client';
 
 export const ChatContext = createContext();
@@ -14,6 +14,7 @@ export const ChatContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (user) {
+      // TODO: Move socket URL to environment variable
       const newSocket = io('https://travelly-backend-27bn.onrender.com');
       setSocket(newSocket);
 

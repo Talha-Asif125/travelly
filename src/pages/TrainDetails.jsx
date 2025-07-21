@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
 import Swal from "sweetalert2";
+import api from '../../api/axios';
 
 const TrainDetails = () => {
   const { id } = useParams();
@@ -23,8 +24,8 @@ const TrainDetails = () => {
   useEffect(() => {
     const fetchService = async () => {
       try {
-        const response = await fetch(`/api/services/details/${id}`);
-        const result = await response.json();
+        const response = await api.get(`/services/details/${id}`);
+        const result = response.data;
         
         if (result.success) {
           setService(result.data);
@@ -98,7 +99,6 @@ const TrainDetails = () => {
 
     try {
       setSubmitting(true);
-      const token = localStorage.getItem('token');
       
       const bookingData = {
         serviceId: id,
@@ -113,16 +113,8 @@ const TrainDetails = () => {
 
       console.log('Submitting train booking:', bookingData);
 
-      const response = await fetch('/api/reservations', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(bookingData)
-      });
-
-      const result = await response.json();
+      const response = await api.post('/reservations', bookingData);
+      const result = response.data;
 
       if (result.success) {
         Swal.fire({

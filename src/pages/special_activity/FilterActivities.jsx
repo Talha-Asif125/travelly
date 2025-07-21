@@ -3,6 +3,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../../assets/images/event.jpg';
+import api from '../../api/axios';
 
 const Activity = ({ id, name, description, startTime, endTime, image }) => {
   const navigate = useNavigate();
@@ -82,8 +83,8 @@ const FilterActivities = () => {
       
       // Try to get activities from the services API (owner-added activities)
       try {
-        const servicesResponse = await fetch('https://travelly-backend-27bn.onrender.com/api/services/event');
-        const servicesResult = await servicesResponse.json();
+        const servicesResponse = await api.get('/services/event');
+        const servicesResult = servicesResponse.data;
         
         if (servicesResult.success && servicesResult.data) {
           // Format service activities to match the activity structure
@@ -113,9 +114,9 @@ const FilterActivities = () => {
       
       // Try to get approved activities from the activities API
       try {
-        const response = await fetch('https://travelly-backend-27bn.onrender.com/api/activities/approved');
-        if (response.ok) {
-          const data = await response.json();
+        const response = await api.get('/activities/approved');
+        if (response.data) {
+          const data = response.data;
           if (data.success && data.activities) {
             allActivities = [...allActivities, ...data.activities];
           }
@@ -143,11 +144,11 @@ const FilterActivities = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(
-        `/api/activities/filter?type=${activityType}&searchQuery=${searchQuery}&startDate=${startDate}&startTime=${startTime}&endDate=${endDate}&endTime=${endTime}`
+      const response = await api.get(
+        `/activities/filter?type=${activityType}&searchQuery=${searchQuery}&startDate=${startDate}&startTime=${startTime}&endDate=${endDate}&endTime=${endTime}`
       );
       
-      const data = await response.json();
+      const data = response.data;
       
       if (data.activities) {
         setActivities(data.activities);

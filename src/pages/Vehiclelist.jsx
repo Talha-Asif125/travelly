@@ -23,7 +23,7 @@ const Vehiclelist = ({ columns }) => {
         
         // Fetch traditional vehicles from /api/vehicle
         try {
-          const vehiclesResponse = await axios.get("https://travelly-backend-27bn.onrender.com/api/vehicle");
+          const vehiclesResponse = await axios.get("/vehicle");
           console.log("Traditional vehicles response:", vehiclesResponse.data);
           const traditionalVehicles = vehiclesResponse.data || [];
           allVehicles = [...traditionalVehicles];
@@ -92,7 +92,7 @@ const Vehiclelist = ({ columns }) => {
       
       // Fetch traditional vehicles
       try {
-        const vehiclesResponse = await axios.get("https://travelly-backend-27bn.onrender.com/api/vehicle");
+        const vehiclesResponse = await axios.get("/vehicle");
         console.log("Traditional vehicles refresh:", vehiclesResponse.data);
         allVehicles = [...(vehiclesResponse.data || [])];
       } catch (vehicleErr) {

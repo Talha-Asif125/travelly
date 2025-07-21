@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { BiPlane } from "react-icons/bi";
 import { MdLocationOn, MdFlight } from "react-icons/md";
+import api from '../../api/axios';
 
 const FlightList = () => {
   const [flights, setFlights] = useState([]);
@@ -16,8 +17,8 @@ const FlightList = () => {
     const fetchFlights = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://travelly-backend-27bn.onrender.com/api/services/flight');
-        const result = await response.json();
+        const response = await api.get('/services/flight');
+        const result = response.data;
         
         if (result.success) {
           const flightServices = result.data || [];

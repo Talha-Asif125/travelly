@@ -57,6 +57,7 @@ import { useNavigate } from 'react-router-dom';
 import { notificationManager, NotificationTypes } from '../services/notificationService';
 import { AuthContext } from '../context/authContext';
 import ServiceEditModal from '../components/ServiceEditModal';
+import api from '../api/axios';
 
 const ServiceProviderDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -112,10 +113,8 @@ const ServiceProviderDashboard = () => {
 
   const loadProviderStatus = async () => {
     try {
-      const response = await fetch('/api/provider/services/status/me', {
-        headers: getAuthHeaders()
-      });
-      const result = await response.json();
+      const response = await api.get('/provider/services/status/me');
+      const result = response.data;
       
       if (result.success) {
         setProviderStatus(result.data);
@@ -137,12 +136,8 @@ const ServiceProviderDashboard = () => {
       setLoading(true);
       console.log('Attempting to repair provider data...');
       
-      const response = await fetch('/api/provider/services/repair', {
-        method: 'POST',
-        headers: getAuthHeaders()
-      });
-      
-      const result = await response.json();
+      const response = await api.get('/provider/services/repair');
+      const result = response.data;
       console.log('Repair result:', result);
       
       if (result.success) {
@@ -177,26 +172,17 @@ const ServiceProviderDashboard = () => {
       // Load all services from provider services API (includes tours, vehicles, etc.)
       try {
         const serviceType = selectedServiceType === 'all' ? '' : selectedServiceType;
-        const servicesResponse = await fetch(`https://travelly-backend-27bn.onrender.com/api/provider/services?type=${serviceType}`, {
-          headers: getAuthHeaders()
-        });
+        const servicesResponse = await api.get(`/provider/services?type=${serviceType}`);
         
         console.log('Loading services for type:', serviceType);
         
-        if (servicesResponse.ok) {
-          const servicesResult = await servicesResponse.json();
-          console.log('Provider services response:', servicesResult);
-          
-          if (servicesResult.success) {
-            const userServices = (servicesResult.data || []).map(service => ({
-              ...service,
-              status: service.status || 'active'
-            }));
-            allServices = [...allServices, ...userServices];
-            console.log('User services loaded:', userServices.length);
-          }
-        } else {
-          console.error('Services API response not ok:', servicesResponse.status);
+        if (servicesResponse.data.success) {
+          const userServices = (servicesResponse.data.data || []).map(service => ({
+            ...service,
+            status: service.status || 'active'
+          }));
+          allServices = [...allServices, ...userServices];
+          console.log('User services loaded:', userServices.length);
         }
       } catch (error) {
         console.error('Error loading provider services:', error);
@@ -205,18 +191,10 @@ const ServiceProviderDashboard = () => {
       // Also load traditional tours if tour type is selected or all services
       if (selectedServiceType === 'tour' || selectedServiceType === 'all') {
         try {
-          const toursResponse = await fetch('/api/tours', {
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
+          const toursResponse = await api.get('/tours');
           
-          if (toursResponse.ok) {
-            const toursData = await toursResponse.json();
-            console.log('Traditional tours data:', toursData);
-            
-            // Filter tours by current user
-            const userTours = (toursData || []).filter(tour => 
+          if (toursResponse.data.success) {
+            const userTours = (toursResponse.data.data || []).filter(tour => 
               tour.currentUser === user?.email
             ).map(tour => ({
               ...tour,
@@ -247,10 +225,8 @@ const ServiceProviderDashboard = () => {
 
   const loadReservations = async () => {
     try {
-      const response = await fetch('/api/reservations/provider', {
-        headers: getAuthHeaders()
-      });
-      const result = await response.json();
+      const response = await api.get('/reservations/provider');
+      const result = response.data;
       
       if (result.success) {
         setReservations(result.data || []);
@@ -325,28 +301,20 @@ const ServiceProviderDashboard = () => {
       
       if (service && service.type === 'tour') {
         // Delete from tours API
-        const response = await fetch(`/api/tours/${serviceId}`, { 
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
+        const response = await api.delete(`/tours/${serviceId}`);
         
-        if (response.ok) {
+        if (response.data.success) {
           loadServices();
           alert('Tour deleted successfully!');
         } else {
-          const result = await response.json();
+          const result = response.data;
           setError(result.message || 'Failed to delete tour');
         }
       } else {
         // Delete from provider services API
-        const response = await fetch(`/api/provider/services/${serviceId}`, { 
-          method: 'DELETE',
-          headers: getAuthHeaders()
-        });
+        const response = await api.delete(`/provider/services/${serviceId}`);
         
-        const result = await response.json();
+        const result = response.data;
         if (result.success) {
           loadServices();
         } else {
@@ -486,18 +454,19 @@ const ServiceProviderDashboard = () => {
         ? `/api/tours/${selectedService._id}`
         : '/api/tours';
 
-      const response = await fetch(url, {
+      const response = await api.request({
         method,
+        url,
+        data: tourData,
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(tourData)
+        }
       });
 
-      const result = await response.json();
+      const result = response.data;
       console.log('Tour save result:', result);
       
-      if (response.ok && (result.status === "Success" || result.message)) {
+      if (response.data.success && (result.status === "Success" || result.message)) {
         setOpenServiceDialog(false);
         loadServices();
         setError('');
@@ -545,10 +514,11 @@ const ServiceProviderDashboard = () => {
         serviceDataToSend.images = processedImages;
       }
 
-      const response = await fetch(url, {
+      const response = await api.request({
         method,
-        headers: getAuthHeaders(),
-        body: JSON.stringify(serviceDataToSend)
+        url,
+        data: serviceDataToSend,
+        headers: getAuthHeaders()
       });
 
       // Log response details for debugging
@@ -557,7 +527,7 @@ const ServiceProviderDashboard = () => {
       
       let result;
       try {
-        result = await response.json();
+        result = response.data;
       } catch (parseError) {
         console.error('Error parsing response JSON:', parseError);
         setError('Server returned invalid response. Please check console for details.');
@@ -609,34 +579,22 @@ const ServiceProviderDashboard = () => {
       
       if (reservation.isLegacyVehicle) {
         // Handle legacy vehicle reservations
-        response = await fetch(`/api/vehiclereservation/${reservation._id}/status`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ 
-            status: 'confirmed'
-          })
+        response = await api.put(`/vehiclereservation/${reservation._id}/status`, { 
+          status: 'confirmed'
         });
       } else if (reservation.isTourReservation) {
         // Handle tour reservations
-        response = await fetch(`/api/tours/reservations/${reservation._id}/status`, {
-          method: 'PATCH',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ 
-            status: 'confirmed'
-          })
+        response = await api.patch(`/tours/reservations/${reservation._id}/status`, { 
+          status: 'confirmed'
         });
       } else {
         // Handle new service reservations
-        response = await fetch(`/api/reservations/${reservation._id}/status`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ 
-            status: 'confirmed'
-          })
+        response = await api.put(`/reservations/${reservation._id}/status`, { 
+          status: 'confirmed'
         });
       }
 
-      const result = await response.json();
+      const result = response.data;
       if (result.success) {
         // Send notification to customer
         try {
@@ -674,37 +632,25 @@ const ServiceProviderDashboard = () => {
       
       if (selectedReservation.isLegacyVehicle) {
         // Handle legacy vehicle reservations
-        response = await fetch(`/api/vehiclereservation/${selectedReservation._id}/status`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ 
-            status: 'cancelled',
-            rejectionReason 
-          })
+        response = await api.put(`/vehiclereservation/${selectedReservation._id}/status`, { 
+          status: 'cancelled',
+          rejectionReason 
         });
       } else if (selectedReservation.isTourReservation) {
         // Handle tour reservations
-        response = await fetch(`/api/tours/reservations/${selectedReservation._id}/status`, {
-          method: 'PATCH',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ 
-            status: 'cancelled',
-            rejectionReason 
-          })
+        response = await api.patch(`/tours/reservations/${selectedReservation._id}/status`, { 
+          status: 'cancelled',
+          rejectionReason 
         });
       } else {
         // Handle new service reservations
-        response = await fetch(`/api/reservations/${selectedReservation._id}/status`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ 
-            status: 'cancelled',
-            rejectionReason 
-          })
+        response = await api.put(`/reservations/${selectedReservation._id}/status`, { 
+          status: 'cancelled',
+          rejectionReason 
         });
       }
 
-      const result = await response.json();
+      const result = response.data;
       if (result.success) {
         // Send notification to customer
         try {

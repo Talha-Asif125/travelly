@@ -1,4 +1,5 @@
-import AuthService from '../services/authService';
+import axios from 'axios';
+import api from '../api/axios';
 
 /**
  * Centralized API Service
@@ -48,17 +49,8 @@ class ApiService {
    */
   static async get(endpoint, options = {}) {
     try {
-      const response = await fetch(endpoint, {
-        method: 'GET',
-        headers: {
-          ...AuthService.getHeaders(),
-          ...options.headers
-        },
-        credentials: 'include',
-        ...options
-      });
-      
-      return await this.handleResponse(response);
+      const response = await api.get(endpoint, options);
+      return response.data;
     } catch (error) {
       console.error(`GET ${endpoint} error:`, error);
       throw error;
@@ -75,18 +67,8 @@ class ApiService {
     try {
       const isFormData = data instanceof FormData;
       
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          ...(isFormData ? AuthService.getAuthHeaders() : AuthService.getHeaders()),
-          ...options.headers
-        },
-        credentials: 'include',
-        body: isFormData ? data : JSON.stringify(data),
-        ...options
-      });
-      
-      return await this.handleResponse(response);
+      const response = await api.post(endpoint, data, options);
+      return response.data;
     } catch (error) {
       console.error(`POST ${endpoint} error:`, error);
       throw error;
@@ -103,18 +85,8 @@ class ApiService {
     try {
       const isFormData = data instanceof FormData;
       
-      const response = await fetch(endpoint, {
-        method: 'PUT',
-        headers: {
-          ...(isFormData ? AuthService.getAuthHeaders() : AuthService.getHeaders()),
-          ...options.headers
-        },
-        credentials: 'include',
-        body: isFormData ? data : JSON.stringify(data),
-        ...options
-      });
-      
-      return await this.handleResponse(response);
+      const response = await api.put(endpoint, data, options);
+      return response.data;
     } catch (error) {
       console.error(`PUT ${endpoint} error:`, error);
       throw error;
@@ -128,17 +100,8 @@ class ApiService {
    */
   static async delete(endpoint, options = {}) {
     try {
-      const response = await fetch(endpoint, {
-        method: 'DELETE',
-        headers: {
-          ...AuthService.getHeaders(),
-          ...options.headers
-        },
-        credentials: 'include',
-        ...options
-      });
-      
-      return await this.handleResponse(response);
+      const response = await api.delete(endpoint, options);
+      return response.data;
     } catch (error) {
       console.error(`DELETE ${endpoint} error:`, error);
       throw error;
@@ -155,18 +118,8 @@ class ApiService {
     try {
       const isFormData = data instanceof FormData;
       
-      const response = await fetch(endpoint, {
-        method: 'PATCH',
-        headers: {
-          ...(isFormData ? AuthService.getAuthHeaders() : AuthService.getHeaders()),
-          ...options.headers
-        },
-        credentials: 'include',
-        body: isFormData ? data : JSON.stringify(data),
-        ...options
-      });
-      
-      return await this.handleResponse(response);
+      const response = await api.patch(endpoint, data, options);
+      return response.data;
     } catch (error) {
       console.error(`PATCH ${endpoint} error:`, error);
       throw error;

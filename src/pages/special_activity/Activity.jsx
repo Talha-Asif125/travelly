@@ -285,9 +285,8 @@ const Activity = () => {
                     onClick={async () => {
                       console.log('Testing direct service API call...');
                       try {
-                        const testResponse = await fetch(`/api/services/details/${id}`);
-                        const testData = await testResponse.json();
-                        console.log('Direct fetch test:', testResponse.status, testData);
+                        const testResponse = await axios.get(`/services/details/${id}`);
+                        console.log('Direct fetch test:', testResponse.status, testResponse.data);
                       } catch (err) {
                         console.log('Direct fetch error:', err);
                       }

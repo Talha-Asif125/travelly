@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/authContext';
 import Swal from 'sweetalert2';
 import AdminBackButton from '../components/AdminBackButton';
+import api from '../api/axios';
 
 const TourServiceCreate = () => {
   const navigate = useNavigate();
@@ -134,16 +135,8 @@ const TourServiceCreate = () => {
         carImage
       };
 
-      const response = await fetch('https://travelly-backend-27bn.onrender.com/api/provider/services', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(serviceData)
-      });
-
-      const result = await response.json();
+      const response = await api.post('/provider/services', serviceData);
+      const result = response.data;
       console.log("Service creation result:", result);
 
       if (result.success) {
@@ -430,3 +423,6 @@ const TourServiceCreate = () => {
 };
 
 export default TourServiceCreate; 
+
+
+

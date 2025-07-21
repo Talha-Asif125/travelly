@@ -1,20 +1,19 @@
 import axios from 'axios';
-import SessionService from '../services/sessionService';
 
-// Create axios instance
-const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://travelly-backend-27bn.onrender.com/api',
-  withCredentials: true // This will send cookies with requests
+const instance = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
 });
 
-// Request interceptor to add authorization header
-api.interceptors.request.use(
+// Add request interceptor to include auth token
+instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      // Reset session timer on API activity (user is active)
-      SessionService.resetSessionTimer();
     }
     return config;
   },
@@ -23,20 +22,4 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle errors
-api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (error.response?.status === 401) {
-      // Token is invalid or expired
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
-
-export default api; 
+export default instance;

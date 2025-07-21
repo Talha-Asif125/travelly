@@ -69,6 +69,7 @@ import {
   VerifiedUser as VerifiedUserIcon,
   GppMaybe as GppMaybeIcon
 } from '@mui/icons-material';
+import api from '../api/axios';
 
 const AdminDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -222,16 +223,8 @@ const AdminDashboard = () => {
   const loadProviderRequests = async () => {
     try {
       console.log('Loading provider requests...');
-      const response = await fetch('/api/admin/service-provider-requests', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      console.log('Response status:', response.status);
-      const result = await response.json();
-      console.log('Provider requests result:', result);
+      const response = await api.get('/admin/service-provider-requests');
+      const result = response.data;
       
       if (result.success) {
         setProviderRequests(result.data);
@@ -246,13 +239,8 @@ const AdminDashboard = () => {
 
   const loadUsers = async () => {
     try {
-      const response = await fetch(`/api/admin/users?search=${searchTerm}&userType=${filterType}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      const result = await response.json();
+      const response = await api.get(`/admin/users?search=${searchTerm}&userType=${filterType}`);
+      const result = response.data;
       
       if (result.success) {
         setUsers(result.data);
@@ -266,13 +254,8 @@ const AdminDashboard = () => {
 
   const loadServices = async () => {
     try {
-      const response = await fetch(`/api/admin/services?search=${searchTerm}&serviceType=${filterType}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      const result = await response.json();
+      const response = await api.get(`/admin/services?search=${searchTerm}&serviceType=${filterType}`);
+      const result = response.data;
       
       if (result.success) {
         setServices(result.data);
@@ -286,13 +269,8 @@ const AdminDashboard = () => {
 
   const loadReservations = async () => {
     try {
-      const response = await fetch('/api/admin/reservations', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      const result = await response.json();
+      const response = await api.get('/admin/reservations');
+      const result = response.data;
       
       if (result.success) {
         setReservations(result.data);
@@ -308,13 +286,8 @@ const AdminDashboard = () => {
 
   const loadContactMessages = async () => {
     try {
-      const response = await fetch('/api/admin/contact-messages', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      const result = await response.json();
+      const response = await api.get('/admin/contact-messages');
+      const result = response.data;
       
       if (result.success) {
         setContactMessages(result.data);
@@ -328,13 +301,8 @@ const AdminDashboard = () => {
 
   const loadChatNotifications = async () => {
     try {
-      const response = await fetch('/api/admin/chat/notifications', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      const result = await response.json();
+      const response = await api.get('/admin/chat/notifications');
+      const result = response.data;
       
       if (result.success) {
         setChatNotifications(result.data);
@@ -495,13 +463,8 @@ const AdminDashboard = () => {
 
   const loadStats = async () => {
     try {
-      const response = await fetch('/api/admin/stats', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      const result = await response.json();
+      const response = await api.get('/admin/stats');
+      const result = response.data;
       
       if (result.success) {
         setStats(result.data);

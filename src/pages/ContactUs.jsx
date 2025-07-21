@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../context/authContext";
 import Swal from "sweetalert2";
+import api from '../api/axios';
 
 const ContactUs = () => {
   const { user } = useContext(AuthContext);
@@ -74,21 +75,8 @@ const ContactUs = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(user && { Authorization: `Bearer ${localStorage.getItem('token')}` })
-        },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          subject: formData.subject.trim() || "General Inquiry",
-          message: formData.message.trim()
-        })
-      });
-
-      const result = await response.json();
+      const response = await api.post('/contact', formData);
+      const result = response.data;
 
       if (response.ok && result.success) {
         Swal.fire({

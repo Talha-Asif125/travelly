@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/authContext';
 import Swal from 'sweetalert2';
 import AdminBackButton from '../components/AdminBackButton';
+import api from '../api/axios';
 
 const RestaurantServiceCreate = () => {
   const navigate = useNavigate();
@@ -125,16 +126,8 @@ const RestaurantServiceCreate = () => {
 
       console.log("Creating restaurant service with data:", serviceData);
 
-      const response = await fetch('https://travelly-backend-27bn.onrender.com/api/provider/services', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(serviceData)
-      });
-
-      const result = await response.json();
+      const response = await api.post('/provider/services', serviceData);
+      const result = response.data;
       console.log("Restaurant service creation result:", result);
 
       if (result.success) {

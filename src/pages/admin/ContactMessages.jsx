@@ -43,6 +43,7 @@ import {
 } from '@mui/icons-material';
 import Swal from 'sweetalert2';
 import AdminBackButton from '../../components/AdminBackButton';
+import api from '../../api/axios';
 
 const ContactMessages = () => {
   const [messages, setMessages] = useState([]);
@@ -90,11 +91,8 @@ const ContactMessages = () => {
       params.append('page', filters.page);
       params.append('limit', filters.limit);
 
-      const response = await fetch(`/api/contact/admin?${params.toString()}`, {
-        headers: getAuthHeaders()
-      });
-
-      const result = await response.json();
+      const response = await api.get(`/contact/admin?${params.toString()}`);
+      const result = response.data;
 
       if (result.success) {
         setMessages(result.data.messages);
@@ -113,11 +111,8 @@ const ContactMessages = () => {
 
   const handleViewMessage = async (messageId) => {
     try {
-      const response = await fetch(`/api/contact/admin/${messageId}`, {
-        headers: getAuthHeaders()
-      });
-
-      const result = await response.json();
+      const response = await api.get(`/contact/admin/${messageId}`);
+      const result = response.data;
 
       if (result.success) {
         setSelectedMessage(result.data);
@@ -145,16 +140,11 @@ const ContactMessages = () => {
     if (!selectedMessage || !newStatus) return;
 
     try {
-      const response = await fetch(`/api/contact/admin/${selectedMessage._id}/status`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          status: newStatus,
-          adminNotes: adminNotes.trim()
-        })
+      const response = await api.put(`/contact/admin/${selectedMessage._id}/status`, {
+        status: newStatus,
+        adminNotes: adminNotes.trim()
       });
-
-      const result = await response.json();
+      const result = response.data;
 
       if (result.success) {
         Swal.fire({
@@ -196,12 +186,8 @@ const ContactMessages = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`/api/contact/admin/${messageId}`, {
-          method: 'DELETE',
-          headers: getAuthHeaders()
-        });
-
-        const result = await response.json();
+        const response = await api.delete(`/contact/admin/${messageId}`);
+        const result = response.data;
 
         if (result.success) {
           Swal.fire('Deleted!', 'Message has been deleted.', 'success');

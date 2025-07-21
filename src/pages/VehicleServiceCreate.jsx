@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/authContext';
 import Swal from 'sweetalert2';
 import AdminBackButton from '../components/AdminBackButton';
+import api from '../api/axios';
 
 const VehicleServiceCreate = () => {
   const navigate = useNavigate();
@@ -198,22 +199,13 @@ const VehicleServiceCreate = () => {
         status: 'active'
       };
 
-      const url = isEditMode 
-        ? `https://travelly-backend-27bn.onrender.com/api/provider/services/${editData._id}`
-        : 'https://travelly-backend-27bn.onrender.com/api/provider/services';
-      
-      const method = isEditMode ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(serviceData)
-      });
-
-      const result = await response.json();
+      let response;
+      if (isEditMode) {
+        response = await api.put(`/provider/services/${editData._id}`, serviceData);
+      } else {
+        response = await api.post('/provider/services', serviceData);
+      }
+      const result = response.data;
 
       if (result.success) {
         await Swal.fire({

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import { AuthContext } from "../context/authContext";
 import { ChatContext } from "../context/ChatContext";
 import { io } from 'socket.io-client';
@@ -26,7 +26,8 @@ const Chat = () => {
     }
 
     // Initialize socket connection
-    socket.current = io('https://travelly-backend-27bn.onrender.com');
+    // TODO: Move socket URL to environment variable
+    socket.current = io(process.env.REACT_APP_API_URL?.replace('/api', '') || 'https://travelly-backend-27bn.onrender.com');
     socket.current.emit('setup', user);
 
     // Fetch user's chats

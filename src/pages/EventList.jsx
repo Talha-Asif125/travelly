@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { BiCalendar } from "react-icons/bi";
 import { MdLocationOn, MdEvent } from "react-icons/md";
+import api from '../../api/axios';
 
 const EventList = () => {
   const [events, setEvents] = useState([]);
@@ -16,8 +17,8 @@ const EventList = () => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://travelly-backend-27bn.onrender.com/api/services/event');
-        const result = await response.json();
+        const response = await api.get('/services/event');
+        const result = response.data;
         
         if (result.success) {
           const eventServices = result.data || [];

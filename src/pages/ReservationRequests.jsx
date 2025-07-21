@@ -34,6 +34,7 @@ import {
   DirectionsCar
 } from '@mui/icons-material';
 import Swal from 'sweetalert2';
+import api from '../api/axios';
 
 const ReservationRequests = () => {
   const { user } = useContext(AuthContext);
@@ -80,13 +81,10 @@ const ReservationRequests = () => {
       };
       
       // Try the main provider endpoint first
-      const response = await fetch('/api/reservations/provider', {
-        method: 'GET',
-        headers
-      });
+      const response = await api.get('/reservations/provider');
+      const result = response.data;
       
       console.log('Response status:', response.status);
-      const result = await response.json();
       console.log('Provider reservations response:', result);
       
       if (result.success && result.data) {
@@ -112,25 +110,13 @@ const ReservationRequests = () => {
       
       if (reservation.isLegacyVehicle) {
         // Handle legacy vehicle reservations
-        response = await fetch(`/api/vehiclereservation/${reservation._id}/status`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ 
-            status: 'confirmed'
-          })
-        });
+        response = await api.put(`/vehiclereservation/${reservation._id}/status`, { status: 'confirmed' });
       } else {
         // Handle new service reservations
-        response = await fetch(`/api/reservations/${reservation._id}/status`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ 
-            status: 'confirmed'
-          })
-        });
+        response = await api.put(`/reservations/${reservation._id}/status`, { status: 'confirmed' });
       }
 
-      const result = await response.json();
+      const result = response.data;
       if (result.success) {
         Swal.fire({
           icon: 'success',
@@ -160,27 +146,13 @@ const ReservationRequests = () => {
       
       if (selectedReservation.isLegacyVehicle) {
         // Handle legacy vehicle reservations
-        response = await fetch(`/api/vehiclereservation/${selectedReservation._id}/status`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ 
-            status: 'cancelled',
-            rejectionReason 
-          })
-        });
+        response = await api.put(`/vehiclereservation/${selectedReservation._id}/status`, { status: 'cancelled', rejectionReason });
       } else {
         // Handle new service reservations
-        response = await fetch(`/api/reservations/${selectedReservation._id}/status`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ 
-            status: 'cancelled',
-            rejectionReason 
-          })
-        });
+        response = await api.put(`/reservations/${selectedReservation._id}/status`, { status: 'cancelled', rejectionReason });
       }
 
-      const result = await response.json();
+      const result = response.data;
       if (result.success) {
         Swal.fire({
           icon: 'success',

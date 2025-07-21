@@ -29,6 +29,7 @@ import ValidatedInput, { ValidatedTextarea, ValidatedSelect, FormErrorSummary } 
 import { validateForm, validateField, ValidationTypes, focusOnField } from '../utils/formValidation';
 import backgroundImage from "../assets/images/bg.jpg";
 import Swal from 'sweetalert2';
+import api from '../api/axios';
 
 const serviceProviderTypes = [
   { value: 'hotel', label: 'Hotel Provider', icon: <Hotel />, description: 'Manage hotels and accommodations' },
@@ -649,14 +650,8 @@ const ServiceProviderRequest = () => {
       console.log('Submitting request data:', requestData);
 
       // API call to submit service provider request
-      const response = await fetch('/api/service-provider-requests', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(requestData)
-      });
+      const response = await api.post('/service-provider-requests', requestData);
+      const result = response.data;
 
       console.log('Response status:', response.status);
       
@@ -674,7 +669,6 @@ const ServiceProviderRequest = () => {
         throw new Error(`Server returned non-JSON response: ${errorText.substring(0, 200)}...`);
       }
 
-      const result = await response.json();
       console.log('Server response:', result);
 
       if (result.success) {

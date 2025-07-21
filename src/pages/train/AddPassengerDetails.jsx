@@ -45,7 +45,7 @@ export default function AddPassengerDetails() {
         if (!trainId) return;
         
         try {
-            const response = await axios.get(`https://travelly-backend-27bn.onrender.com/api/train/get/${trainId}`);
+            const response = await axios.get(`/train/get/${trainId}`);
             const trainData = response.data;
             
             settrainName(trainData.trainName);

@@ -40,6 +40,7 @@ import {
 import { AuthContext } from '../context/authContext';
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import api from '../api/axios';
 
 const MyBookings = () => {
   const { user } = useContext(AuthContext);
@@ -76,14 +77,8 @@ const MyBookings = () => {
         url += `?${params.toString()}`;
       }
       
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const result = await response.json();
+      const response = await api.get(url);
+      const result = response.data;
       
       if (result.success) {
         setBookings(result.data || []);
@@ -117,9 +112,7 @@ const MyBookings = () => {
         for (const endpoint of endpoints) {
           try {
             console.log(`Trying endpoint: ${endpoint}`);
-            const response = await axios.get(endpoint, {
-              headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get(endpoint);
             
             if (response.data && (response.data.data || response.data.length > 0)) {
               bookingsData = response.data.data || response.data;
@@ -271,17 +264,10 @@ const MyBookings = () => {
       if (result.isConfirmed) {
         const token = localStorage.getItem('token');
         
-        const response = await fetch(`/api/reservations/${bookingId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const response = await api.delete(`/reservations/${bookingId}`);
+        const result = response.data;
 
-        const data = await response.json();
-
-        if (data.success) {
+        if (result.success) {
           // Remove the booking from local state
           setBookings(prev => prev.filter(booking => booking._id !== bookingId));
           
@@ -293,7 +279,7 @@ const MyBookings = () => {
             showConfirmButton: false
           });
         } else {
-          throw new Error(data.message || 'Failed to delete booking');
+          throw new Error(result.message || 'Failed to delete booking');
         }
       }
     } catch (error) {

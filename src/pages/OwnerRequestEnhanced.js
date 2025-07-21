@@ -19,6 +19,7 @@ import ValidatedInput, { ValidatedTextarea, ValidatedSelect, FormErrorSummary } 
 import { validateForm, validateField, CommonSchemas, ValidationTypes, focusOnField } from '../utils/formValidation';
 import backgroundImage from "../assets/images/bg.jpg";
 import Swal from 'sweetalert2';
+import api from '../api/axios';
 
 const serviceProviderTypes = [
   { value: 'hotel', label: 'Hotel Provider', icon: <Hotel />, description: 'Manage hotels and accommodations' },
@@ -316,15 +317,8 @@ const ServiceProviderRequestEnhanced = () => {
       };
 
       // API call to submit service provider request
-      const response = await fetch('/api/service-provider-requests', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      const result = await response.json();
+      const response = await api.post('/service-provider-requests', requestData);
+      const result = response.data;
 
       if (result.success) {
         setSuccess(true);

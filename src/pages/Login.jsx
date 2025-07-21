@@ -59,30 +59,12 @@ const Login = () => {
     setLoading2(true);
 
     try {
-      const res = await fetch(`${BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include',
-        body: JSON.stringify(credentials),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        throw new Error(result.message || 'Login failed');
-      }
-
+      const res = await axios.post(`${BASE_URL}/auth/login`, credentials);
+      const result = res.data;
       if (result.success && result.data) {
         const { user, token } = result.data;
-        
-        // Store the token
         localStorage.setItem("token", token);
-        
         dispatch({ type: "LOGIN_SUCCESS", payload: user });
-        
-        // Success notification
         Swal.fire({
           title: "Welcome Back!",
           text: `Welcome back, ${user.name}!`,
@@ -91,8 +73,6 @@ const Login = () => {
           timer: 2000,
           showConfirmButton: false
         });
-        
-        // Navigate based on user type
         if (user.isAdmin === true) {
           localStorage.setItem("adminLoginTime", Date.now().toString());
           navigate("/admin");
