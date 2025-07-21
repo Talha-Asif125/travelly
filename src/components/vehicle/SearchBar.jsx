@@ -21,12 +21,12 @@ const Searchbar = () => {
       : vehicleType === "" ? "vehicle/"  
       : `vehicle/type/get/${vehicleType}`; 
 
-    const { data: legacyVehicles } = useFetch(url);
+    const { data: legacyVehicles } = useFetch('/api/vehicle');
 
     // Fetch new vehicle services
     const serviceUrl = 'services/vehicle';
     
-    const { data: vehicleServices } = useFetch(serviceUrl);
+    const { data: vehicleServices } = useFetch('/api/provider/services?type=vehicle');
 
     // Combine legacy vehicles and new vehicle services
     useEffect(() => {

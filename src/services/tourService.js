@@ -2,17 +2,17 @@ import axios from '../api/axios';
 
 export const getAllTours = async () => {
   try {
-    const response = await axios.get(`/tour`);
+    const response = await axios.get(`/api/tours`);
     return response.data;
   } catch (error) {
-    console.error('Tour fetch error:', error);
+    console.error('Failed to fetch tours:', error);
     throw new Error('Failed to fetch tours. Please try again later.');
   }
 };
 
 export const getToursByCategory = async (category) => {
   try {
-    const response = await axios.get(`/tour/category/${category}`);
+    const response = await axios.get(`/api/tours/category/${category}`);
     return response.data;
   } catch (error) {
     console.error('Category tours error:', error);
@@ -22,7 +22,7 @@ export const getToursByCategory = async (category) => {
 
 export const getTourDetails = async (tourId) => {
   try {
-    const response = await axios.get(`/tour/${tourId}`);
+    const response = await axios.get(`/api/tours/${tourId}`);
     return response.data;
   } catch (error) {
     console.error('Tour details error:', error);
@@ -42,7 +42,7 @@ export const bookTour = async (bookingData) => {
 
 export const getPopularTours = async () => {
   try {
-    const response = await axios.get(`/tour/popular`);
+    const response = await axios.get(`/api/tours/popular`);
     return response.data;
   } catch (error) {
     console.error('Popular tours error:', error);

@@ -43,7 +43,7 @@ const VehicleBookingPage = () => {
         }
 
         // Fallback to old vehicle API
-        response = await axios.get(`/vehicle/${id}`);
+        response = await axios.get(`/api/vehicle/${id}`);
         setVehicle({
           ...response.data,
           name: `${response.data.brand} ${response.data.model}`,
