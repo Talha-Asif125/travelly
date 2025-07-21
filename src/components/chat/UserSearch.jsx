@@ -24,7 +24,7 @@ const UserSearch = ({ onUserSelect, onClose }) => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      setSearchResults(data);
+      setSearchResults(Array.isArray(data) ? data : []);
     } catch (error) {
       toast.error('Failed to search users');
       console.error('Error searching users:', error);

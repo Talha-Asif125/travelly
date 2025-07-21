@@ -26,13 +26,12 @@ const VehicleBookingPage = () => {
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        // Try service API first, then fallback to old vehicle API
-        let response;
+        // Try service API first
         try {
-          response = await axios.get(`/services/details/${id}`);
-          if (response.data.success) {
+          response = await axios.get(`/api/provider/services/${id}`);
+          if (response.data && response.data._id) {
             setVehicle({
-              ...response.data.data,
+              ...response.data,
               isService: true
             });
             setLoading(false);
@@ -41,16 +40,10 @@ const VehicleBookingPage = () => {
         } catch (serviceError) {
           console.log('Service API failed, trying vehicle API...');
         }
-
         // Fallback to old vehicle API
         response = await axios.get(`/api/vehicle/${id}`);
         setVehicle({
           ...response.data,
-          name: `${response.data.brand} ${response.data.model}`,
-          vehicleBrand: response.data.brand,
-          vehicleModel: response.data.model,
-          vehicleType: response.data.type,
-          seatingCapacity: response.data.capacity,
           isService: false
         });
         setLoading(false);

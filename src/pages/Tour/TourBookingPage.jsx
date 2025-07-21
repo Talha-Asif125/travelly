@@ -24,24 +24,13 @@ const TourBookingPage = () => {
   useEffect(() => {
     const fetchTour = async () => {
       try {
-        const response = await axios.get(`/services/details/${id}`);
-        if (response.data.success) {
-          setTour(response.data.data);
+        const response = await axios.get(`/api/tours/${id}`);
+        if (response.data) {
+          setTour(response.data);
         } else {
-          // If no service found, use demo data
-          const demoTour = {
-            _id: id,
-            name: "Private Car Service Demo",
-            description: "Professional private car service for your travel needs. Experience luxury travel with our experienced drivers and well-maintained vehicles.",
-            price: 500,
-            location: "Pakistan",
-            duration: "30 minutes",
-            category: "private car service",
-            availableSeats: 3,
-            maxGroupSize: 3
-          };
-          setTour(demoTour);
+          setError('Tour not found');
         }
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching tour:", error);
         // Use demo data as fallback

@@ -21,7 +21,7 @@ const Hotellist = ({ columns }) => {
         setLoading(true);
         console.log(`Fetching hotels from API endpoint: /${path}`);
         
-        const response = await axios.get(`/hotels`, {
+        const response = await axios.get(`/api/hotels`, {
           timeout: 10000 // 10 second timeout
         });
         
@@ -63,7 +63,7 @@ const Hotellist = ({ columns }) => {
   const refreshData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/hotels`);
+      const response = await axios.get(`/api/hotels`);
       setData(response.data);
       setLoading(false);
     } catch (err) {
@@ -158,3 +158,4 @@ const Hotellist = ({ columns }) => {
 };
 
 export default Hotellist;
+

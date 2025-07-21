@@ -86,55 +86,14 @@ const Vehiclelist = ({ columns }) => {
   const refreshData = async () => {
     try {
       setLoading(true);
-      console.log("Refreshing vehicle data...");
       
-      let allVehicles = [];
+      // Original working endpoint
+      const vehiclesResponse = await axios.get("/vehicle");
+      setVehicles(vehiclesResponse.data || []);
       
-      // Fetch traditional vehicles
-      try {
-        const vehiclesResponse = await axios.get("/vehicle");
-        console.log("Traditional vehicles refresh:", vehiclesResponse.data);
-        allVehicles = [...(vehiclesResponse.data || [])];
-      } catch (vehicleErr) {
-        console.warn("Error refreshing traditional vehicles:", vehicleErr);
-      }
-      
-      // Fetch vehicle services
-      try {
-        const servicesResponse = await axios.get("https://travelly-backend-27bn.onrender.com/api/provider/services?type=vehicle");
-        console.log("Vehicle services refresh:", servicesResponse.data);
-        
-        if (servicesResponse.data.success) {
-          const vehicleServices = (servicesResponse.data.data || []).map(service => ({
-            _id: service._id,
-            vehicleBrand: service.vehicleBrand || service.name?.split(' ')[0] || 'Unknown',
-            vehicleModel: service.vehicleModel || service.name?.split(' ')[1] || 'Model',
-            vehicleYear: service.vehicleYear || 'N/A',
-            vehicleType: service.vehicleType || service.category || 'Vehicle',
-            vehicleNumber: service.vehicleNumber || 'N/A',
-            seatingCapacity: service.seatingCapacity || service.capacity || service.maxGroupSize || 'N/A',
-            pricePerDay: service.price || 0,
-            location: service.location || 'N/A',
-            description: service.description || 'No description',
-            vehicleImage: service.images?.[0] || '',
-            providerId: service.providerId,
-            status: service.status || 'active',
-            isNewService: true,
-            createdAt: service.createdAt
-          }));
-          allVehicles = [...allVehicles, ...vehicleServices];
-        }
-      } catch (servicesErr) {
-        console.warn("Error refreshing vehicle services:", servicesErr);
-      }
-      
-      console.log("All vehicles refreshed:", allVehicles);
-      setData(allVehicles);
-      setLoading(false);
-    } catch (err) {
-      console.error("Error refreshing data:", err);
-      console.error("Error details:", err.response ? err.response.data : "No response data");
-      console.error("Error status:", err.response ? err.response.status : "No status");
+    } catch (error) {
+      console.error("Error refreshing vehicles:", error);
+    } finally {
       setLoading(false);
     }
   };
@@ -222,3 +181,4 @@ const Vehiclelist = ({ columns }) => {
 };
 
 export default Vehiclelist;
+

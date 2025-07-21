@@ -27,13 +27,12 @@ const HotelBookingPage = () => {
   useEffect(() => {
     const fetchHotel = async () => {
       try {
-        // Try service API first, then fallback to old hotel API
-        let response;
+        // Try service API first
         try {
-          response = await axios.get(`/services/details/${id}`);
-          if (response.data.success) {
+          response = await axios.get(`/api/provider/services/${id}`);
+          if (response.data && response.data._id) {
             setHotel({
-              ...response.data.data,
+              ...response.data,
               isService: true
             });
             setLoading(false);
@@ -42,7 +41,6 @@ const HotelBookingPage = () => {
         } catch (serviceError) {
           console.log('Service API failed, trying hotel API...');
         }
-
         // Fallback to old hotel API
         response = await axios.get(`/api/hotelreservation/${id}`);
         setHotel({

@@ -27,14 +27,13 @@ const RestaurantDetails = () => {
   useEffect(() => {
     const fetchService = async () => {
       try {
-        const response = await api.get(`/services/details/${id}`);
-        const result = response.data;
-        
-        if (result.success) {
-          setService(result.data);
+        const response = await api.get(`/api/provider/services/${id}`);
+        if (response.data && response.data._id) {
+          setService(response.data);
         } else {
-          setError(result.message || 'Service not found');
+          setError('Restaurant not found');
         }
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching service details:', error);
         setError('Failed to load service details');
