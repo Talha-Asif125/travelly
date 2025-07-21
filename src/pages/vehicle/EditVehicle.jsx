@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react'
 
 import Swal from 'sweetalert2'
-import axios from 'axios';
+import axios from '../../api/axios';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 
 
@@ -27,7 +27,7 @@ const EditVehicle = () => {
         setLoading(true);
         console.log("State is null, fetching vehicle data for ID:", id);
         
-        axios.get(`http://localhost:5000/api/vehicle/${id}`)
+        axios.get(`/vehicle/${id}`)
           .then(response => {
             console.log("Vehicle data fetched:", response.data);
             setVehicleData(response.data);
@@ -71,7 +71,7 @@ const EditVehicle = () => {
         console.log("Updating vehicle with ID:", vehicleId, "with data:", updateVehicle);
 
       axios
-      .patch(`http://localhost:5000/api/vehicle/${vehicleId}`, updateVehicle) 
+      .patch(`/vehicle/${vehicleId}`, updateVehicle) 
       .then((response) => {
         console.log("Update response:", response);
         Swal.fire({

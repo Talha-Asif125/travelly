@@ -14,7 +14,7 @@ const TrainHomeAdmmin = () => {
         const getAllTrain = async () => {
             try {
                 console.log("Fetching all trains...");
-                const response = await axios.get("http://localhost:5000/api/train");
+                const response = await axios.get("https://travelly-backend-27bn.onrender.com/api/train");
                 console.log("Train data received:", response.data);
                 setTrains(response.data);
             } catch (err) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 
 const DebugServices = () => {
   const [tourServices, setTourServices] = useState([]);
@@ -11,7 +11,7 @@ const DebugServices = () => {
     setLoading(true);
     try {
       console.log("Testing tour services API...");
-      const response = await axios.get("http://localhost:5000/api/provider/services?type=tour");
+      const response = await axios.get("/provider/services?type=tour");
       console.log("Tour services response:", response.data);
       setTourServices(response.data.data || []);
     } catch (error) {
@@ -25,7 +25,7 @@ const DebugServices = () => {
     setLoading(true);
     try {
       console.log("Testing vehicle services API...");
-      const response = await axios.get("http://localhost:5000/api/provider/services?type=vehicle");
+      const response = await axios.get("/provider/services?type=vehicle");
       console.log("Vehicle services response:", response.data);
       setVehicleServices(response.data.data || []);
     } catch (error) {
@@ -39,7 +39,7 @@ const DebugServices = () => {
     setLoading(true);
     try {
       console.log("Testing all provider services API...");
-      const response = await axios.get("http://localhost:5000/api/provider/services");
+      const response = await axios.get("/provider/services");
       console.log("All provider services response:", response.data);
       setAllProviderServices(response.data.data || []);
     } catch (error) {

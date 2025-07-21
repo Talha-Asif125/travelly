@@ -141,7 +141,7 @@ const EventServiceCreate = () => {
 
       console.log("Creating event service with data:", serviceData);
 
-      const response = await fetch('http://localhost:5000/api/provider/services', {
+      const response = await fetch('https://travelly-backend-27bn.onrender.com/api/provider/services', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

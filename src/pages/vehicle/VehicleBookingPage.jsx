@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../api/axios";
 import Swal from 'sweetalert2';
 import { AuthContext } from "../../context/authContext";
 
@@ -29,7 +29,7 @@ const VehicleBookingPage = () => {
         // Try service API first, then fallback to old vehicle API
         let response;
         try {
-          response = await axios.get(`http://localhost:5000/api/services/details/${id}`);
+          response = await axios.get(`/services/details/${id}`);
           if (response.data.success) {
             setVehicle({
               ...response.data.data,

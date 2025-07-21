@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from '../api/axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://travelly-backend-27bn.onrender.com/api';
+// Remove API_BASE_URL, use relative paths
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -12,7 +12,7 @@ const getAuthHeaders = () => {
 
 export const getNotifications = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/notifications`, {
+    const response = await axios.get(`/notifications`, {
       headers: getAuthHeaders()
     });
     return response.data.data || [];
@@ -23,7 +23,7 @@ export const getNotifications = async () => {
 
 export const markNotificationAsRead = async (notificationId) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/notifications/${notificationId}/read`, {}, {
+    const response = await axios.post(`/notifications/${notificationId}/read`, {}, {
       headers: getAuthHeaders()
     });
     return response.data;
@@ -34,7 +34,7 @@ export const markNotificationAsRead = async (notificationId) => {
 
 export const markAllNotificationsAsRead = async () => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/notifications/mark-all-read`, {}, {
+    const response = await axios.post(`/notifications/mark-all-read`, {}, {
       headers: getAuthHeaders()
     });
     return response.data;
@@ -45,7 +45,7 @@ export const markAllNotificationsAsRead = async () => {
 
 export const sendNotification = async (notificationData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/notifications`, notificationData, {
+    const response = await axios.post(`/notifications`, notificationData, {
       headers: getAuthHeaders()
     });
     return response.data;

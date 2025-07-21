@@ -11,7 +11,7 @@ import {
 } from "react-icons/tb";
 import { BsFillTelephoneOutboundFill } from "react-icons/bs";
 import Swal from "sweetalert2";
-import axios from "axios";
+import axios from "../../../api/axios";
 import { AuthContext } from "../../../context/authContext";
 
 const number = [1, 2, 3, 5, 7, 9, 12];

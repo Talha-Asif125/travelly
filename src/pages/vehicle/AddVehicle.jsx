@@ -124,7 +124,7 @@ const AddVehicle = () => {
     console.log("Vehicle details:", { ownerName, brandName, model, vehicleType, vehicleNumber, numberOfSeats });
     
     try {
-      const response = await axios.post('http://localhost:5000/api/vehicle', formData, {
+      const response = await axios.post('/vehicle', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

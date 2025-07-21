@@ -132,7 +132,7 @@ const HotelReservations = () => {
         <div className="flex items-center">
           {params.row.hotelImage ? (
             <img 
-              src={`http://localhost:5000/api/hotels/images/${params.row.hotelImage}`}
+              src={`https://travelly-backend-27bn.onrender.com/api/hotels/images/${params.row.hotelImage}`}
               alt="Hotel"
               className="w-8 h-8 rounded-full mr-2"
             />

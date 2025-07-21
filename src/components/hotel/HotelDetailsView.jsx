@@ -160,7 +160,7 @@ const HotelDetailsView = () => {
       } catch (error) {
         // If hotel not found, try services API
         try {
-          response = await axios.get(`http://localhost:5000/api/services/details/${id}`);
+          response = await axios.get(`https://travelly-backend-27bn.onrender.com/api/services/details/${id}`);
           if (response.data.success) {
             setHotelData({
               ...response.data.data,
@@ -251,7 +251,7 @@ const HotelDetailsView = () => {
     ? hotelData.HotelImgs.map(img => 
         hotelData.isService 
           ? img 
-          : `http://localhost:5000/api/hotels/images/${img}`
+          : `https://travelly-backend-27bn.onrender.com/api/hotels/images/${img}`
       )
     : ['https://via.placeholder.com/800x600?text=Hotel+Image'];
 

@@ -14,7 +14,7 @@ export const ChatContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (user) {
-      const newSocket = io('http://localhost:5000');
+      const newSocket = io('https://travelly-backend-27bn.onrender.com');
       setSocket(newSocket);
 
       newSocket.emit('setup', user);

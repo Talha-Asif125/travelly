@@ -45,7 +45,7 @@ export default function AddPassengerDetails() {
         if (!trainId) return;
         
         try {
-            const response = await axios.get(`http://localhost:5000/api/train/get/${trainId}`);
+            const response = await axios.get(`https://travelly-backend-27bn.onrender.com/api/train/get/${trainId}`);
             const trainData = response.data;
             
             settrainName(trainData.trainName);
@@ -94,7 +94,7 @@ export default function AddPassengerDetails() {
           }).then((result) => {
             if (result.isConfirmed) {
               axios
-                .post("http://localhost:5000/api/seatBookings/add", {userId,trainId,trainName,price,noOfTickets,firstName,LastName,nationality,IdCardNumber,phoneNumber,email,isApproved,priceStatus})
+                .post("https://travelly-backend-27bn.onrender.com/api/seatBookings/add", {userId,trainId,trainName,price,noOfTickets,firstName,LastName,nationality,IdCardNumber,phoneNumber,email,isApproved,priceStatus})
                 .then(() => {
                   Swal.fire("your ticket in under review", "", "success");
                   navigate("/train/MyTickets")

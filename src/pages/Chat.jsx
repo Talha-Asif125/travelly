@@ -26,7 +26,7 @@ const Chat = () => {
     }
 
     // Initialize socket connection
-    socket.current = io('http://localhost:5000');
+    socket.current = io('https://travelly-backend-27bn.onrender.com');
     socket.current.emit('setup', user);
 
     // Fetch user's chats

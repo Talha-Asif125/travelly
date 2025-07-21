@@ -1,7 +1,7 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
-import axios from "axios";
+import axios from "../../api/axios";
 import "./datatable.scss";
 import Swal from "sweetalert2";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -35,23 +35,23 @@ const Datatable = ({ columns, data, setData, loading: externalLoading, onEdit, r
         
         let deleteUrl;
         if (path === "users") {
-          deleteUrl = `http://localhost:5000/api/users/delete/${id}`;
+          deleteUrl = `/users/delete/${id}`;
           await axios.delete(deleteUrl);
         } else if (path === "hotels") {
-          deleteUrl = `http://localhost:5000/api/hotels/${id}`;
+          deleteUrl = `/hotels/${id}`;
           await axios.delete(deleteUrl);
         } else if (path === "tours") {
-          deleteUrl = `http://localhost:5000/api/tours/${id}`;
+          deleteUrl = `/tours/${id}`;
           await axios.delete(deleteUrl);
         } else if (path === "vehicle") {
-          deleteUrl = `http://localhost:5000/api/vehicle/${id}`;
+          deleteUrl = `/vehicle/${id}`;
           await axios.delete(deleteUrl);
         } else if (fullPath.includes("/admin/restaurants") || fullPath.includes("/Restaurants")) {
-          deleteUrl = `http://localhost:5000/api/restaurant/${id}`;
+          deleteUrl = `/restaurant/${id}`;
           console.log("Restaurant delete URL:", deleteUrl);
           await axios.delete(deleteUrl);
         } else {
-          deleteUrl = `http://localhost:5000/api/${path}/${id}`;
+          deleteUrl = `/${path}/${id}`;
           await axios.delete(deleteUrl);
         }
         
@@ -119,19 +119,19 @@ const Datatable = ({ columns, data, setData, loading: externalLoading, onEdit, r
         const deletePromises = selectedRows.map(async (id) => {
           let deleteUrl;
           if (path === "users") {
-            deleteUrl = `http://localhost:5000/api/users/delete/${id}`;
+            deleteUrl = `/users/delete/${id}`;
           } else if (path === "hotels") {
-            deleteUrl = `http://localhost:5000/api/hotels/${id}`;
+            deleteUrl = `/hotels/${id}`;
           } else if (path === "tours") {
-            deleteUrl = `http://localhost:5000/api/tours/${id}`;
+            deleteUrl = `/tours/${id}`;
           } else if (path === "vehicle") {
-            deleteUrl = `http://localhost:5000/api/vehicle/${id}`;
+            deleteUrl = `/vehicle/${id}`;
                             } else if (fullPath.includes("/admin/restaurants") || fullPath.includes("/Restaurants")) {
-            deleteUrl = `http://localhost:5000/api/restaurant/${id}`;
+            deleteUrl = `/restaurant/${id}`;
           } else if (path === "event-management") {
-          deleteUrl = `http://localhost:5000/api/events/${id}`;
+          deleteUrl = `/events/${id}`;
           } else {
-            deleteUrl = `http://localhost:5000/api/${path}/${id}`;
+            deleteUrl = `/${path}/${id}`;
           }
           return axios.delete(deleteUrl);
         });
@@ -195,29 +195,29 @@ const Datatable = ({ columns, data, setData, loading: externalLoading, onEdit, r
       
       if (path === "users") {
         console.log("View URL:", `/users/${id}`);
-        const userdata = await axios.get(`http://localhost:5000/api/users/all/${id}`);
+        const userdata = await axios.get(`/users/all/${id}`);
         console.log("User data received:", userdata.data);
         navigate("/userpage", { state: userdata.data });
       }
       if (path === "hotels") {
-        console.log("Hotel view URL:", `http://localhost:5000/api/hotels/find/${id}`);
-        const hoteldata = await axios.get(`http://localhost:5000/api/hotels/find/${id}`);
+        console.log("Hotel view URL:", `https://travelly-backend-27bn.onrender.com/api/hotels/find/${id}`);
+        const hoteldata = await axios.get(`/hotels/find/${id}`);
         console.log("Hotel data received:", hoteldata.data);
         navigate("/hoteladmin", { state: hoteldata.data });
       }
       if (path === "vehicle") {
-        console.log("Vehicle view URL:", `http://localhost:5000/api/vehicle/${id}`);
-        const vehicledata = await axios.get(`http://localhost:5000/api/vehicle/${id}`);
+        console.log("Vehicle view URL:", `https://travelly-backend-27bn.onrender.com/api/vehicle/${id}`);
+        const vehicledata = await axios.get(`/vehicle/${id}`);
         navigate("/vehicle/view/", { state: vehicledata.data });
       }
       //path tour
       if (path === "tours") {
-        console.log("Tour view URL:", `http://localhost:5000/api/tours/${id}`);
-        const tourData = await axios.get(`http://localhost:5000/api/tours/${id}`);
+        console.log("Tour view URL:", `https://travelly-backend-27bn.onrender.com/api/tours/${id}`);
+        const tourData = await axios.get(`/tours/${id}`);
         navigate("/tour/view", { state: tourData.data });
       }
       if (fullPath.includes("/admin/restaurants") || fullPath.includes("/Restaurants")) {
-        console.log("Restaurant view URL:", `http://localhost:5000/api/restaurant/find-resturent-by-id`);
+        console.log("Restaurant view URL:", `https://travelly-backend-27bn.onrender.com/api/restaurant/find-resturent-by-id`);
         navigate(`/restaurant-admin-details/${id}`);
       }
       if (path === "event-management") {

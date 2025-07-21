@@ -41,7 +41,7 @@ const ServiceManagement = () => {
     try {
       setLoading(true);
       const params = selectedType !== 'all' ? { type: selectedType } : {};
-      const response = await axios.get('http://localhost:5000/api/provider/services', { params });
+      const response = await axios.get('https://travelly-backend-27bn.onrender.com/api/provider/services', { params });
       setServices(response.data.data || []);
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -53,7 +53,7 @@ const ServiceManagement = () => {
   const deleteService = async (serviceId) => {
     if (window.confirm('Are you sure you want to delete this service?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/provider/services/${serviceId}`);
+        await axios.delete(`https://travelly-backend-27bn.onrender.com/api/provider/services/${serviceId}`);
         fetchServices();
       } catch (error) {
         console.error('Error deleting service:', error);

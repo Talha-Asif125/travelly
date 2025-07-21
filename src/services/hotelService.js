@@ -1,10 +1,10 @@
-import axios from 'axios';
+import axios from '../api/axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://travelly-backend-27bn.onrender.com/api';
+// Remove API_BASE_URL, use relative paths
 
 export const searchHotels = async (searchParams) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/hotels/search`, { params: searchParams });
+    const response = await axios.get(`/hotels/search`, { params: searchParams });
     return response.data;
   } catch (error) {
     console.error('Hotel search error:', error);

@@ -12,7 +12,7 @@ const DoUpdateTrain = () => {
 
     useEffect(() => {
         const getOneTrain = () => {
-            axios.get(`http://localhost:5000/api/train/get/${id}`).then((res) => {
+            axios.get(`https://travelly-backend-27bn.onrender.com/api/train/get/${id}`).then((res) => {
                 setSingleTrain(res.data)
                 console.log(singleTrain)
             }).catch((err) => {
@@ -37,7 +37,7 @@ const DoUpdateTrain = () => {
         event.preventDefault();
 
         axios.
-            put(`http://localhost:5000/api/train/update/${id}`, singleTrain)
+            put(`https://travelly-backend-27bn.onrender.com/api/train/update/${id}`, singleTrain)
             .then((response) => {
                 console.log("Update response:", response.data);
                 Swal.fire({

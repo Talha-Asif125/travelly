@@ -3,9 +3,10 @@
  * Centralized auth management for consistent behavior
  */
 
+import axios from '../api/axios';
 import SessionService from './sessionService';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://travelly-backend-27bn.onrender.com/api';
+// Remove API_BASE_URL, use relative paths
 
 class AuthService {
   // Token management
@@ -107,28 +108,15 @@ class AuthService {
   // API calls
   static async login(email, password) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ email, password })
-      });
+      const response = await axios.post('/auth/login', { email, password });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+      if (response.data.success && response.data.data) {
+        this.setToken(response.data.data.token);
+        this.setUser(response.data.data.user);
+        return response.data;
       }
 
-      if (data.success && data.data) {
-        this.setToken(data.data.token);
-        this.setUser(data.data.user);
-        return data;
-      }
-
-      throw new Error('Invalid response format');
+      throw new Error(response.data.message || 'Login failed');
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -137,21 +125,13 @@ class AuthService {
 
   static async register(userData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(userData)
-      });
+      const response = await axios.post('/auth/register', userData);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+      if (response.data.success) {
+        return response.data;
       }
 
-      return data;
+      throw new Error(response.data.message || 'Registration failed');
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
@@ -160,17 +140,13 @@ class AuthService {
 
   static async logout() {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        credentials: 'include'
-      });
+      const response = await axios.post('/auth/logout', {}, { headers: this.getAuthHeaders() });
 
       // Clear local storage regardless of response
       this.clearToken();
       this.clearUser();
 
-      return response.ok;
+      return response.status === 200; // Check for 200 status for success
     } catch (error) {
       // Clear local storage even if request fails
       this.clearToken();
@@ -182,26 +158,14 @@ class AuthService {
 
   static async getCurrentUser() {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: this.getAuthHeaders()
-      });
+      const response = await axios.get('/auth/me', { headers: this.getAuthHeaders() });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          this.clearToken();
-          this.clearUser();
-        }
-        throw new Error(data.message || 'Failed to get user data');
+      if (response.data.success && response.data.data) {
+        this.setUser(response.data.data);
+        return response.data.data;
       }
 
-      if (data.success && data.data) {
-        this.setUser(data.data);
-        return data.data;
-      }
-
-      throw new Error('Invalid response format');
+      throw new Error(response.data.message || 'Failed to get user data');
     } catch (error) {
       console.error('Get current user error:', error);
       throw error;
@@ -210,21 +174,13 @@ class AuthService {
 
   static async resetPasswordRequest(email) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/reset-password-request`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email })
-      });
+      const response = await axios.post('/auth/reset-password-request', { email });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Password reset request failed');
+      if (response.data.success) {
+        return response.data;
       }
 
-      return data;
+      throw new Error(response.data.message || 'Password reset request failed');
     } catch (error) {
       console.error('Password reset request error:', error);
       throw error;
@@ -233,21 +189,13 @@ class AuthService {
 
   static async resetPassword(token, password) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ token, password })
-      });
+      const response = await axios.post('/auth/reset-password', { token, password });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Password reset failed');
+      if (response.data.success) {
+        return response.data;
       }
 
-      return data;
+      throw new Error(response.data.message || 'Password reset failed');
     } catch (error) {
       console.error('Password reset error:', error);
       throw error;
@@ -256,11 +204,8 @@ class AuthService {
 
   static async checkEmailExists(email) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/check-email?email=${encodeURIComponent(email)}`);
-      const data = await response.json();
-      
-      // Return true if email exists (409 status)
-      return response.status === 409;
+      const response = await axios.get(`/auth/check-email?email=${encodeURIComponent(email)}`);
+      return response.status === 409; // Return true if email exists (409 status)
     } catch (error) {
       console.error('Check email error:', error);
       return false;

@@ -39,7 +39,7 @@ const PendingReservationsPage = () => {
   const [pendingReservations, setPendingReservations] = useState([]);
   const fetchPendingReservations = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/activity-reservations/pending");
+      const response = await axios.get("https://travelly-backend-27bn.onrender.com/api/activity-reservations/pending");
       setPendingReservations(response.data.pendingReservations);
     } catch (err) {
       console.log(err);
@@ -47,7 +47,7 @@ const PendingReservationsPage = () => {
   };
   const handleDecline = async (reservation) => {
     try {
-      await axios.put(`http://localhost:5000/api/activity-reservations/decline/${reservation._id}`);
+      await axios.put(`https://travelly-backend-27bn.onrender.com/api/activity-reservations/decline/${reservation._id}`);
       fetchPendingReservations();
     } catch (err) {
       console.log(err);
@@ -56,7 +56,7 @@ const PendingReservationsPage = () => {
 
   const handleApprove = async (reservation) => {
     try {
-      await axios.put(`http://localhost:5000/api/activity-reservations/approve/${reservation._id}`);
+      await axios.put(`https://travelly-backend-27bn.onrender.com/api/activity-reservations/approve/${reservation._id}`);
       fetchPendingReservations();
     } catch (err) {
       console.log(err);

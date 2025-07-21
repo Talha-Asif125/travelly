@@ -48,7 +48,7 @@ export default function AddNewTrain() {
       if (result.isConfirmed) {
         console.log("Sending train data:", newTrain);
         axios
-          .post("http://localhost:5000/api/train/add", newTrain)
+          .post("https://travelly-backend-27bn.onrender.com/api/train/add", newTrain)
           .then((response) => {
             console.log("Train added successfully:", response.data);
             Swal.fire("Train has been successfully Saved!", "", "success");

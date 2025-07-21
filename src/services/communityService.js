@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from '../api/axios';
 
-const API_BASE_URL = 'https://travelly-backend-27bn.onrender.com/api/community';
+// Remove API_BASE_URL, use relative paths
 
 // Create axios instance with interceptors for auth
 const api = axios.create({

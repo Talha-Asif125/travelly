@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import jspdf from "jspdf";
 import "jspdf-autotable";
 import AdminBackButton from "../components/AdminBackButton";
-import axios from "axios";
+import axios from "../api/axios";
 import Swal from "sweetalert2";
 
 const Vehiclelist = ({ columns }) => {
@@ -23,7 +23,7 @@ const Vehiclelist = ({ columns }) => {
         
         // Fetch traditional vehicles from /api/vehicle
         try {
-          const vehiclesResponse = await axios.get("http://localhost:5000/api/vehicle");
+          const vehiclesResponse = await axios.get("https://travelly-backend-27bn.onrender.com/api/vehicle");
           console.log("Traditional vehicles response:", vehiclesResponse.data);
           const traditionalVehicles = vehiclesResponse.data || [];
           allVehicles = [...traditionalVehicles];
@@ -33,7 +33,7 @@ const Vehiclelist = ({ columns }) => {
         
         // Fetch new vehicle services from /api/provider/services
         try {
-          const servicesResponse = await axios.get("http://localhost:5000/api/provider/services?type=vehicle");
+          const servicesResponse = await axios.get("https://travelly-backend-27bn.onrender.com/api/provider/services?type=vehicle");
           console.log("Vehicle services response:", servicesResponse.data);
           
           if (servicesResponse.data.success) {
@@ -92,7 +92,7 @@ const Vehiclelist = ({ columns }) => {
       
       // Fetch traditional vehicles
       try {
-        const vehiclesResponse = await axios.get("http://localhost:5000/api/vehicle");
+        const vehiclesResponse = await axios.get("https://travelly-backend-27bn.onrender.com/api/vehicle");
         console.log("Traditional vehicles refresh:", vehiclesResponse.data);
         allVehicles = [...(vehiclesResponse.data || [])];
       } catch (vehicleErr) {
@@ -101,7 +101,7 @@ const Vehiclelist = ({ columns }) => {
       
       // Fetch vehicle services
       try {
-        const servicesResponse = await axios.get("http://localhost:5000/api/provider/services?type=vehicle");
+        const servicesResponse = await axios.get("https://travelly-backend-27bn.onrender.com/api/provider/services?type=vehicle");
         console.log("Vehicle services refresh:", servicesResponse.data);
         
         if (servicesResponse.data.success) {

@@ -82,7 +82,7 @@ const FilterActivities = () => {
       
       // Try to get activities from the services API (owner-added activities)
       try {
-        const servicesResponse = await fetch('http://localhost:5000/api/services/event');
+        const servicesResponse = await fetch('https://travelly-backend-27bn.onrender.com/api/services/event');
         const servicesResult = await servicesResponse.json();
         
         if (servicesResult.success && servicesResult.data) {
@@ -113,7 +113,7 @@ const FilterActivities = () => {
       
       // Try to get approved activities from the activities API
       try {
-        const response = await fetch('http://localhost:5000/api/activities/approved');
+        const response = await fetch('https://travelly-backend-27bn.onrender.com/api/activities/approved');
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.activities) {

@@ -3,7 +3,7 @@ import Datatable from "../components/datatable/Datatable";
 import jspdf from "jspdf";
 import "jspdf-autotable";
 import AdminBackButton from "../components/AdminBackButton";
-import axios from "axios";
+import axios from "../api/axios";
 import Swal from "sweetalert2";
 
 const Tourreservations = ({ columns }) => {
@@ -17,7 +17,7 @@ const Tourreservations = ({ columns }) => {
       try {
         setLoading(true);
         console.log("Fetching tour reservations...");
-        const response = await axios.get("http://localhost:5000/api/tours/reservations");
+        const response = await axios.get("/tours/reservations");
         console.log("Tour reservations response:", response.data);
         setData(response.data);
         setLoading(false);
@@ -45,7 +45,7 @@ const Tourreservations = ({ columns }) => {
     try {
       setLoading(true);
       console.log("Refreshing tour reservation data...");
-      const response = await axios.get("http://localhost:5000/api/tours/reservations");
+      const response = await axios.get("/tours/reservations");
       console.log("Refresh response:", response.data);
       setData(response.data);
       setLoading(false);

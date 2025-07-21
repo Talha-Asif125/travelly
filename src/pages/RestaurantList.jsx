@@ -22,7 +22,7 @@ const RestaurantList = () => {
         
         // Fetch owner-added restaurants from services API
         try {
-          const serviceResponse = await fetch('http://localhost:5000/api/services/restaurant');
+          const serviceResponse = await fetch('https://travelly-backend-27bn.onrender.com/api/services/restaurant');
           const serviceResult = await serviceResponse.json();
           
           if (serviceResult.success && serviceResult.data) {
@@ -39,7 +39,7 @@ const RestaurantList = () => {
           
           // Try to get all restaurants first (if there's an endpoint for it)
           try {
-            const allAdminResponse = await fetch('http://localhost:5000/api/restaurant', {
+            const allAdminResponse = await fetch('https://travelly-backend-27bn.onrender.com/api/restaurant', {
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json'
@@ -60,7 +60,7 @@ const RestaurantList = () => {
           // If we didn't get restaurants from the GET endpoint, try the limited one
           if (adminRestaurants.length === 0) {
             try {
-              const adminResponse = await fetch('http://localhost:5000/api/restaurant/find-first-five-resturents', {
+              const adminResponse = await fetch('https://travelly-backend-27bn.onrender.com/api/restaurant/find-first-five-resturents', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'

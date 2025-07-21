@@ -214,7 +214,7 @@ const PostCard = ({ post, onPostUpdated, onPostDeleted }) => {
         {post.image && (
           <div className="mb-4">
             <img
-              src={`http://localhost:5000/api/community/images/${post.image}`}
+              src={`https://travelly-backend-27bn.onrender.com/api/community/images/${post.image}`}
               alt="Post attachment"
               className="w-full max-h-96 object-cover rounded-lg border"
               onError={(e) => {
@@ -357,7 +357,7 @@ const PostCard = ({ post, onPostUpdated, onPostDeleted }) => {
                     {reply.image && (
                       <div className="mt-2">
                         <img
-                          src={`http://localhost:5000/api/community/images/${reply.image}`}
+                          src={`https://travelly-backend-27bn.onrender.com/api/community/images/${reply.image}`}
                           alt="Reply attachment"
                           className="max-w-full h-32 object-cover rounded-lg border reply-image cursor-pointer"
                           onError={(e) => {

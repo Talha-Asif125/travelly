@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../api/axios';
 
 const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';

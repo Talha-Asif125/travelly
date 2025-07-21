@@ -79,7 +79,7 @@ const checkOutDate = new Date(date.checkOutDate);
             </h1>
         <div className="flex justify-center items-center w-full flex-col lg:flex-row pt-12 lg:pt-0">
           <img
-            src={`http://localhost:5000/api/hotels/images/${data.HotelImg}`}
+            src={`https://travelly-backend-27bn.onrender.com/api/hotels/images/${data.HotelImg}`}
             alt="Hotel Image"
             className=" w-[320px] md:w-[700px]  lg:w-[800px] rounded-lg mb-10"
           />
@@ -148,7 +148,7 @@ const checkOutDate = new Date(date.checkOutDate);
   {data.HotelImgs &&
     data.HotelImgs.map((image, index) => (
       <img
-        src={`http://localhost:5000/api/hotels/images/${image}`}
+        src={`https://travelly-backend-27bn.onrender.com/api/hotels/images/${image}`}
         alt={`Hotel Image ${index}`}
         key={index}
         class="ml-10 w-64 h-64 rounded-lg mb-2"

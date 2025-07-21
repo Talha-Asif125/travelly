@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { FaWindowClose } from 'react-icons/fa';
 import Swal from 'sweetalert2';
@@ -14,7 +14,7 @@ const VehicleReserve = ({ setOpen, vehicleId, pickupDate, returnDate, date_diffe
 
   useEffect(() => {
     // Fetch vehicle data
-    axios.get(`/api/vehicle/${vehicleId}`)
+    axios.get(`/vehicle/${vehicleId}`)
       .then(response => {
         setVehicleData(response.data);
       })
@@ -45,7 +45,7 @@ const VehicleReserve = ({ setOpen, vehicleId, pickupDate, returnDate, date_diffe
     const token = localStorage.getItem('token');
 
     axios
-      .post(`/api/vehiclereservation`, reservationData, {
+      .post(`/vehiclereservation`, reservationData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import axios from "../../../api/axios";
 import { AiOutlineCalendar, AiOutlineUser } from "react-icons/ai";
 
 const ServiceCard = () => {
@@ -18,7 +18,7 @@ const ServiceCard = () => {
         
         // Fetch traditional tours from /api/tours
         try {
-          const toursResponse = await axios.get("/api/tours");
+          const toursResponse = await axios.get("/tours");
           console.log("Traditional Tours API Response:", toursResponse.data);
           const traditionalTours = toursResponse.data || [];
           allTours = [...traditionalTours];
@@ -28,7 +28,7 @@ const ServiceCard = () => {
         
         // Fetch new tour/travel services from /api/provider/services
         try {
-          const servicesResponse = await axios.get("http://localhost:5000/api/provider/services?type=tour");
+          const servicesResponse = await axios.get("/provider/services?type=tour");
           console.log("Tour Services API Response:", servicesResponse.data);
           
           if (servicesResponse.data.success) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../api/axios";
 import Swal from 'sweetalert2';
 import { AuthContext } from "../../context/authContext";
 
@@ -36,7 +36,7 @@ const RestaurantBookingPage = () => {
   useEffect(() => {
     const fetchRestaurant = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/services/details/${id}`);
+        const response = await axios.get(`/services/details/${id}`);
         if (response.data.success) {
           setRestaurant(response.data.data);
           setLoading(false);
@@ -155,7 +155,7 @@ const RestaurantBookingPage = () => {
 
       console.log('Submitting restaurant booking:', bookingData);
 
-      const response = await axios.post('/api/reservations', bookingData, {
+      const response = await axios.post('/reservations', bookingData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

@@ -32,7 +32,7 @@ const UserpageA = () => {
     if (confirmResult.isConfirmed) {
       try {
         console.log("Deleting user with ID:", state._id);
-        await regularAxios.delete(`http://localhost:5000/api/users/delete/${state._id}`);
+        await regularAxios.delete(`https://travelly-backend-27bn.onrender.com/api/users/delete/${state._id}`);
         
         localStorage.setItem('needUserRefresh', 'true');
         

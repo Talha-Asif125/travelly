@@ -39,7 +39,7 @@ const Profileupdate = () => {
       if (result.isConfirmed) {
         try {
           // Match the exact route in userRoutes.js
-          await regularAxios.delete(`http://localhost:5000/api/users/delete/${user._id}`);
+          await regularAxios.delete(`https://travelly-backend-27bn.onrender.com/api/users/delete/${user._id}`);
           navigate("/");
           dispatch({ type: "LOGOUT" });
           Swal.fire("Deleted!", "Your account has been deleted.", "success");
@@ -77,7 +77,7 @@ const Profileupdate = () => {
       console.log("Update data:", updatedUser);
       
       const response = await regularAxios.put(
-        `http://localhost:5000/api/users/update/${user._id}`, 
+        `https://travelly-backend-27bn.onrender.com/api/users/update/${user._id}`, 
         updatedUser
       );
       
@@ -101,7 +101,7 @@ const Profileupdate = () => {
           
           // Update with the image URL using the unprotected route
           const imageUpdateResponse = await regularAxios.put(
-            `http://localhost:5000/api/users/update/${user._id}`, 
+            `https://travelly-backend-27bn.onrender.com/api/users/update/${user._id}`, 
             { img: url }
           );
           

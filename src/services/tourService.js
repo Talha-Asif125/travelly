@@ -1,10 +1,10 @@
-import axios from 'axios';
+import axios from '../api/axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://travelly-backend-27bn.onrender.com/api';
+// Remove API_BASE_URL, use relative paths
 
 export const getAllTours = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/tour`);
+    const response = await axios.get(`/tour`);
     return response.data;
   } catch (error) {
     console.error('Tour fetch error:', error);
@@ -14,7 +14,7 @@ export const getAllTours = async () => {
 
 export const getToursByCategory = async (category) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/tour/category/${category}`);
+    const response = await axios.get(`/tour/category/${category}`);
     return response.data;
   } catch (error) {
     console.error('Category tours error:', error);
@@ -24,7 +24,7 @@ export const getToursByCategory = async (category) => {
 
 export const getTourDetails = async (tourId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/tour/${tourId}`);
+    const response = await axios.get(`/tour/${tourId}`);
     return response.data;
   } catch (error) {
     console.error('Tour details error:', error);
@@ -34,7 +34,7 @@ export const getTourDetails = async (tourId) => {
 
 export const bookTour = async (bookingData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/tour-reservations`, bookingData);
+    const response = await axios.post(`/tour-reservations`, bookingData);
     return response.data;
   } catch (error) {
     console.error('Tour booking error:', error);
@@ -44,7 +44,7 @@ export const bookTour = async (bookingData) => {
 
 export const getPopularTours = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/tour/popular`);
+    const response = await axios.get(`/tour/popular`);
     return response.data;
   } catch (error) {
     console.error('Popular tours error:', error);

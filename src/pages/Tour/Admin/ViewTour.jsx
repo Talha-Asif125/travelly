@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../../api/axios";
 import Swal from "sweetalert2";
 
 const UpdateTour = () => {

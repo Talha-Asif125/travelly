@@ -114,7 +114,7 @@ const ServiceEditModal = ({ isOpen, onClose, service, onSave }) => {
 
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/provider/services/${service._id}`, {
+      const response = await fetch(`https://travelly-backend-27bn.onrender.com/api/provider/services/${service._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

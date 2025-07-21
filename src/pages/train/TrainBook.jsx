@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../api/axios";
 
 const TrainBook = () => {
     const [train, setTrain] = useState(null);
@@ -13,7 +13,7 @@ const TrainBook = () => {
         const fetchTrain = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`http://localhost:5000/api/train/get/${id}`);
+                const response = await axios.get(`/train/get/${id}`);
                 setTrain(response.data);
                 console.log("Train data fetched:", response.data);
                 setLoading(false);

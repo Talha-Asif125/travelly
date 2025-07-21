@@ -54,7 +54,7 @@ const Beach = () => {
       
       // Fetch provider services and filter by category
       try {
-        const servicesResponse = await axios.get("http://localhost:5000/api/services/tour");
+        const servicesResponse = await axios.get("https://travelly-backend-27bn.onrender.com/api/services/tour");
         
         if (servicesResponse.data.success) {
           const services = servicesResponse.data.data || [];

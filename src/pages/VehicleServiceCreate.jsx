@@ -199,8 +199,8 @@ const VehicleServiceCreate = () => {
       };
 
       const url = isEditMode 
-        ? `http://localhost:5000/api/provider/services/${editData._id}`
-        : 'http://localhost:5000/api/provider/services';
+        ? `https://travelly-backend-27bn.onrender.com/api/provider/services/${editData._id}`
+        : 'https://travelly-backend-27bn.onrender.com/api/provider/services';
       
       const method = isEditMode ? 'PUT' : 'POST';
 

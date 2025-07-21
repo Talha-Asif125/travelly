@@ -16,7 +16,7 @@ const EventList = () => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:5000/api/services/event');
+        const response = await fetch('https://travelly-backend-27bn.onrender.com/api/services/event');
         const result = await response.json();
         
         if (result.success) {

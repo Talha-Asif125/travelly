@@ -54,7 +54,7 @@ const UpdateuserA = () => {
       
       // Using the direct endpoint without authentication
       const response = await axios.put(
-        `http://localhost:5000/api/users/update/${state._id}`,
+        `https://travelly-backend-27bn.onrender.com/api/users/update/${state._id}`,
         userData
       );
       

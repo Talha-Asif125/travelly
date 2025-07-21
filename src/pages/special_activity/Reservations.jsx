@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../api/axios";
 
 function Reservation({ reservation, onCancel }) {
   const { _id, activity, status, dateRange, timeRange } = reservation;
@@ -35,7 +35,7 @@ function ReservationPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get("http://localhost:5000/api/activity-reservations", {
+    axios.get("/activity-reservations", {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -50,7 +50,7 @@ function ReservationPage() {
   const cancelReservation = (reservationId) => {
     console.log(reservationId);
     const token = localStorage.getItem('token');
-    axios.delete(`http://localhost:5000/api/activity-reservations/${reservationId}`, {
+    axios.delete(`/activity-reservations/${reservationId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

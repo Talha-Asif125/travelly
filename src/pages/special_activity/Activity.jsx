@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import axios from "../../api/axios";
 import Swal from "sweetalert2";
 import { AuthContext } from "../../context/authContext";
 import ProviderBadge from '../../components/ui/ProviderBadge';
@@ -22,7 +22,7 @@ const Activity = () => {
       
       try {
         // First try to get from activities API
-        const response = await axios.get(`http://localhost:5000/api/activities/${id}`);
+        const response = await axios.get(`/activities/${id}`);
         console.log('Activity API response:', response.data);
         
         if (response.data && response.data._id) {
@@ -40,7 +40,7 @@ const Activity = () => {
         const token = localStorage.getItem('token');
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         
-        const serviceResponse = await axios.get(`http://localhost:5000/api/services/details/${id}`, { headers });
+        const serviceResponse = await axios.get(`/services/details/${id}`, { headers });
         console.log('Services API response:', serviceResponse.data);
         
         if (serviceResponse.data.success && serviceResponse.data.data) {
@@ -172,7 +172,7 @@ const Activity = () => {
       let response;
       if (activity.isServiceActivity) {
         // For service activities, use the reservations API
-        response = await axios.post(`http://localhost:5000/api/reservations`, {
+        response = await axios.post(`/reservations`, {
           serviceId: id,
           checkInDate: activity?.eventDate || activity?.dateRange?.startDate || new Date().toISOString(),
           checkOutDate: activity?.eventDate || activity?.dateRange?.startDate || new Date().toISOString(),
@@ -191,7 +191,7 @@ const Activity = () => {
         });
       } else {
         // For regular activities, use the activities reservation API
-        response = await axios.post(`http://localhost:5000/api/activity-reservations/create`, {
+        response = await axios.post(`/activity-reservations/create`, {
           activity_id: id,
           tickets: tickets,
           customerName: user.name,

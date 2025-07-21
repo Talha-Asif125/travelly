@@ -74,7 +74,7 @@ const HotelOverview = () => {
         <div className="flex justify-center items-center w-full flex-col lg:flex-row pt-12 lg:pt-0">
           {!imgError.main && data.HotelImg ? (
             <img
-              src={`http://localhost:5000/api/hotels/images/${data.HotelImg}`}
+              src={`https://travelly-backend-27bn.onrender.com/api/hotels/images/${data.HotelImg}`}
               alt={data.name || "Hotel Image"}
               className="w-[320px] md:w-[700px] lg:w-[800px] rounded-lg mb-10"
               onError={() => handleImageError('main')}
@@ -134,7 +134,7 @@ const HotelOverview = () => {
           data.HotelImgs.map((image, index) => (
             !imgError[image] ? (
               <img
-                src={`http://localhost:5000/api/hotels/images/${image}`}
+                src={`https://travelly-backend-27bn.onrender.com/api/hotels/images/${image}`}
                 alt={`Hotel Image ${index}`}
                 key={index}
                 className="w-full h-64 object-cover rounded-lg mb-2"

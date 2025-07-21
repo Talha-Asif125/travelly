@@ -13,7 +13,7 @@ const HotelCard = () => {
     const fetchNewHotelServices = async () => {
       try {
         setServicesLoading(true);
-        const response = await fetch('http://localhost:5000/api/services/hotel');
+        const response = await fetch('https://travelly-backend-27bn.onrender.com/api/services/hotel');
         const result = await response.json();
         
         if (result.success) {
@@ -124,7 +124,7 @@ const HotelCard = () => {
                         src={
                           item.isNewService 
                             ? (item.images?.[0] || "https://via.placeholder.com/400x250?text=Hotel+Image")
-                            : `http://localhost:5000/api/hotels/images/${item.HotelImgs[0]}`
+                            : `https://travelly-backend-27bn.onrender.com/api/hotels/images/${item.HotelImgs[0]}`
                         }
                         alt={item.name}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"

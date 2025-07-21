@@ -17,7 +17,7 @@ const Vehiclereservation = ({ columns }) => {
       try {
         setLoading(true);
         console.log("Fetching vehicle reservations...");
-        const response = await axios.get("http://localhost:5000/api/vehiclereservation");
+        const response = await axios.get("https://travelly-backend-27bn.onrender.com/api/vehiclereservation");
         console.log("Reservations response:", response.data);
         setData(response.data);
         setLoading(false);
@@ -45,7 +45,7 @@ const Vehiclereservation = ({ columns }) => {
     try {
       setLoading(true);
       console.log("Refreshing reservation data...");
-      const response = await axios.get("http://localhost:5000/api/vehiclereservation");
+      const response = await axios.get("https://travelly-backend-27bn.onrender.com/api/vehiclereservation");
       console.log("Refresh response:", response.data);
       setData(response.data);
       setLoading(false);
